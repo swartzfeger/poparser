@@ -1,0 +1,2781 @@
+[
+  {
+    "id": "A-1 BARTON WATER CON",
+    "name": "A-1 BARTON WATER CONDITION",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "ADVANCE PRODUCTS & S",
+    "name": "ADVANCE PRODUCTS & SYSTEMS",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "AGRASYST",
+    "name": "AGRASYST",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "ALASKA RESTAURANT",
+    "name": "ALASKA RESTAURANT SUPPLY",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "ALDON CORPORATION",
+    "name": "ALDON",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "FEDC",
+    "priceLevel": "DIST + 50%"
+  },
+  {
+    "id": "ALLPOINTS IL",
+    "name": "ALLPOINTS",
+    "terms": "Prepaid",
+    "shipVia": "UPS THRD",
+    "priceLevel": "DIST - 15%"
+  },
+  {
+    "id": "ALPHA ASSEMBLY SOLUT",
+    "name": "ALPHA ASSEMBLY SOLUTIONS",
+    "terms": "Prepaid",
+    "shipVia": "FEDC",
+    "priceLevel": "DIST + 50%"
+  },
+  {
+    "id": "ALPHA CHEMICAL SERVI",
+    "name": "ALPHA CHEMICAL SERVICE",
+    "terms": "Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "APOTHECARY PRODUCTS",
+    "name": "APOTHECARY PRODUCTS",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "FEDC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "APPLIED INDUSTRIAL T",
+    "name": "APPLIED INDUSTRIAL TECHNOLOGIE",
+    "terms": "Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "AQUA BACKFLOW",
+    "name": "AQUA BACKFLOW & CHLORINATION, INC",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "AQUA PHOENIX SCIE",
+    "name": "AQUA PHOENIX SCIENTIFIC INC.",
+    "terms": "Net 30 Days",
+    "shipVia": "FEDC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "AQUA RESEARCH",
+    "name": "AQUA RESEARCH, LLC",
+    "terms": "Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "ARPEGE INDUSTRIE",
+    "name": "ARPEGE INDUSTRIE",
+    "terms": "Net 30 Days",
+    "shipVia": "UPS INTX",
+    "priceLevel": "DIST + 10%"
+  },
+  {
+    "id": "ATHEA LABORATORIES",
+    "name": "ATHEA LABORATORIES",
+    "terms": "Net 30th of Next Month",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "AUTO-CHLOR SYSTEM TN",
+    "name": "AUTO-CHLOR SYSTEM-MEMPHIS PLANT",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "FEDC",
+    "priceLevel": "DIST - 10%"
+  },
+  {
+    "id": "AVIATION SECURITY",
+    "name": "AVIATION SECURITY MANAGEMENT, LLC",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "BAE SYSTEMS ORDNANCE",
+    "name": "BAE SYSTEMS, ORDNANCE SYSTEMS INC",
+    "terms": "Prepaid",
+    "shipVia": "FEDC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "BAILEYS THERMOMETERS",
+    "name": "BAILEY'S TEST STRIPS & THERMOMETERS,LLC",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "BARTOVATION LLC",
+    "name": "BARTOVATION LLC",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST - 15%"
+  },
+  {
+    "id": "BC SCIENTIFIC",
+    "name": "BC SCIENTIFIC",
+    "terms": "Net 30 Days",
+    "shipVia": "UPS Collect",
+    "priceLevel": "DIST + 10%"
+  },
+  {
+    "id": "BENNETT MARINE UTILI",
+    "name": "BENNETT MARINE UTILITY INC.",
+    "terms": "Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "BETA PROCESOS",
+    "name": "BETA COMMERCIAL LLC",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 50%"
+  },
+  {
+    "id": "BILL ALEMAN INC",
+    "name": "BILL ALEMAN, INC.",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "BLUE DRAGON DEFENSE",
+    "name": "BLUE DRAGON DEFENSE",
+    "terms": "Prepaid",
+    "shipVia": "FEDC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "BSG HANDCRAFT",
+    "name": "BSG HANDCRAFT",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "BUNZL",
+    "name": "BUNZL HICKORY (24-245)",
+    "terms": "Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "BURNS CHEMICAL SERVI",
+    "name": "BURNS CHEMICAL SERVICES",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "BUTLER CHEMICAL PROD",
+    "name": "BUTLER CHEMICAL PRODUCTS",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 50%"
+  },
+  {
+    "id": "BYRON WHITE FORMULAS",
+    "name": "BYRON WHITE FORMULAS",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "C&M REPRESENTACIO",
+    "name": "C&M REPRESENTACIONES, S.A. DE C.V.",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 50%"
+  },
+  {
+    "id": "CAMBRIDGE ENVIRONMEN",
+    "name": "CAMBRIDGE ENVIRONMENTAL PRODUCTS, INC",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "CARCO CHEMICAL",
+    "name": "CARCO CHEMICAL CO., LTD.",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "CARDIGAN",
+    "name": "TECHNICAL",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "CAROLINA BIOLOGICAL",
+    "name": "CAROLINA BIOLOGICAL SUPPLY",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "FEDC",
+    "priceLevel": "DIST - 5%"
+  },
+  {
+    "id": "CENTRAL SANITARY SUP",
+    "name": "BRADLEY IFS",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "CHARLOTTE PRODUCTS",
+    "name": "CHARLOTTE PRODUCTS LTD.",
+    "terms": "Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 10%"
+  },
+  {
+    "id": "CHEM MARK OF EAST TE",
+    "name": "CHEM MARK OF EAST TEXAS",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "CHEM MARK of SAN ANT",
+    "name": "CHEM MARK of SAN ANTONIO, INC",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "CHEM-SUPPLY",
+    "name": "CHEMSUPPLY AUSTRALIA PTY LTD",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "FEDIE",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "CHOSUN MEASUREMENT",
+    "name": "CHOSUN MEASUREMENT",
+    "terms": "Prepaid",
+    "shipVia": "SPECIAL",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "CLARKSON LABORATORY",
+    "name": "CLARKSON LABORATORY & SUPPLY",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "COLORADO EARLY EDUCA",
+    "name": "COLORADO EARLY EDUCATION NETWORK",
+    "terms": "Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "COMMUNITY LEARNING",
+    "name": "COMMUNITY LEARNING LLC",
+    "terms": "Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "COMPANHIA NITRO",
+    "name": "BTG PACTUAL COMMODITIES SERTRADING S.A",
+    "terms": "Prepaid",
+    "shipVia": "SPECIAL",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "CONTAINMENT TECH",
+    "name": "CONTAINMENT TECH GROUP",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "CONTEC DISTRIBUTION",
+    "name": "CONTEC DISTRIBUTION CENTER-WP",
+    "terms": "Net 30 Days",
+    "shipVia": "UPS Collect",
+    "priceLevel": "DIST + 75%"
+  },
+  {
+    "id": "CORPOLAB INC",
+    "name": "CORPOLAB INC",
+    "terms": "Prepaid",
+    "shipVia": "FedEx Ground",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "COVENANT AVIATION SE",
+    "name": "COVENANT AVIATION SECURITY LLC",
+    "terms": "Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "COVIDIEN CT",
+    "name": "COVIDIEN",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "FEDC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "CULTURES FOR HEALTH",
+    "name": "CULTURES FOR HEALTH",
+    "terms": "1% 15, Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 50%"
+  },
+  {
+    "id": "CURIS SYSTEM",
+    "name": "CURIS SYSTEMS",
+    "terms": "Prepaid",
+    "shipVia": "FEDC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "D.W. DAVIES",
+    "name": "D.W. DAVIES & CO, INC.",
+    "terms": "Net 30 Days",
+    "shipVia": "FEDC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "D2 MARINE SOLUTIONS",
+    "name": "D2 MARINE SOLUTIONS INC",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "DAIGGER",
+    "name": "DAIGGER/ WEBER SCIENTIFIC",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "FEDC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "DEARDORFF FITZ",
+    "name": "DEARDORFF FITZSIMMONS CORP.",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 50%"
+  },
+  {
+    "id": "DEFENSE CONSULTING S",
+    "name": "DEFENSE CONSULTING SERVICES",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "DEVERE",
+    "name": "DEVERE COMPANY, INC.",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 50%"
+  },
+  {
+    "id": "DIAGNOSTICS DIRECT",
+    "name": "DIAGNOSTICS DIRECT INC",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "DIESELCRAFT MAGNUM",
+    "name": "DIESELCRAFT/MAGNUM GROUP",
+    "terms": "Prepaid",
+    "shipVia": "FEDC",
+    "priceLevel": "DIST + 50%"
+  },
+  {
+    "id": "DISHMACHINE TUBING &",
+    "name": "DISHMACHINE TUBING & PARTS",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST - 5%"
+  },
+  {
+    "id": "DIVERSEY TAIWAN1",
+    "name": "DIVERSEY HYGIENE (TAIWAN) LTD",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "UPS INTX",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "DIVERSEY TURKEY",
+    "name": "DIVERSEY  KIMYA SANAYI VE TICARET A.S.",
+    "terms": "Net 30 Days",
+    "shipVia": "DHL COLLECT",
+    "priceLevel": "DIST + 10%"
+  },
+  {
+    "id": "DIVERSIFIED FOODSERV",
+    "name": "DIVERSIFIED FOODSERVICE SUPPLY LLC",
+    "terms": "Prepaid",
+    "shipVia": "UPS THRD",
+    "priceLevel": "DIST - 15%"
+  },
+  {
+    "id": "DOVE MATERIAL",
+    "name": "DOVE MATERIAL SUPPLIERS USA LLC CC",
+    "terms": "Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST - 10%"
+  },
+  {
+    "id": "DRAKE SPECIALITIES",
+    "name": "DRAKE SPECIALTIES, LLC",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "FEDC",
+    "priceLevel": "DIST + 50%"
+  },
+  {
+    "id": "EASTERN CROWN",
+    "name": "EASTERN CROWN",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "ECA EDUCATIONAL SERV",
+    "name": "ECA SCIENCE KIT SERVICE",
+    "terms": "Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 50%"
+  },
+  {
+    "id": "ECOLAB INC",
+    "name": "ECOLAB PRODUCTION LLC",
+    "terms": "1% 15, Net 60 Days",
+    "shipVia": "FEDC",
+    "priceLevel": "DIST - 15%"
+  },
+  {
+    "id": "ECOLAB PERU HOLDINGS",
+    "name": "ECOLAB PERU HOLDINGS S.R.L.",
+    "terms": "1% 15, Net 60 Days",
+    "shipVia": "SPECIAL",
+    "priceLevel": "DIST - 15%"
+  },
+  {
+    "id": "EDVOTEK, INC",
+    "name": "EDVOTEK, INC",
+    "terms": "Prepaid",
+    "shipVia": "FEDC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "EISCO SCI",
+    "name": "EISCO LLC / EISCO SCIENTIFIC",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "FEDC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "ELECTRONIC CONTROLS",
+    "name": "ELECTRONIC CONTROLS DESIGN, INC.",
+    "terms": "Prepaid",
+    "shipVia": "FEDC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "ENVIRONICS INC",
+    "name": "ENVIRONICS INC.",
+    "terms": "Net 30 Days",
+    "shipVia": "FEDC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "ENVIRONMENTAL EDUCAT",
+    "name": "VERDE VALLEY DISCOVERY CENTER",
+    "terms": "Prepaid",
+    "shipVia": "SPECIAL",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "ETD DIRECT SUPPLY",
+    "name": "ETD DIRECT SUPPLY LLC",
+    "terms": "Prepaid",
+    "shipVia": "FEDC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "EVA HRBOTICKA",
+    "name": "Dr. Eva Hrboticka, Ph.D",
+    "terms": "Net 30 Days",
+    "shipVia": "UPS INTX",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "EXPLOSIA as",
+    "name": "EXPLOSIA a.s.",
+    "terms": "Prepaid",
+    "shipVia": "UPS INTX",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "EXTRACT TECHNOLOGY",
+    "name": "EXTRACT TECHNOLOGY",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 50%"
+  },
+  {
+    "id": "FISHER SCIENTIFIC CO",
+    "name": "FISHER SCIENTIFIC COMPANY",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "FEDC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "FLINN SCIENTIFIC INC",
+    "name": "FLINN SCIENTIFIC INC.",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 10%"
+  },
+  {
+    "id": "FLOAT FRESH",
+    "name": "FLOAT FRESH LLC",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 50%"
+  },
+  {
+    "id": "FLOWCHEM",
+    "name": "FLOW CHEM S.A.S",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST - 5%"
+  },
+  {
+    "id": "FORESTRY SUPPLIERS",
+    "name": "FORESTRY SUPPLIERS INC.",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "FORMULATOR SAMPLE SH",
+    "name": "FORMULATOR SAMPLE SHOP",
+    "terms": "Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 10%"
+  },
+  {
+    "id": "FOX MANUFACTURING",
+    "name": "FOX MANUFACTURING INC",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "FRANZ ZIEL GmbH",
+    "name": "FRANZ ZIEL GmbH",
+    "terms": "Net 30 Days",
+    "shipVia": "UPS INTX",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "FRESENIUS MEDICAL CA",
+    "name": "FRESENIUS MEDICAL CARE NORTH AMERICA",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST - 5%"
+  },
+  {
+    "id": "GASCO INDUSTRIAL",
+    "name": "GASCO INDUSTRIAL",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "GENERAL LABORATORY",
+    "name": "GENERAL LABORATORY SUPPLY",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "GENERAL RUBBER & PLA",
+    "name": "GENERAL RUBBER & PLASTICS CO. INC.",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "GEORGES INC",
+    "name": "GEORGE'S INC.",
+    "terms": "Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "GSA FEDERAL CONTRACT",
+    "name": "GSA FEDERAL CONTRACTOR 8EY72",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "H2O2 WATER INC",
+    "name": "H2O2 WATER INC",
+    "terms": "Prepaid",
+    "shipVia": "FEDC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "HAGNOS HYGIENE",
+    "name": "HAGNOS HYGIENE CO., LTD.",
+    "terms": "Prepaid",
+    "shipVia": "UPS INTX",
+    "priceLevel": "DIST + 50%"
+  },
+  {
+    "id": "HAND2MIND",
+    "name": "HAND2MIND",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "FEDC",
+    "priceLevel": "DIST + 50%"
+  },
+  {
+    "id": "HAWAII CHEMICAL & SC",
+    "name": "HAWAII CHEMICAL & SCIENTIFIC",
+    "terms": "Net 30 Days",
+    "shipVia": "FEDC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "HOME BREW OHIO",
+    "name": "HOME BREW OHIO",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "HOME SCIENCE TOOLS",
+    "name": "HOME SCIENCE TOOLS",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 50%"
+  },
+  {
+    "id": "HVO CHEMISTRY LAB",
+    "name": "HVO CHEMISTRY",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "IMPACT WATER",
+    "name": "IMPACT WATER FOUNDATION",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "INDUSTRIAS CORY SAS",
+    "name": "INDUSTRIAS CORY SAS",
+    "terms": "Prepaid",
+    "shipVia": "FEDC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "INTERCON CHEMICAL CO",
+    "name": "INTERCON CHEMICAL COMPANY",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 10%"
+  },
+  {
+    "id": "ISOFILL TECHNOLOGY",
+    "name": "ISOFILL TECHNOLOGY",
+    "terms": "Prepaid",
+    "shipVia": "UPS INTX",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "ISSS CO LTD",
+    "name": "ISSS CO LTD",
+    "terms": "Prepaid",
+    "shipVia": "UPS INTX",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "JANITORIAL PRODUCTS",
+    "name": "JANITORIAL PRODUCTS, CORRECTION ENT",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "JAYHAWK SALES TX",
+    "name": "JAYHAWK SALES AKA LEONARD & ASSOC.",
+    "terms": "2% 15, Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 10%"
+  },
+  {
+    "id": "JAYHAWK SALES WI",
+    "name": "JAYHAWK SALES WISCONSIN",
+    "terms": "Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 10%"
+  },
+  {
+    "id": "JONKMAN EQUIPMENT",
+    "name": "JONKMAN EQUIPMENT LTD",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "KOBBE-MCCAWLEY CORPO",
+    "name": "KOBBE-MCCAWLEY CORPORATION",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "KOCH FOODS-MORRISTOW",
+    "name": "KOCH FOODS - MORRISTOWN",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "SPECIAL",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "KOCOUR",
+    "name": "KOCOUR",
+    "terms": "Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "KROWNE METAL CORPORA",
+    "name": "KROWNE METAL CORPORATION",
+    "terms": "1% 10 Days, Net 30th Next Month",
+    "shipVia": "FEDC",
+    "priceLevel": "DIST - 10%"
+  },
+  {
+    "id": "LABORATORY SALES &",
+    "name": "LABORATORY SALES & SERVICE LLC",
+    "terms": "Prepaid",
+    "shipVia": "FEDC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "LAMOTTE COMPANY",
+    "name": "LAMOTTE COMPANY",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "FEDC",
+    "priceLevel": "DIST - 15%"
+  },
+  {
+    "id": "LD CARLSON",
+    "name": "LD CARLSON",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "FEDC",
+    "priceLevel": "DIST + 10%"
+  },
+  {
+    "id": "LIT REFRIGERATION",
+    "name": "LIT REFRIGERATION CO.",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "LOTIONCRAFTER",
+    "name": "LOTIONCRAFTER, LLC",
+    "terms": "Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "MAKINGCOSMETICS.COM",
+    "name": "MAKINGCOSMETICS INC.",
+    "terms": "Prepaid",
+    "shipVia": "SPECIAL",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "MARKETING Y COMUNICA",
+    "name": "MARKETING Y COMUNICACION DIRECTA",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "MATT-CHLOR INC",
+    "name": "MATT-CHLOR INC",
+    "terms": "Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "MCCOY HEALTH SCIENCE",
+    "name": "MCCOY MEDICAL",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "FEDC",
+    "priceLevel": "DIST + 50%"
+  },
+  {
+    "id": "MEDIVATORS",
+    "name": "MEDIVATORS",
+    "terms": "Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 50%"
+  },
+  {
+    "id": "MEDLINE INDUSTRIES",
+    "name": "MEDLINE INDUSTRIES LP",
+    "terms": "Net 60 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "MEDTRONIC",
+    "name": "MEDTRONIC/COVIDIEN MFG GRENOBLE SAS",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "FEDIE",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "MICRO ESSENTIAL LABO",
+    "name": "MICRO ESSENTIAL LABORATORY",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST - 10%"
+  },
+  {
+    "id": "MIDLAND SCIENTIFI",
+    "name": "MIDLAND SCIENTIFIC INC",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "MIROIL USA, LLC",
+    "name": "MIROIL USA, LLC",
+    "terms": "Net 30th of Next Month",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST - 10%"
+  },
+  {
+    "id": "MISC. SALES",
+    "name": "MISC. SALES",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "MORE FLAVOR",
+    "name": "MORE FLAVOR",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "FEDC",
+    "priceLevel": "DIST + 50%"
+  },
+  {
+    "id": "NALCO COMPANY",
+    "name": "NALCO COMPANY",
+    "terms": "1% 15, Net 60 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST - 15%"
+  },
+  {
+    "id": "NASCO  WI",
+    "name": "NASCO WISCONSIN",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "FEDC",
+    "priceLevel": "DIST + 50%"
+  },
+  {
+    "id": "NATIONAL CHEMICALS",
+    "name": "NATIONAL CHEMICALS, INC.",
+    "terms": "Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "NATURES WORKSHOP",
+    "name": "NATURE'S WORKSHOP PLUS, INC",
+    "terms": "Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "NEPHRON PHARMACEUTIC",
+    "name": "NEPHRON PHARMACEUTICALS CORP",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 10%"
+  },
+  {
+    "id": "NEW YORK CITY POLICE",
+    "name": "NEW YORK CITY POLICE DEPT",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "NOCODE STUDIO CO",
+    "name": "NOCODE STUDIO COMPANY",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "OSCELOA SUPPLY, INC",
+    "name": "OSCEOLA SUPPLY, INC",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "OZM RESEARCH S.R.O.",
+    "name": "OZM RESEARCH S.R.O.",
+    "terms": "Prepaid",
+    "shipVia": "UPS INTX",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "PATRICK SYSTEM",
+    "name": "PATRICK SYSTEM OPERATIONS, LLC",
+    "terms": "Prepaid",
+    "shipVia": "SPECIAL",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "PDQ MANUFACTURING",
+    "name": "PDQ MANUFACTURING INC.",
+    "terms": "Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 10%"
+  },
+  {
+    "id": "PHENOMUNE",
+    "name": "PHENOMUNE LLC",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "PINETREE INSTRUMENTS",
+    "name": "PINETREE INSTRUMENTS INC.",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "UPS INTX",
+    "priceLevel": "DIST - 10%"
+  },
+  {
+    "id": "PLANT PRODUCTS",
+    "name": "PLANT PRODUCTS",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "FEDC",
+    "priceLevel": "DIST + 50%"
+  },
+  {
+    "id": "PRECISION EUROPE",
+    "name": "PRECISION EUROPE",
+    "terms": "2% 15, Net 60 Days",
+    "shipVia": "UPS INTX",
+    "priceLevel": "P. EUROPE"
+  },
+  {
+    "id": "PRODUCE PACKAGING",
+    "name": "PRODUCE PACKAGING INC",
+    "terms": "Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "PROFESSIONAL KITCHEN",
+    "name": "PROFESSIONAL KITCHEN SERVICES",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "PROLAB SCIENTIFIC",
+    "name": "PROLAB SCIENTIFIC LTD",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "UPS INTX",
+    "priceLevel": "DIST + 10%"
+  },
+  {
+    "id": "PROWEST SUPPLIES INC",
+    "name": "PROWEST SUPPLIES INC.",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "QUALITY SCIENCE LABS",
+    "name": "QUALITY SCIENCE LABS",
+    "terms": "Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 50%"
+  },
+  {
+    "id": "QVORTEX LLC",
+    "name": "QVORTEX LLC",
+    "terms": "Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "RAMCO",
+    "name": "RAMCO MANUFACTURING COMPANY INC.",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "RHOMAR WATER",
+    "name": "RHOMAR WATER",
+    "terms": "Net 30 Days",
+    "shipVia": "UPS Collect",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "RIDEAU GROUP INC.",
+    "name": "RIDEAU SUPPLY",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "UPS INTX",
+    "priceLevel": "DIST + 50%"
+  },
+  {
+    "id": "RILAB",
+    "name": "RILAB SPA",
+    "terms": "Prepaid",
+    "shipVia": "UPS INTX",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "RITZ SAFETY LLC",
+    "name": "RITZ SAFETY LLC",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "Sage Test",
+    "name": "Sage TEst",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "SAINT LUKES HEALTH",
+    "name": "SAINT LUKE'S HEALTH SYSTEM",
+    "terms": "Net 30 Days",
+    "shipVia": "UPS THRD",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "SANI-TEST",
+    "name": "SANI-TEST, LLC",
+    "terms": "Prepaid",
+    "shipVia": "FEDC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "SANITECH",
+    "name": "SANITECH SYSTEMS INC",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 10%"
+  },
+  {
+    "id": "SCHOOL SPECIALTY",
+    "name": "SCHOOL SPECIALTY, INC.",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "FEDC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "SCIEDCO LABS",
+    "name": "SCIEDCO LABS",
+    "terms": "Prepaid",
+    "shipVia": "UPS INTX",
+    "priceLevel": "DIST + 50%"
+  },
+  {
+    "id": "SCIENCE FIRST",
+    "name": "SCIENCE FIRST",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "FEDC",
+    "priceLevel": "DIST + 10%"
+  },
+  {
+    "id": "SCIENCE TAKEOUT",
+    "name": "SCIENCE TAKEOUT",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "SCINO PHARM TAIWAN L",
+    "name": "SCINO PHARM TAIWAN LTD",
+    "terms": "Prepaid",
+    "shipVia": "DHL COLLECT",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "SEABOARD FARMS",
+    "name": "SEABOARD FOODS/GUYMON PLANT",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "SENSONICS INTL",
+    "name": "SENSONICS INTERNATIONAL",
+    "terms": "Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST - 5%"
+  },
+  {
+    "id": "SINO TOPLEADER TECH",
+    "name": "SINO TOPLEADER TECHNOLOGIES CO. LTD",
+    "terms": "Prepaid",
+    "shipVia": "DHL Collect",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "SOMERSET EDUCATIONAL",
+    "name": "SOMERSET EDUCATIONAL (PTY) LTD",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "UPS INTX",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "ST MARKS POWDER",
+    "name": "OTS ST MARKS - 70",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "FEDC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "STATLAB",
+    "name": "STATLAB MEDICAL PRODUCTS",
+    "terms": "Prepaid",
+    "shipVia": "FEDC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "STONER QUALITY WATER",
+    "name": "STONER QUALITY WATER",
+    "terms": "Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "SUMMIT SUPPLY",
+    "name": "SUMMIT SUPPLY",
+    "terms": "Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "SUN CHEMICAL OH",
+    "name": "SUN CHEMICAL CORP.",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "SUT CORP",
+    "name": "SUT CORP",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "TAYLOR TECHNOLOGIES",
+    "name": "TAYLOR WATER TECHNOLOGIES",
+    "terms": "Net 30 Days",
+    "shipVia": "SPECIAL",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "TCD PARTS",
+    "name": "TCD PARTS",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST - 5%"
+  },
+  {
+    "id": "TECHNOS",
+    "name": "TECHNOS Pty. Ltd.",
+    "terms": "Prepaid",
+    "shipVia": "UPS INTX",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "THERMAL SCIENTIFIC",
+    "name": "THERMAL SCIENTIFIC INC.",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "SPECIAL",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "TRANSATLANTIC TRADIN",
+    "name": "TRANSATLANTIC TRADING",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "TRANSPORT CANADA",
+    "name": "TRANSPORT CANADA",
+    "terms": "Prepaid",
+    "shipVia": "UPS INTX",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TRINITY TECHNOLOGY",
+    "name": "TRINITY TECHNOLOGY GROUP",
+    "terms": "Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TRUKING TECHNOLOGY",
+    "name": "CONCORD TECHNOLOGY CORPORATION",
+    "terms": "Net 30 Days",
+    "shipVia": "DHL COLLECT",
+    "priceLevel": "DIST + 10%"
+  },
+  {
+    "id": "TSA-ABILENE",
+    "name": "TSA-ABILENE",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-ADIRONDACK",
+    "name": "TSA-SARANAC LAKE",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-AGUADILLA",
+    "name": "TSA-AGUADILLA",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-ALBANY",
+    "name": "TSA/ALBANY",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-ALBUQUERQUE",
+    "name": "TSA-ALBUQUERQUE",
+    "terms": "Prepaid",
+    "shipVia": "FEDC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-ALCOA",
+    "name": "TSA-ALCOA",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-ALLENTOWN",
+    "name": "TSA-ALLENTOWN",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-ALLIANCE",
+    "name": "TSA/ALLIANCE",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-AMARILLO",
+    "name": "TSA-AMARILLO",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-ANCHORAGE",
+    "name": "TSA-ANCHORAGE",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-ARLINGTON",
+    "name": "TSA-ARLINGTON",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-ASPEN",
+    "name": "TSA-ASPEN",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-ATLANTA",
+    "name": "TSA-ATLANTA",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-AURORA",
+    "name": "TSA-AURORA",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-AUSTIN 78719",
+    "name": "TSA-AUSTIN",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-AUSTIN 78744",
+    "name": "TSA-AUSTIN",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-BANGOR",
+    "name": "TSA-BANGOR",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-BARRIGADA",
+    "name": "TSA-BARRIGADA",
+    "terms": "Prepaid",
+    "shipVia": "FEDC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-BATON ROUGE",
+    "name": "TSA-BATON ROUGE",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-BELGRADE",
+    "name": "TSA-BELGRADE",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-BENTONVILLE",
+    "name": "TSA-BENTONVILLE",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-BILLINGS",
+    "name": "TSA-BILLINGS",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-BIRMINGHAM",
+    "name": "TSA-BIRMINGHAM",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-BISMARCK",
+    "name": "TSA-BISMARCK",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-BLOUNTVILLE",
+    "name": "TSA-BLOUNTVILLE",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-BOHEMIA",
+    "name": "TSA-BOHEMIA",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-BOISE",
+    "name": "TSA-BOISE",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-BURBANK",
+    "name": "TSA-BURBANK",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-BURLINGAME",
+    "name": "TSA-BURLINGAME",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-BURLINGTON",
+    "name": "TSA-BURLINGTON",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-CAPITOL HEIGHTS",
+    "name": "TSA-CAPITOL HEIGHTS",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-CASPER",
+    "name": "TSA-CASPER",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-CEDAR RAPIDS",
+    "name": "TSA-CEDAR RAPIDS",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-CHADRON",
+    "name": "TSA-CHADRON",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-CHARLESTON",
+    "name": "TSA-CHARLESTON",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-CHARLOTTE",
+    "name": "TSA-CHARLOTTE",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-CHATTANOOGA",
+    "name": "TSA-CHATTANOOGA",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-CHEEKTOWAGA",
+    "name": "TSA-CHEEKTOWAGA",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-CHEYENNE",
+    "name": "TSA-CHEYENNE",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-CHICAGO",
+    "name": "TSA-CHICAGO",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-CLEVELAND",
+    "name": "TSA-CLEVELAND",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-COLORADO SPRINGS",
+    "name": "TSA-COLORADO SPRINGS",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-COLUMBUS",
+    "name": "TSA-COLUMBUS",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-COPPELL",
+    "name": "TSA-COPPELL",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-CORAOPOLIS",
+    "name": "TSA-CORAOPOLIS",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-CORPUS",
+    "name": "TSA-CORPUS",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-CORTEZ",
+    "name": "TSA-CORTEZ",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-DALLAS 75220",
+    "name": "TSA-DALLAS",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-DALLAS 75235",
+    "name": "TSA-DALLAS",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-DAYTONA BEACH",
+    "name": "TSA-DAYTONA BEACH",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-DES MOINES",
+    "name": "TSA-DES MOINES",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-DORAL",
+    "name": "TSA-DORAL",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-DULLES",
+    "name": "TSA-DULLES",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-EAST BOSTON",
+    "name": "TSA-EAST BOSTON",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-EAST ELMHURST",
+    "name": "TSA-EAST ELMHURST",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-EGG HARBOR",
+    "name": "TSA-EGG HARBOR",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-EGLIN AFB",
+    "name": "TSA-EGLIN AFB",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-EL PASO",
+    "name": "TSA-EL PASO",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-ERIE",
+    "name": "TSA-ERIE",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-ERLANGER",
+    "name": "TSA-ERLANGER",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-ESCANABA",
+    "name": "TSA-ESCANABA",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-EUGENE",
+    "name": "TSA-EUGENE",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-FAIRBANKS",
+    "name": "TSA-FAIRBANKS",
+    "terms": "Prepaid",
+    "shipVia": "FEDC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-FLETCHER",
+    "name": "TSA-FLETCHER",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-FLOWOOD",
+    "name": "TSA-FLOWOOD",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-FORT LAUDERDALE",
+    "name": "TSA-FORT LAUDERDALE",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-FORT MYERS",
+    "name": "TSA-FORT MYERS",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-FRANKLIN",
+    "name": "TSA-FRANKLIN",
+    "terms": "Prepaid",
+    "shipVia": "FEDC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-FREEPORT",
+    "name": "FREEPORT AIRPORT DEVELOPMENT COMPANY",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-FRESNO",
+    "name": "TSA-FRESNO",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-GOLETA",
+    "name": "TSA-GOLETA",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-GRAND JUNCTION",
+    "name": "TSA-GRAND JUNCTION",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-GRAND RAPIDS",
+    "name": "TSA-GRAND RAPIDS",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-GREEN BAY",
+    "name": "TSA-GREEN BAY",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-GREENSBORO",
+    "name": "TSA-GREENSBORO",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-GREER",
+    "name": "TSA-GREER",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-HANOVER",
+    "name": "TSA-HANOVER",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-HAPEVILLE",
+    "name": "TSA-HAPEVILLE",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-HARLINGEN",
+    "name": "TSA-HARLINGEN",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-HILO",
+    "name": "TSA-HILO",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-HONOLULU",
+    "name": "TSA-HONOLULU",
+    "terms": "Prepaid",
+    "shipVia": "FEDC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-HORSEHEADS",
+    "name": "TSA-HORSEHEADS",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-HOUSTON 77017",
+    "name": "TSA-HOUSTON",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-HOUSTON 77032",
+    "name": "TSA-HOUSTON",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-HUNTSVILLE",
+    "name": "TSA-HUNTSVILLE",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-INDIANAPOLIS",
+    "name": "TSA-INDIANAPOLIS",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-JACKSON",
+    "name": "TSA-JACKSON",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-JACKSONVILLE",
+    "name": "TSA-JACKSONVILLE",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-JAMAICA",
+    "name": "TSA-JAMAICA",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-KAHULUI",
+    "name": "TSA-KAHULUI",
+    "terms": "Prepaid",
+    "shipVia": "SPECIAL",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-KAILUA-KONA",
+    "name": "TSA-KAILUA-KONA",
+    "terms": "Prepaid",
+    "shipVia": "SPECIAL",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-KANSAS CITY",
+    "name": "TSA-KANSAS CITY",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-KILLEEN",
+    "name": "TSA-KILLEEN",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-KNOXVILLE",
+    "name": "TSA-KNOXVILLE",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-LANSING",
+    "name": "TSA-LANSING",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-LAREDO",
+    "name": "TSA-LAREDO",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-LAS VEGAS",
+    "name": "TSA-LAS VEGAS",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-LEXINGTON",
+    "name": "TSA-LEXINGTON",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-LIHUE",
+    "name": "TSA-LIHUE",
+    "terms": "Prepaid",
+    "shipVia": "FEDC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-LINCOLN",
+    "name": "TSA-LINCOLN",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-LINTHICUM",
+    "name": "TSA-LINTHICUM",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-LITTLE ROCK",
+    "name": "TSA-LITTLE ROCK",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-LONDONDERRY",
+    "name": "TSA-LONDONDERRY",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-LOS ANGELES",
+    "name": "TSA-LOS ANGELES",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-LOUISVILLE",
+    "name": "TSA-LOUISVILLE",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-LUBBOCK",
+    "name": "TSA-LUBBOCK",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-LYNCHBURG",
+    "name": "TSA-LYNCHBURG",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-MADISON",
+    "name": "TSA-MADISON",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-MASSENA",
+    "name": "TSA-MASSENA",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-MCALLEN",
+    "name": "TSA-MCALLEN",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-MEDFORD",
+    "name": "TSA-MEDFORD",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-MEMPHIS",
+    "name": "TSA-MEMPHIS",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-MIAMI",
+    "name": "TSA-MIAMI",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-MIDDLEBURG",
+    "name": "TSA-MIDDLEBURG HEIGHTS",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-MIDDLETOWN",
+    "name": "TSA-MIDDLETOWN",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-MIDLAND",
+    "name": "TSA-MIDLAND",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-MILWAUKEE",
+    "name": "TSA/MILWAUKEE",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-MOBILE",
+    "name": "TSA-MOBILE",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-MOLINE",
+    "name": "TSA-MOLINE",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-MORRISVILLE",
+    "name": "TSA-MORRISVILLE",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-MYRTLE BEACH",
+    "name": "TSA-MYRTLE BEACH",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-N CHARLESTON",
+    "name": "TSA-NORTH CHARLESTON",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-N CHARLESTON CHS",
+    "name": "TSA-N CHARLESTON CHS",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-NASHVILLE",
+    "name": "TSA-NASHVILLE",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-NASSAU",
+    "name": "TSA-NASSAU",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-NEW WINDSOR",
+    "name": "TSA-NEW WINDSOR",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-NORFOLK",
+    "name": "TSA-NORFOLK",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-NORTH CANTON",
+    "name": "TSA-NORTH CANTON",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-NORTH CHARLESTON",
+    "name": "TSA-NORTH CHARLESTON",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-NORTH PLATTE",
+    "name": "TSA-NORTH PLATTE",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-NORTH SYRACUSE",
+    "name": "TSA-NORTH SYRACUSE",
+    "terms": "Prepaid",
+    "shipVia": "SPECIAL",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-OAKLAND",
+    "name": "TSA-OAKLAND",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-OKLAHOMA CITY",
+    "name": "TSA-OKLAHOMA CITY",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-OMAHA",
+    "name": "TSA-OMAHA",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-ONTARIO",
+    "name": "TSA-ONTARIO",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-ORANJESTAD",
+    "name": "TSA-ORANJESTAD ARUBA",
+    "terms": "Prepaid",
+    "shipVia": "FEDIE",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-ORLANDO",
+    "name": "TSA-ORLANDO",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-PAGO PAGO",
+    "name": "TSA-PAGO PAGO",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-PALM SPRINGS",
+    "name": "TSA-PALM SPRINGS",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-PANAMA CITY",
+    "name": "TSA-PANAMA CITY",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-PENSACOLA",
+    "name": "TSA-PENSACOLA",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-PHILADELPHIA",
+    "name": "TSA-PHILADELPHIA",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-PHOENIX",
+    "name": "TSA-PHOENIX",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-PORTLAND 04102",
+    "name": "TSA-PORTLAND",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-PORTLAND 97218",
+    "name": "TSA-PORTLAND",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-PROVO",
+    "name": "TSA-PROVO / PVU",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-RAPID CITY",
+    "name": "TSA-RAPID CITY",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-REDMOND",
+    "name": "TSA-REDMOND",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-RENO",
+    "name": "TSA/RENO",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-RICHMOND",
+    "name": "TSA-RICHMOND",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-ROCHESTER",
+    "name": "TSA-ROCHESTER",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-ROMULUS",
+    "name": "TSA-ROMULUS",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-ROSEMONT",
+    "name": "TSA-ROSEMONT",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-SACRAMENTO",
+    "name": "TSA-SACRAMENTO",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-SAINT ANN",
+    "name": "TSA-SAINT ANN",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-SAINT ROSE",
+    "name": "TSA-SAINT ROSE",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-SAIPAN",
+    "name": "TSA-SAIPAN",
+    "terms": "Prepaid",
+    "shipVia": "USPS",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-SALT LAKE CITY",
+    "name": "TSA-SALT LAKE CITY",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-SAN ANTONIO",
+    "name": "TSA-SAN ANTONIO",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-SAN DIEGO",
+    "name": "TSA-SAN DIEGO",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-SAN JOSE",
+    "name": "TSA-SAN JOSE",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-SAN JUAN",
+    "name": "TSA-SAN JUAN",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-SAVANNAH",
+    "name": "TSA-SAVANNAH",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-SCOTTSBLUFF",
+    "name": "TSA-SCOTTSBLUFF",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-SEATTLE",
+    "name": "TSA-SEATTLE",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-SIOUX FALLS",
+    "name": "TSA-SIOUX FALLS",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-SOUTH BEND",
+    "name": "TSA-SOUTH BEND",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-SOUTH BURLINGTON",
+    "name": "TSA-SOUTH BURLINGTON",
+    "terms": "Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-SPOKANE",
+    "name": "TSA-SPOKANE",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-SPRINGFIELD",
+    "name": "TSA-SPRINGFIELD",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-SPRINGFIELD VA",
+    "name": "TSA-SPRINGFIELD VA",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-ST CROIX",
+    "name": "TSA-ST CROIX",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-ST PAUL",
+    "name": "TSA-ST PAUL",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-ST PETERSBURG",
+    "name": "TSA-ST PETERSBURG",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-ST THOMAS",
+    "name": "TSA-ST THOMAS",
+    "terms": "Prepaid",
+    "shipVia": "UPS INTX",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-STERLING",
+    "name": "TSA-STERLING",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-TALLAHASSEE",
+    "name": "TSA-TALLAHASSEE",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-TAMPA",
+    "name": "TSA-TAMPA",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-TINTON FALLS",
+    "name": "TSA-TINTON FALLS",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-TRAVERSE CITY",
+    "name": "TSA-TRAVERSE CITY",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-TUCSON",
+    "name": "TSA-TUCSON",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-TULSA",
+    "name": "TSA-TULSA",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-UNION",
+    "name": "TSA-UNION",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-VANDALIA",
+    "name": "TSA-VANDALIA",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-VERNAL",
+    "name": "TSA-VERNAL",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-WARWICK",
+    "name": "TSA-WARWICK",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-WASHINGTON DC",
+    "name": "TSA-WASHINGTON DC",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-WENDOVER",
+    "name": "TSA-WENDOVER",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-WEST COLUMBIA",
+    "name": "TSA-WEST COLUMBIA",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-WEST PALM BEACH",
+    "name": "TSA-WEST PALM BEACH",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-WEYERS CAVE",
+    "name": "TSA-WEYERS CAVE",
+    "terms": "Prepaid",
+    "shipVia": "UPS Ground",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "TSA-WHITE PLAINS",
+    "name": "TSA-WHITE PLAINS",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-WICHITA",
+    "name": "TSA-WICHITA",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSA-WINDSOR LOCKS",
+    "name": "TSA-WINDSOR LOCKS",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "TSM SOLUTIONS SDN BH",
+    "name": "TSM MFG SOLUTIONS PLT",
+    "terms": "Prepaid",
+    "shipVia": "FEDIE",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "TUNDRA SPECIALTIES",
+    "name": "TUNDRA SPECIALTIES",
+    "terms": "Prepaid",
+    "shipVia": "UPS THRD",
+    "priceLevel": "DIST - 15%"
+  },
+  {
+    "id": "UNI-KEM.COM",
+    "name": "UNI-KEM.COM",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "UNIPAK",
+    "name": "UNIPAK, LLC",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "SPECIAL",
+    "priceLevel": "DIST + 10%"
+  },
+  {
+    "id": "UNIVISION USA INC",
+    "name": "UNIVISIOIN USA INC",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "US FOODS",
+    "name": "US FOODS, INC",
+    "terms": "Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "USABLUEBOOK",
+    "name": "USABLUEBOOK",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "FEDC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "VIATEQ CORP",
+    "name": "VIATEQ CORPORATION",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "VIKING PURE",
+    "name": "VIKING PURE SOLUTIONS, LLC",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "VMD CORP",
+    "name": "VMD CORP",
+    "terms": "Prepaid",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "VWR",
+    "name": "VWR INTERNATIONAL",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "SPECIAL",
+    "priceLevel": "DIST - 5%"
+  },
+  {
+    "id": "WATERTEST SYSTEMS",
+    "name": "WATERTEST SYSTEMS PTY LTD",
+    "terms": "Net 30 Days",
+    "shipVia": "FEDIE",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "WEBB CHEMICAL & PAPE",
+    "name": "WEBB CHEMICAL & PAPER",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "WESTLAB",
+    "name": "WESTLAB",
+    "terms": "Net 30 Days",
+    "shipVia": "UPS INTX",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "WILKEM SCIENTIFIC",
+    "name": "WILKEM SCIENTIFIC LIMITED",
+    "terms": "Prepaid",
+    "shipVia": "SPECIAL",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "WILKENS ANDERSON",
+    "name": "WILKENS-ANDERSON CO.",
+    "terms": "1% 10, Net 30 Days",
+    "shipVia": "UPS GRNC",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "YOUNG CANADIAN",
+    "name": "YOUNG CANADIAN WATER SYSTEM",
+    "terms": "Prepaid",
+    "shipVia": "UPS INTX",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "YU YU INSTRUMENT CO.",
+    "name": "YU YU INSTRUMENT CO.",
+    "terms": "Prepaid",
+    "shipVia": "FEDIE",
+    "priceLevel": "DISTRIBUTOR"
+  },
+  {
+    "id": "ZHANG JIAGANG SUREJI",
+    "name": "ZHANG JIAGANG SUREJIE ENVIRONMENTAL TEC",
+    "terms": "Prepaid",
+    "shipVia": "FEDIE",
+    "priceLevel": "DIST + 100%"
+  },
+  {
+    "id": "ZZ SCHOOL SPEC HISTO",
+    "name": "SCHOOL SPECIALTY, INC.",
+    "terms": "1% 10, Net 15 Days",
+    "shipVia": "UPS Ground",
+    "priceLevel": "DISTRIBUTOR"
+  }
+]
