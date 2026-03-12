@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeHotReload)
+    kotlin("plugin.serialization") version "2.3.10"
 }
 
 kotlin {
@@ -46,12 +47,15 @@ kotlin {
 
 compose.desktop {
     application {
-        mainClass = "com.jay.parser.parser.MainKt"
+        mainClass = "com.jay.parser.MainKt"
 
         nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "com.jay.parser.parser"
-            packageVersion = "1.0.0"
+            packageName = "PO Parser"
+            targetFormats(
+                TargetFormat.Dmg,
+                TargetFormat.Msi,
+                TargetFormat.Exe
+            )
         }
     }
 }

@@ -20,17 +20,17 @@ object CustomerMapper {
     fun lookupCustomer(name: String?): MasterCustomer? {
         if (name.isNullOrBlank()) return null
 
-        val normalized = name.trim().uppercase()
+        val normalized = normalize(name)
 
-        val matchById = customerData.find { it.id.uppercase() == normalized }
+        val matchById = customerData.find { normalize(it.id) == normalized }
         if (matchById != null) return matchById
 
-        val matchByName = customerData.find { it.name.uppercase() == normalized }
+        val matchByName = customerData.find { normalize(it.name) == normalized }
         if (matchByName != null) return matchByName
 
         val partialMatch = customerData.find {
-            val customerId = it.id.uppercase()
-            val customerName = it.name.uppercase()
+            val customerId = normalize(it.id)
+            val customerName = normalize(it.name)
 
             normalized.contains(customerId) ||
                     customerId.contains(normalized) ||
@@ -39,5 +39,15 @@ object CustomerMapper {
         }
 
         return partialMatch
+    }
+
+    private fun normalize(value: String): String {
+        return value
+            .uppercase()
+            .replace(Regex("""\([^)]*\)"""), " ")   // remove things like (200)
+            .replace("&", " AND ")
+            .replace(Regex("""[^A-Z0-9]+"""), " ")  // collapse punctuation/hyphens/slashes
+            .replace(Regex("""\s+"""), " ")
+            .trim()
     }
 }
