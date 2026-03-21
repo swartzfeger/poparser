@@ -75,26 +75,61 @@ class EiscoSciLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         return lines.firstOrNull { normalize(it) == "NET30" }?.let { "Net 30" }
     }
 
+    private fun extractRightSideAddressLine(line: String): String? {
+        val matches = Regex("""\d+\s*[A-Za-z]+(?:[A-Za-z\s]+)?Rd""", RegexOption.IGNORE_CASE)
+            .findAll(line)
+            .map { it.value }
+            .toList()
+
+        return matches.lastOrNull()?.let { extractEiscoAddressLine(it) }
+    }
+
+    private fun extractRightSideCityState(line: String): String? {
+        val matches = Regex("""([A-Za-z]+(?:\s+[A-Za-z]+)?),\s*([A-Z]{2})""", RegexOption.IGNORE_CASE)
+            .findAll(line)
+            .toList()
+
+        val last = matches.lastOrNull() ?: return null
+        val city = last.groupValues[1]
+            .replace("HoneoyeFalls", "Honeoye Falls", ignoreCase = true)
+            .trim()
+            .uppercase()
+        val state = last.groupValues[2].trim().uppercase()
+
+        return "$city $state"
+    }
     private fun findShipTo(lines: List<String>): ShipToBlock {
-        val shipToMarkerLine = lines.firstOrNull {
+        val markerIdx = lines.indexOfFirst {
             normalize(it).contains("SHIP-TOADDRESS") && normalize(it).contains("EISCOLLC")
         }
+
+        val shipToMarkerLine = if (markerIdx >= 0) lines[markerIdx] else null
 
         val shipToCustomer = shipToMarkerLine?.let {
             extractAfter(it, "ship-toaddress")
         }?.let(::normalizeCustomerName)
 
-        val addressLine1 = lines.firstOrNull {
-            normalize(it).contains("QUAKERMEETINGHOUSE")
-        }?.let { extractEiscoAddressLine(it) }
+        val addressLine1 = if (markerIdx >= 0 && markerIdx + 1 < lines.size) {
+            extractRightSideAddressLine(lines[markerIdx + 1])
+        } else {
+            lines.firstOrNull {
+                normalize(it).contains("QUAKERMEETINGHOUSE")
+            }?.let { extractEiscoAddressLine(it) }
+        }
 
-        val cityStateLine = lines.firstOrNull {
-            normalize(it).contains("HONEOYEFALLS,NY") || normalize(it).contains("HONEOYEFALLSNY")
-        }?.let { cleanCityState(it) }
+        val cityStateLine = if (markerIdx >= 0 && markerIdx + 2 < lines.size) {
+            extractRightSideCityState(lines[markerIdx + 2])
+        } else {
+            lines.firstOrNull {
+                normalize(it).contains("HONEOYEFALLSNY")
+            }?.let { extractRightSideCityState(it) }
+        }
 
-        val zip = lines.firstOrNull {
-            normalize(it) == "14472"
-        }?.trim()
+        val zip = if (markerIdx >= 0 && markerIdx + 3 < lines.size) {
+            extractLastZip(lines[markerIdx + 3])
+        } else {
+            lines.firstOrNull { extractLastZip(it) != null }?.let { extractLastZip(it) }
+        }
 
         val parsed = parseCityState(cityStateLine)
 
@@ -115,17 +150,14 @@ class EiscoSciLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
             while (i < lines.size) {
                 val normalizedLine = lines[i].replace(Regex("""\s+"""), " ").trim()
 
-                val match = Regex(
-                    """^([A-Z0-9]+)\s+(.+?),\s+([A-Z0-9-]+)\s+([\d,]+)\s+\$?(\d+(?:\.\d{1,4})?)\s+\$?([\d,]+\.\d{2})$""",
-                    RegexOption.IGNORE_CASE
-                ).find(normalizedLine)
+                val match = matchEiscoItemLine(normalizedLine)
 
                 if (match != null) {
-                    val leftCode = match.groupValues[1].trim()
-                    val firstDesc = match.groupValues[2].trim()
-                    val vendorCode = normalizeSku(match.groupValues[3].trim())
-                    val quantity = match.groupValues[4].replace(",", "").toDoubleOrNull()
-                    val unitPrice = match.groupValues[5].replace(",", "").toDoubleOrNull()
+                    val leftCode = match.leftCode
+                    val firstDesc = match.description
+                    val vendorCode = normalizeSku(match.vendorCode)
+                    val quantity = match.quantity.replace(",", "").toDoubleOrNull()
+                    val unitPrice = match.unitPrice.replace(",", "").toDoubleOrNull()
 
                     val extraDesc = mutableListOf<String>()
                     var j = i + 1
@@ -134,13 +166,9 @@ class EiscoSciLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
                         val next = lines[j].replace(Regex("""\s+"""), " ").trim()
                         val nextNorm = normalize(next)
 
-                        val startsNewItem = Regex(
-                            """^[A-Z0-9]{4,}\s+.+,\s+[A-Z0-9-]+\s+[\d,]+\s+\$?\d""",
-                            RegexOption.IGNORE_CASE
-                        ).containsMatchIn(next)
-
+                        val startsNewItem = matchEiscoItemLine(next) != null
                         val isFooter = nextNorm.contains("SUB-TOTAL") || nextNorm.contains("TOTAL$")
-                        val isHeader = nextNorm.contains("PRODUCTDESCRIPTION")
+                        val isHeader = nextNorm.contains("PRODUCTDESCRIPTION") || nextNorm == "CODE"
 
                         val isContinuation =
                             !startsNewItem &&
@@ -182,6 +210,40 @@ class EiscoSciLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
             }
         }
 
+    private fun matchEiscoItemLine(line: String): ItemLineMatch? {
+        val withComma = Regex(
+            """^([A-Z0-9]+)\s+(.+?),\s+([A-Z0-9-]+)\s+([\d,]+)\s+\$?(\d+(?:\.\d{1,4})?)\s+\$?([\d,]+\.\d{2})$""",
+            RegexOption.IGNORE_CASE
+        ).find(line)
+
+        if (withComma != null) {
+            return ItemLineMatch(
+                leftCode = withComma.groupValues[1].trim(),
+                description = withComma.groupValues[2].trim(),
+                vendorCode = withComma.groupValues[3].trim(),
+                quantity = withComma.groupValues[4].trim(),
+                unitPrice = withComma.groupValues[5].trim()
+            )
+        }
+
+        val withoutComma = Regex(
+            """^([A-Z0-9]+)\s+(.+?)\s+([A-Z0-9-]+)\s+([\d,]+)\s+\$?(\d+(?:\.\d{1,4})?)\s+\$?([\d,]+\.\d{2})$""",
+            RegexOption.IGNORE_CASE
+        ).find(line)
+
+        if (withoutComma != null) {
+            return ItemLineMatch(
+                leftCode = withoutComma.groupValues[1].trim(),
+                description = withoutComma.groupValues[2].trim(),
+                vendorCode = withoutComma.groupValues[3].trim(),
+                quantity = withoutComma.groupValues[4].trim(),
+                unitPrice = withoutComma.groupValues[5].trim()
+            )
+        }
+
+        return null
+    }
+
     private fun cleanVendorDescription(raw: String?, sku: String?, leftCode: String?): String? {
         val merged = raw
             ?.replace("1VIAL/BAG(3X4),", "1 VIAL/BAG (3X4)")
@@ -204,6 +266,9 @@ class EiscoSciLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
 
             "PH2844-1V-100", "WINETEST" ->
                 "WINE PH TEST STRIPS, VIAL OF 100"
+
+            "GLU-1B-100", "GLUTEST100" ->
+                "GLUCOSE PLASTIC TEST STRIPS, 100"
 
             else -> merged
         }
@@ -229,9 +294,19 @@ class EiscoSciLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         return line
             .replace("HoneoyeFalls,NY", "HONEOYE FALLS NY", ignoreCase = true)
             .replace("HoneoyeFalls", "HONEOYE FALLS", ignoreCase = true)
+            .replace("UnitedStates", "", ignoreCase = true)
+            .replace("USA", "", ignoreCase = true)
+            .replace(Regex("""\b\d{5}\b"""), "")
             .replace(",", " ")
             .replace(Regex("""\s+"""), " ")
             .trim()
+    }
+
+    private fun extractLastZip(line: String): String? {
+        return Regex("""\b(\d{5})\b""")
+            .findAll(line)
+            .map { it.groupValues[1] }
+            .lastOrNull()
     }
 
     private fun extractAfter(line: String, marker: String): String? {
@@ -286,5 +361,13 @@ class EiscoSciLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
     private data class CityState(
         val city: String?,
         val state: String?
+    )
+
+    private data class ItemLineMatch(
+        val leftCode: String,
+        val description: String,
+        val vendorCode: String,
+        val quantity: String,
+        val unitPrice: String
     )
 }

@@ -6,7 +6,7 @@ fun main() {
     val testFiles = listOf(
         //"testpdf/Precision 2025.08.29(406390).pdf",
         //"testpdf/Precision 2025.12.16(406460).pdf",
-        "testpdf/Precision 2025.12.30(406468).pdf",
+        "testpdf/Eisco PO-002857.pdf",
         //"testpdf/Precision 2025.12.30(406469)Maintex.pdf",
         //"testpdf/Precision 2025.12.30406467)FastenalPA.pdf"
     )

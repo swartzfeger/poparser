@@ -24,6 +24,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -40,10 +41,19 @@ import com.jay.parser.models.ExportOrder
 import com.jay.parser.pdf.PdfFieldParser
 import com.jay.parser.pdf.PdfTextExtractor
 import com.jay.parser.parser.OrderEnricher
+import java.awt.Component
+import java.awt.Container
 import java.awt.FileDialog
+import java.awt.datatransfer.DataFlavor
+import java.awt.dnd.DnDConstants
+import java.awt.dnd.DropTarget
+import java.awt.dnd.DropTargetAdapter
+import java.awt.dnd.DropTargetDragEvent
+import java.awt.dnd.DropTargetDropEvent
 import java.io.File
 import java.time.LocalDate
 import java.util.Locale
+import javax.swing.SwingUtilities
 
 private val AppColors = darkColorScheme(
     background = Color(0xFF0E1116),
@@ -64,6 +74,7 @@ fun FrameWindowScope.MainScreen() {
     val queuedFiles = remember { mutableStateListOf<File>() }
     var parsedOrders by remember { mutableStateOf<List<ExportOrder>>(emptyList()) }
     var uiState by remember { mutableStateOf(UiState()) }
+    var isDragOver by remember { mutableStateOf(false) }
 
     val extractor = remember { PdfTextExtractor() }
     val parser = remember { PdfFieldParser() }
@@ -91,6 +102,94 @@ fun FrameWindowScope.MainScreen() {
         }
     }
 
+    DisposableEffect(window) {
+        val listener = object : DropTargetAdapter() {
+            private fun supportsFiles(flavors: Array<DataFlavor>): Boolean {
+                return flavors.any { it == DataFlavor.javaFileListFlavor }
+            }
+
+            override fun dragEnter(dtde: DropTargetDragEvent) {
+                if (supportsFiles(dtde.currentDataFlavors)) {
+                    dtde.acceptDrag(DnDConstants.ACTION_COPY)
+                    isDragOver = true
+                } else {
+                    dtde.rejectDrag()
+                    isDragOver = false
+                }
+            }
+
+            override fun dragOver(dtde: DropTargetDragEvent) {
+                if (supportsFiles(dtde.currentDataFlavors)) {
+                    dtde.acceptDrag(DnDConstants.ACTION_COPY)
+                    isDragOver = true
+                } else {
+                    dtde.rejectDrag()
+                    isDragOver = false
+                }
+            }
+
+            override fun dragExit(dte: java.awt.dnd.DropTargetEvent) {
+                isDragOver = false
+            }
+
+            override fun drop(dtde: DropTargetDropEvent) {
+                try {
+                    if (!supportsFiles(dtde.currentDataFlavors)) {
+                        dtde.rejectDrop()
+                        isDragOver = false
+                        return
+                    }
+
+                    dtde.acceptDrop(DnDConstants.ACTION_COPY)
+
+                    @Suppress("UNCHECKED_CAST")
+                    val droppedFiles = dtde.transferable
+                        .getTransferData(DataFlavor.javaFileListFlavor) as? List<File>
+                        ?: emptyList()
+
+                    addFiles(droppedFiles)
+                    dtde.dropComplete(true)
+                } catch (e: Exception) {
+                    uiState = UiState(
+                        status = "Error",
+                        message = "Drop failed: ${e.message ?: "Unknown error"}"
+                    )
+                    dtde.dropComplete(false)
+                } finally {
+                    isDragOver = false
+                }
+            }
+        }
+
+        val installedTargets = mutableListOf<Pair<Component, DropTarget?>>()
+
+        fun installDropTarget(component: Component) {
+            installedTargets += component to component.dropTarget
+            component.dropTarget = DropTarget(component, DnDConstants.ACTION_COPY, listener, true)
+        }
+
+        fun installRecursively(component: Component) {
+            installDropTarget(component)
+            if (component is Container) {
+                component.components.forEach { child ->
+                    installRecursively(child)
+                }
+            }
+        }
+
+        SwingUtilities.invokeLater {
+            installRecursively(window)
+            installRecursively(window.rootPane)
+            installRecursively(window.rootPane.contentPane)
+        }
+
+        onDispose {
+            installedTargets.forEach { (component, previous) ->
+                component.dropTarget = previous
+            }
+        }
+    }
+
     MaterialTheme(colorScheme = AppColors) {
         Surface(
             modifier = Modifier.fillMaxSize(),
@@ -107,7 +206,7 @@ fun FrameWindowScope.MainScreen() {
                 ) {
                     HeaderSection()
 
-                    FilePickerBanner()
+                    FilePickerBanner(isDragOver = isDragOver)
 
                     ActionRow(
                         onChooseFiles = {
@@ -266,16 +365,19 @@ private fun HeaderSection() {
 }
 
 @Composable
-private fun FilePickerBanner() {
+private fun FilePickerBanner(isDragOver: Boolean) {
+    val backgroundColor = if (isDragOver) Color(0xFF1B2A3C) else Color(0xFF121720)
+    val borderColor = if (isDragOver) Color(0xFF6EA8FF) else Color(0xFF3A4558)
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color(0xFF121720), RoundedCornerShape(20.dp)),
+            .background(backgroundColor, RoundedCornerShape(20.dp)),
         contentAlignment = Alignment.Center
     ) {
         Card(
-            colors = CardDefaults.cardColors(containerColor = Color(0xFF121720)),
-            border = BorderStroke(2.dp, Color(0xFF3A4558)),
+            colors = CardDefaults.cardColors(containerColor = backgroundColor),
+            border = BorderStroke(2.dp, borderColor),
             shape = RoundedCornerShape(20.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -290,13 +392,21 @@ private fun FilePickerBanner() {
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = "Use Choose PDFs to import purchase order files",
+                        text = if (isDragOver) {
+                            "Drop PDF files here"
+                        } else {
+                            "Use Choose PDFs or drag files here"
+                        },
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.Medium
                     )
                     Text(
-                        text = "Drag and drop has been removed",
+                        text = if (isDragOver) {
+                            "Release to add files to the queue"
+                        } else {
+                            "Drag and drop is enabled"
+                        },
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.secondary
                     )
