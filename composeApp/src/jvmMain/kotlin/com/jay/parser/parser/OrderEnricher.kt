@@ -98,6 +98,7 @@ class OrderEnricher {
             "TCD PARTS",
             "DRAKE SPECIALITIES",
             "EISCO SCI",
+            "NATIONAL CHEMICALS",
             "KROWNE METAL CORPORA"
         )
 

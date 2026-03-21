@@ -36,6 +36,8 @@ abstract class BaseLayoutStrategy : LayoutStrategy {
         sku = sku.replace(Regex("""^IPA\s+""", RegexOption.IGNORE_CASE), "")
         sku = sku.replace(Regex("""-CANADA$""", RegexOption.IGNORE_CASE), "")
         sku = sku.replace(Regex("""/EDMX$""", RegexOption.IGNORE_CASE), "")
+        // Specific fix for Maintex partial extractions
+        if (sku == "PIN-MNTX-") sku = "PIN-MNTX-100"
 
         return sku.trim()
     }
