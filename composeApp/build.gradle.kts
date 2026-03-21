@@ -1,6 +1,6 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
-val appVersion = "1.0.3"
+val appVersion = "1.0.4"
 val appVendor = "Jay Swartzfeger"
 val appCopyright = "© 2026 Precision Laboratories"
 val appBaseName = "PO Parser"
@@ -69,8 +69,12 @@ compose.desktop {
             )
 
             windows {
+                menu = true
+                shortcut = true
                 menuGroup = appBaseName
                 upgradeUuid = windowsUpgradeUuid
+                dirChooser = true
+                perUserInstall = false
             }
 
             macOS {
