@@ -75,23 +75,13 @@ class OrderEnricher {
         )
     }
 
-    /**
-     * UOM adjustment is enabled only for specific canonical customer IDs.
-     *
-     * Important:
-     * We do NOT divide by just any numeric segment containing V/B/VB.
-     * We only divide when the factor is a plausible pack/count divisor.
-     *
-     * This prevents false positives like:
-     *   KRO-1452VB-100
-     * where 1452VB is part of the item identity, not a divisor.
-     */
     private fun getUomAdjustedQuantity(
         sku: String,
         rawQuantity: Double,
         resolvedCustomer: ResolvedCustomer?
     ): Double {
         val customerId = resolvedCustomer?.id?.uppercase().orEmpty()
+        val normalizedSku = sku.uppercase().trim()
 
         val uomCustomerIds = setOf(
             "DIVERSIFIED FOODSERV",
@@ -99,10 +89,22 @@ class OrderEnricher {
             "DRAKE SPECIALITIES",
             "EISCO SCI",
             "NATIONAL CHEMICALS",
+            "DOVE MATERIAL",
             "KROWNE METAL CORPORA"
         )
 
         if (!uomCustomerIds.contains(customerId)) {
+            return rawQuantity
+        }
+
+        // Dove-specific exceptions:
+        // these SKUs already arrive with the correct "Total Each" raw quantity
+        // and must NOT be divided by the 4VB segment.
+        if (customerId == "DOVE MATERIAL" && normalizedSku in setOf(
+                "145-4VB-100",
+                "106-QR5-4VB-100"
+            )
+        ) {
             return rawQuantity
         }
 
@@ -111,10 +113,8 @@ class OrderEnricher {
             100, 144, 200, 250, 500, 1000, 10000
         )
 
-        val segments = sku.uppercase().split("-")
+        val segments = normalizedSku.split("-")
 
-        // First preference: exact V/B/VB-style UOM segments
-        // Examples: 500V, 1VB, 2VB, 12V, 50V, 4VB
         val markedFactor = segments
             .asSequence()
             .mapNotNull { segment ->
@@ -127,8 +127,6 @@ class OrderEnricher {
             return rawQuantity / markedFactor
         }
 
-        // Fallback: use second segment only if it is a sane divisor.
-        // Example: 210-100-1X2 -> divisor 100
         val secondSegmentFactor = segments
             .getOrNull(1)
             ?.let { Regex("""^(\d+)""").find(it)?.groupValues?.getOrNull(1)?.toIntOrNull() }

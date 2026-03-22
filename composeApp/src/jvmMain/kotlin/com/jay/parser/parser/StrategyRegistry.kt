@@ -22,6 +22,7 @@ class StrategyRegistry(
                     CovidienCtLayoutStrategy(),
                     DiversifiedFoodserviceLayoutStrategy(),
                     DiverseyTurkeyLayoutStrategy(),
+                    DoveLayoutStrategy(),
                     DrakeLayoutStrategy(),
                     ElectronicControlsDesignLayoutStrategy(),
                     EcolabLayoutStrategy(),
