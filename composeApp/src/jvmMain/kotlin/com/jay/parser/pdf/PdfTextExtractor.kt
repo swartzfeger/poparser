@@ -22,6 +22,30 @@ class PdfTextExtractor {
 
     fun extractLines(pdfFile: File): List<PdfLine> {
         Loader.loadPDF(pdfFile).use { document ->
+            // Fresenius-only fallback:
+            // The token-grouped path is corrupting the item block for this PDF,
+            // while plain PDF text contains the exact three-line item block correctly.
+            if (pdfFile.name.contains("FRESENIUS MEDICAL", ignoreCase = true)) {
+                val plainStripper = PDFTextStripper().apply {
+                    sortByPosition = true
+                    startPage = 1
+                    endPage = document.pages.count
+                }
+
+                val text = plainStripper.getText(document)
+
+                return text
+                    .lines()
+                    .map { it.replace(Regex("\\s+"), " ").trim() }
+                    .filter { it.isNotBlank() }
+                    .map { line ->
+                        PdfLine(
+                            tokens = emptyList(),
+                            text = line
+                        )
+                    }
+            }
+
             val stripper = PositionTextStripper()
             stripper.sortByPosition = true
             stripper.startPage = 1
@@ -34,8 +58,6 @@ class PdfTextExtractor {
     }
 
     private fun groupIntoLines(tokens: List<PdfToken>): List<PdfLine> {
-        // IMPORTANT:
-        // Sort top-to-bottom, then left-to-right.
         val sorted = tokens.sortedWith(
             compareBy<PdfToken> { it.y }.thenBy { it.x }
         )
