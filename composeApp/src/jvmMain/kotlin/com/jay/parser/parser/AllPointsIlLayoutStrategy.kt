@@ -170,16 +170,24 @@ class AllPointsIlLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
 
     private fun parseSkuFromDescriptionLine(line: String): String? {
         val match = Regex(
-            """\|\s*([A-Z0-9]+(?:-[A-Z0-9]+)+)\s+DFS\s*\|""",
+            """\|\s*([A-Z0-9]+(?:-[A-Z0-9]+)*)\s+DFS\s*\|""",
             RegexOption.IGNORE_CASE
         ).find(line)
 
-        return match?.groupValues?.get(1)?.trim()?.uppercase()
+        val rawSku = match?.groupValues?.get(1)?.trim()?.uppercase() ?: return null
+        return normalizeAllPointsSku(rawSku)
+    }
+
+    private fun normalizeAllPointsSku(sku: String): String {
+        return when (sku.uppercase()) {
+            "QAC-400B" -> "DFS-QAC-400B"
+            else -> sku.uppercase()
+        }
     }
 
     private fun extractDescriptionFromDescriptionLine(line: String, sku: String): String {
         val match = Regex(
-            """^(.*?)\s*\|\s*${Regex.escape(sku)}\s+DFS\s*\|""",
+            """^(.*?)\s*\|\s*${Regex.escape(sku.removePrefix("DFS-"))}\s+DFS\s*\|""",
             RegexOption.IGNORE_CASE
         ).find(line)
 
