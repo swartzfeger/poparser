@@ -1,6 +1,6 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
-val appVersion = "1.0.6"
+val appVersion = "1.0.7"
 val appVendor = "Jay Swartzfeger"
 val appCopyright = "© 2026 Precision Laboratories"
 val appBaseName = "PO Parser"
@@ -41,6 +41,9 @@ kotlin {
 
             implementation("org.apache.pdfbox:pdfbox:3.0.2")
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
+            implementation("org.apache.poi:poi-ooxml:5.2.5")
+            implementation("org.apache.logging.log4j:log4j-core:2.23.1")
+
 
             implementation("io.ktor:ktor-client-core:2.3.12")
             implementation("io.ktor:ktor-client-cio:2.3.12")

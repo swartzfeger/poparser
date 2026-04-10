@@ -38,9 +38,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.FrameWindowScope
 import com.jay.parser.export.SageCsvExporter
 import com.jay.parser.models.ExportOrder
-import com.jay.parser.pdf.PdfFieldParser
-import com.jay.parser.pdf.PdfTextExtractor
 import com.jay.parser.parser.OrderEnricher
+import com.jay.parser.parser.OrderFileParser
 import java.awt.Component
 import java.awt.Container
 import java.awt.FileDialog
@@ -66,7 +65,7 @@ private val AppColors = darkColorScheme(
 
 data class UiState(
     val status: String = "Idle",
-    val message: String = "Choose purchase order PDFs to begin."
+    val message: String = "Choose purchase order files to begin."
 )
 
 @Composable
@@ -76,15 +75,17 @@ fun FrameWindowScope.MainScreen() {
     var uiState by remember { mutableStateOf(UiState()) }
     var isDragOver by remember { mutableStateOf(false) }
 
-    val extractor = remember { PdfTextExtractor() }
-    val parser = remember { PdfFieldParser() }
+    val fileParser = remember { OrderFileParser() }
     val enricher = remember { OrderEnricher() }
     val exporter = remember { SageCsvExporter() }
 
     fun addFiles(files: List<File>) {
         val existing = queuedFiles.map { it.absolutePath }.toSet()
         val newFiles = files
-            .filter { it.extension.equals("pdf", ignoreCase = true) }
+            .filter {
+                it.extension.equals("pdf", ignoreCase = true) ||
+                        it.extension.equals("xlsx", ignoreCase = true)
+            }
             .filterNot { it.absolutePath in existing }
 
         if (newFiles.isNotEmpty()) {
@@ -92,12 +93,12 @@ fun FrameWindowScope.MainScreen() {
             parsedOrders = emptyList()
             uiState = UiState(
                 status = "Ready",
-                message = "${queuedFiles.size} PDF file(s) queued."
+                message = "${queuedFiles.size} file(s) queued."
             )
         } else if (files.isNotEmpty()) {
             uiState = UiState(
                 status = "Ready",
-                message = "No new PDF files were added."
+                message = "No new supported files were added."
             )
         }
     }
@@ -210,7 +211,7 @@ fun FrameWindowScope.MainScreen() {
 
                     ActionRow(
                         onChooseFiles = {
-                            val selected = pickPdfFiles()
+                            val selected = pickOrderFiles()
                             addFiles(selected)
                         },
                         onClear = {
@@ -222,19 +223,19 @@ fun FrameWindowScope.MainScreen() {
                             if (queuedFiles.isEmpty()) {
                                 uiState = UiState(
                                     status = "Idle",
-                                    message = "Add at least one PDF before parsing."
+                                    message = "Add at least one file before parsing."
                                 )
                             } else {
                                 try {
                                     uiState = UiState(
                                         status = "Processing",
-                                        message = "Parsing ${queuedFiles.size} PDF file(s)..."
+                                        message = "Parsing ${queuedFiles.size} file(s)..."
                                     )
 
                                     val startNanos = System.nanoTime()
 
                                     val orders = queuedFiles.map { file ->
-                                        val parsed = parser.parse(extractor.extractLines(file))
+                                        val parsed = fileParser.parse(file)
                                         enricher.enrich(file.name, parsed)
                                     }
 
@@ -260,48 +261,27 @@ fun FrameWindowScope.MainScreen() {
                             if (parsedOrders.isEmpty()) {
                                 uiState = UiState(
                                     status = "Idle",
-                                    message = "Parse at least one PDF before exporting."
+                                    message = "Parse at least one file before exporting."
                                 )
                             } else {
                                 try {
-                                    val offending = parsedOrders.firstOrNull { order ->
-                                        val shipTo = order.shipToCustomer.orEmpty().uppercase()
-                                        val addr1 = order.addressLine1.orEmpty().uppercase()
-                                        val addr2 = order.addressLine2.orEmpty().uppercase()
-                                        val city = order.city.orEmpty().uppercase()
-                                        val zip = order.zip.orEmpty().uppercase()
+                                    val outputFile = pickSaveCsvFile()
+                                    if (outputFile != null) {
+                                        exporter.export(
+                                            orders = parsedOrders,
+                                            outputFile = outputFile,
+                                            orderDate = LocalDate.now()
+                                        )
 
-                                        shipTo.contains("PRECISION") ||
-                                                addr1.contains("AIRPORT") ||
-                                                addr2.contains("AIRPORT") ||
-                                                city.contains("COTTONWOOD") ||
-                                                zip.contains("86326")
-                                    }
-
-                                    if (offending != null) {
                                         uiState = UiState(
-                                            status = "Error",
-                                            message = "Export blocked: shipTo='${offending.shipToCustomer}', addr1='${offending.addressLine1}', addr2='${offending.addressLine2}', city='${offending.city}', zip='${offending.zip}'"
+                                            status = "Exported",
+                                            message = "CSV written to: ${outputFile.absolutePath}"
                                         )
                                     } else {
-                                        val outputFile = pickSaveCsvFile()
-                                        if (outputFile != null) {
-                                            exporter.export(
-                                                orders = parsedOrders,
-                                                outputFile = outputFile,
-                                                orderDate = LocalDate.now()
-                                            )
-
-                                            uiState = UiState(
-                                                status = "Exported",
-                                                message = "CSV written to: ${outputFile.absolutePath}"
-                                            )
-                                        } else {
-                                            uiState = UiState(
-                                                status = "Ready",
-                                                message = "Export canceled."
-                                            )
-                                        }
+                                        uiState = UiState(
+                                            status = "Ready",
+                                            message = "Export canceled."
+                                        )
                                     }
                                 } catch (e: Exception) {
                                     uiState = UiState(
@@ -328,9 +308,9 @@ fun FrameWindowScope.MainScreen() {
                                     uiState = UiState(
                                         status = if (queuedFiles.isEmpty()) "Idle" else "Ready",
                                         message = if (queuedFiles.isEmpty()) {
-                                            "Choose purchase order PDFs to begin."
+                                            "Choose purchase order files to begin."
                                         } else {
-                                            "${queuedFiles.size} PDF file(s) queued."
+                                            "${queuedFiles.size} file(s) queued."
                                         }
                                     )
                                 }
@@ -351,13 +331,13 @@ fun FrameWindowScope.MainScreen() {
 private fun HeaderSection() {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(
-            text = "PO PDF Parser",
+            text = "PO Parser",
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.onBackground,
             fontWeight = FontWeight.SemiBold
         )
         Text(
-            text = "Import purchase order PDFs, extract customer and item data, and export Sage-ready CSV.",
+            text = "Import purchase order PDFs or XLSX files, extract customer and item data, and export Sage-ready CSV.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.secondary
         )
@@ -393,9 +373,9 @@ private fun FilePickerBanner(isDragOver: Boolean) {
                 ) {
                     Text(
                         text = if (isDragOver) {
-                            "Drop PDF files here"
+                            "Drop PDF or XLSX files here"
                         } else {
-                            "Use Choose PDFs or drag files here"
+                            "Use Choose Files or drag files here"
                         },
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface,
@@ -411,7 +391,7 @@ private fun FilePickerBanner(isDragOver: Boolean) {
                         color = MaterialTheme.colorScheme.secondary
                     )
                     Text(
-                        text = "Single-page and multi-page purchase orders supported",
+                        text = "PDF and XLSX purchase orders supported",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.secondary
                     )
@@ -433,7 +413,7 @@ private fun ActionRow(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Button(onClick = onChooseFiles) {
-            Text("Choose PDFs")
+            Text("Choose Files")
         }
 
         OutlinedButton(onClick = onClear) {
@@ -443,7 +423,7 @@ private fun ActionRow(
         Spacer(modifier = Modifier.width(8.dp))
 
         Button(onClick = onParse) {
-            Text("Parse PDFs")
+            Text("Parse Files")
         }
 
         Button(onClick = onExport) {
@@ -669,10 +649,10 @@ private fun FileRow(
     }
 }
 
-private fun FrameWindowScope.pickPdfFiles(): List<File> {
-    val dialog = FileDialog(window, "Choose Purchase Order PDFs", FileDialog.LOAD).apply {
+private fun FrameWindowScope.pickOrderFiles(): List<File> {
+    val dialog = FileDialog(window, "Choose Purchase Order Files", FileDialog.LOAD).apply {
         isMultipleMode = true
-        file = "*.pdf"
+        file = "*.*"
         isVisible = true
     }
 

@@ -37,6 +37,7 @@ class StrategyRegistry(
                     NalcoCompanyLayoutStrategy(),
                     NationalChemicalsLayoutStrategy(),
                     PinetreeInstrumentsLayoutStrategy(),
+                    PrecisionEuropeLayoutStrategy(),
                     TcdPartsLayoutStrategy(),
                     VwrLayoutStrategy(),
                     WebbChemicalAndPaperLayoutStrategy()
