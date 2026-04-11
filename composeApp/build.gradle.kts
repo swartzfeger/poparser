@@ -72,6 +72,8 @@ compose.desktop {
                 TargetFormat.Exe
             )
 
+            appResourcesRootDir.set(project.layout.projectDirectory.dir("composeApp/resources"))
+
             windows {
                 menu = true
                 shortcut = true
@@ -86,11 +88,4 @@ compose.desktop {
             }
         }
     }
-}
-
-tasks.withType<JavaExec>().configureEach {
-    environment("DYLD_LIBRARY_PATH", "/opt/homebrew/opt/tesseract/lib:/opt/homebrew/opt/leptonica/lib")
-    jvmArgs(
-        "-Djna.library.path=/opt/homebrew/opt/tesseract/lib:/opt/homebrew/opt/leptonica/lib"
-    )
 }
