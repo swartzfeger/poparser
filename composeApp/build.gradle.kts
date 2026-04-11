@@ -42,6 +42,7 @@ kotlin {
             implementation("org.apache.pdfbox:pdfbox:3.0.2")
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
             implementation("org.apache.poi:poi-ooxml:5.2.5")
+            implementation("net.sourceforge.tess4j:tess4j:5.10.0")
             implementation("org.apache.logging.log4j:log4j-core:2.23.1")
 
 
@@ -85,4 +86,11 @@ compose.desktop {
             }
         }
     }
+}
+
+tasks.withType<JavaExec>().configureEach {
+    environment("DYLD_LIBRARY_PATH", "/opt/homebrew/opt/tesseract/lib:/opt/homebrew/opt/leptonica/lib")
+    jvmArgs(
+        "-Djna.library.path=/opt/homebrew/opt/tesseract/lib:/opt/homebrew/opt/leptonica/lib"
+    )
 }

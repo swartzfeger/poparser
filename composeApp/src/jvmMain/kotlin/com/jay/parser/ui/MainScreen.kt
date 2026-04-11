@@ -53,7 +53,8 @@ import java.io.File
 import java.time.LocalDate
 import java.util.Locale
 import javax.swing.SwingUtilities
-
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
 private val AppColors = darkColorScheme(
     background = Color(0xFF0E1116),
     surface = Color(0xFF171B22),
@@ -78,6 +79,7 @@ fun FrameWindowScope.MainScreen() {
     val fileParser = remember { OrderFileParser() }
     val enricher = remember { OrderEnricher() }
     val exporter = remember { SageCsvExporter() }
+    val clipboard = LocalClipboardManager.current
 
     fun addFiles(files: List<File>) {
         val existing = queuedFiles.map { it.absolutePath }.toSet()
@@ -318,7 +320,16 @@ fun FrameWindowScope.MainScreen() {
                         }
 
                         Box(modifier = Modifier.weight(1f)) {
-                            ResultsPanel(parsedOrders)
+                            ResultsPanel(
+                                orders = parsedOrders,
+                                onCopyOrder = { order ->
+                                    clipboard.setText(AnnotatedString(buildOrderDebugText(order)))
+                                    uiState = UiState(
+                                        status = "Copied",
+                                        message = "Parsed order copied to clipboard."
+                                    )
+                                }
+                            )
                         }
                     }
                 }
@@ -506,7 +517,10 @@ private fun QueuePanel(
 }
 
 @Composable
-private fun ResultsPanel(orders: List<ExportOrder>) {
+private fun ResultsPanel(
+    orders: List<ExportOrder>,
+    onCopyOrder: (ExportOrder) -> Unit
+) {
     Card(
         modifier = Modifier.fillMaxSize(),
         colors = CardDefaults.cardColors(containerColor = Color(0xFF171B22)),
@@ -538,7 +552,11 @@ private fun ResultsPanel(orders: List<ExportOrder>) {
                     modifier = Modifier.fillMaxSize()
                 ) {
                     itemsIndexed(orders) { index, order ->
-                        ResultOrderCard(index = index, order = order)
+                        ResultOrderCard(
+                            index = index,
+                            order = order,
+                            onCopy = { onCopyOrder(order) }
+                        )
                     }
                 }
             }
@@ -549,7 +567,8 @@ private fun ResultsPanel(orders: List<ExportOrder>) {
 @Composable
 private fun ResultOrderCard(
     index: Int,
-    order: ExportOrder
+    order: ExportOrder,
+    onCopy: () -> Unit
 ) {
     Card(
         colors = CardDefaults.cardColors(containerColor = Color(0xFF11161D)),
@@ -559,7 +578,7 @@ private fun ResultOrderCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(14.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
                 text = "${index + 1}. ${order.sourceFilename}",
@@ -605,6 +624,10 @@ private fun ResultOrderCard(
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.secondary
             )
+
+            OutlinedButton(onClick = onCopy) {
+                Text("Copy Parsed Order")
+            }
         }
     }
 }
@@ -670,4 +693,33 @@ private fun FrameWindowScope.pickSaveCsvFile(): File? {
 
     val finalName = if (filename.endsWith(".csv", ignoreCase = true)) filename else "$filename.csv"
     return File(directory, finalName)
+}
+
+private fun buildOrderDebugText(order: ExportOrder): String {
+    return buildString {
+        appendLine("File: ${order.sourceFilename}")
+        appendLine("Customer: ${order.customer?.name ?: order.customerNameRaw.orEmpty()}")
+        appendLine("Order #: ${order.orderNumber}")
+        appendLine("Ship To: ${order.shipToCustomer.orEmpty()}")
+        appendLine("Address 1: ${order.addressLine1.orEmpty()}")
+        appendLine("Address 2: ${order.addressLine2.orEmpty()}")
+        appendLine("City: ${order.city.orEmpty()}")
+        appendLine("State: ${order.state.orEmpty()}")
+        appendLine("Zip: ${order.zip.orEmpty()}")
+        appendLine("Terms: ${order.termsResolved.orEmpty()}")
+        appendLine("Lines: ${order.lines.size}")
+        appendLine()
+
+        order.lines.forEachIndexed { index, line ->
+            appendLine("Line ${index + 1}")
+            appendLine("  sku               = ${line.sku}")
+            appendLine("  description       = ${line.description}")
+            appendLine("  quantityRaw       = ${line.quantityRaw}")
+            appendLine("  quantityForExport = ${line.quantityForExport}")
+            appendLine("  unitPriceRef      = ${line.unitPriceReference}")
+            appendLine("  unitPriceResolved = ${line.unitPriceResolved}")
+            appendLine("  glAccount         = ${line.glAccount}")
+            appendLine()
+        }
+    }
 }

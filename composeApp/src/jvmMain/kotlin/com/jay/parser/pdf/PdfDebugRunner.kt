@@ -1,6 +1,7 @@
 package com.jay.parser.pdf
 
 import com.jay.parser.parser.OrderEnricher
+import com.jay.parser.parser.OrderFileParser
 import java.io.File
 
 fun main() {
@@ -8,50 +9,50 @@ fun main() {
         //"testpdf/Dove PO-00226-D - Prec Lab.pdf",
         //"testpdf/Dove PO-00348-D - Prec Lab.pdf",
         //"testpdf/Dove PO-00452-D - Prec Lab.pdf",
-        "testpdf/PE PO 326.pdf",
+        "testpdf/COVENANT AVIATION - TSA DISTRIBUTOR Scan2026-01-19_112238 precision.pdf",
         //"testpdf/Dove POD-0087 - PrecLab.pdf"
     )
 
-    val extractor = PdfTextExtractor()
-    val parser = PdfFieldParser()
+    val fileParser = OrderFileParser()
     val enricher = OrderEnricher()
 
     println("==================================================")
-    println("BATCH PDF DEBUG")
+    println("BATCH ORDER DEBUG")
     println("==================================================")
     println("Files queued: ${testFiles.size}")
     println()
 
     testFiles.forEachIndexed { fileIndex, path ->
-        val pdfFile = File(path)
+        val inputFile = File(path)
 
         println("##################################################")
-        println("PDF ${fileIndex + 1} of ${testFiles.size}")
+        println("FILE ${fileIndex + 1} of ${testFiles.size}")
         println("##################################################")
         println("Requested path: $path")
 
-        if (!pdfFile.exists()) {
-            println("ERROR: PDF not found: ${pdfFile.absolutePath}")
+        if (!inputFile.exists()) {
+            println("ERROR: File not found: ${inputFile.absolutePath}")
             println()
             return@forEachIndexed
         }
 
-        val textLines = extractor.extractLines(pdfFile)
-        val parsed = parser.parse(textLines)
-        val enriched = enricher.enrich(pdfFile.name, parsed)
+        val ocrExtractor = OcrPdfTextExtractor()
+        val rawOcrLines = ocrExtractor.extractLines(inputFile)
 
-        println("==================================================")
-        println("PDF DEBUG")
-        println("==================================================")
-        println("File: ${pdfFile.name}")
-        println("Absolute path: ${pdfFile.absolutePath}")
-        println("Line count: ${textLines.size}")
+        println("---- RAW OCR LINES ----")
+        rawOcrLines.forEachIndexed { index, line ->
+            println("${index + 1}: ${line.text}")
+        }
         println()
 
-        println("---- RAW TEXT LINES ----")
-        textLines.forEachIndexed { index, line ->
-            println("${index + 1}: $line")
-        }
+        val parsed = fileParser.parse(inputFile)
+        val enriched = enricher.enrich(inputFile.name, parsed)
+
+        println("==================================================")
+        println("ORDER DEBUG")
+        println("==================================================")
+        println("File: ${inputFile.name}")
+        println("Absolute path: ${inputFile.absolutePath}")
         println()
 
         println("---- PARSED FIELDS ----")
