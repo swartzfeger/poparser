@@ -222,41 +222,61 @@ fun FrameWindowScope.MainScreen() {
                             uiState = UiState()
                         },
                         onParse = {
-                            if (queuedFiles.isEmpty()) {
+                            if (queuedFiles.isEmpty()) return@ActionRow
+
+                            val startTime = System.currentTimeMillis()
+
+                            try {
                                 uiState = UiState(
-                                    status = "Idle",
-                                    message = "Add at least one file before parsing."
+                                    status = "Processing",
+                                    message = "Starting parse of ${queuedFiles.size} file(s)..."
                                 )
-                            } else {
-                                try {
+
+                                val results = mutableListOf<ExportOrder>()
+                                var totalOrdersFound = 0
+
+                                queuedFiles.forEachIndexed { index, file ->
+                                    val fileNum = index + 1
+
+                                    // Live update: show which file we're working on
                                     uiState = UiState(
                                         status = "Processing",
-                                        message = "Parsing ${queuedFiles.size} file(s)..."
+                                        message = "Parsing file $fileNum/${queuedFiles.size}: ${file.name}..."
                                     )
 
-                                    val startNanos = System.nanoTime()
+                                    // FIXED: Handle List<ParsedPdfFields> for multi-order support
+                                    val parsedOrdersList = fileParser.parse(file)
 
-                                    val orders = queuedFiles.map { file ->
-                                        val parsed = fileParser.parse(file)
-                                        enricher.enrich(file.name, parsed)
+                                    if (parsedOrdersList.isEmpty()) {
+                                        println("No orders found in file: ${file.name}")
+                                    } else {
+                                        totalOrdersFound += parsedOrdersList.size
                                     }
 
-                                    val elapsedSeconds = (System.nanoTime() - startNanos) / 1_000_000_000.0
-                                    val elapsedText = String.format(Locale.US, "%.1f", elapsedSeconds)
-
-                                    parsedOrders = orders
-
-                                    val totalLines = orders.sumOf { it.lines.size }
-                                    uiState = UiState(
-                                        status = "Parsed",
-                                        message = "Parsed ${orders.size} order(s), $totalLines line(s) total, $elapsedText seconds processing time"
-                                    )
-                                } catch (e: Exception) {
-                                    uiState = UiState(
-                                        status = "Error",
-                                        message = "Parse failed: ${e.message ?: "Unknown error"}"
-                                    )
+                                    parsedOrdersList.forEach { parsed ->
+                                        try {
+                                            val enriched = enricher.enrich(file.name, parsed)
+                                            results.add(enriched)
+                                        } catch (e: Exception) {
+                                            println("Error enriching order from ${file.name}: ${e.message}")
+                                            e.printStackTrace()
+                                        }
+                                    }
                                 }
+
+                                val elapsedSeconds = (System.currentTimeMillis() - startTime) / 1000.0
+
+                                parsedOrders = results
+                                uiState = UiState(
+                                    status = "Complete",
+                                    message = "Successfully parsed ${results.size} orders from ${queuedFiles.size} files in ${"%.2f".format(elapsedSeconds)}s."
+                                )
+                            } catch (e: Exception) {
+                                uiState = UiState(
+                                    status = "Error",
+                                    message = "Parsing failed: ${e.message ?: "Unknown error"}"
+                                )
+                                e.printStackTrace()
                             }
                         },
                         onExport = {

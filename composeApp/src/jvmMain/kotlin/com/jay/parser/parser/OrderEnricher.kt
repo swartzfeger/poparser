@@ -13,12 +13,55 @@ class OrderEnricher {
     fun enrich(sourceFilename: String, parsed: ParsedPdfFields): ExportOrder {
         val resolvedCustomer = resolveCustomer(parsed)
 
+        // Inside OrderEnricher.kt -> enrich()
         val lines = parsed.items
             .mapNotNull { item ->
-                val sku = item.sku?.trim().orEmpty()
+                var sku = item.sku?.trim().orEmpty()
                 if (sku.isBlank()) return@mapNotNull null
 
-                val description = ItemMapper.getItemDescription(sku).ifBlank { sku }
+                val allKnownSkus = ItemMapper.getAllSkus()
+
+                // 1. STRICT EXACT MATCH FIRST
+                val isExactMatch = allKnownSkus.contains(sku)
+                var description = if (isExactMatch) ItemMapper.getItemDescription(sku) else ""
+
+                // 2. FUZZY MATCH FALLBACK
+                if (!isExactMatch) {
+                    val bestMatch = allKnownSkus
+                        .associateWith { sku.levenshteinDistance(it) }
+                        .filterValues { distance -> distance <= 2 } // Tightened to 2 to prevent wild guesses
+                        .minByOrNull { it.value }?.key
+
+                    if (bestMatch != null) {
+                        sku = bestMatch
+                        description = ItemMapper.getItemDescription(sku)
+                    } else {
+                        // If fuzzy fails, fall back to the startsWith logic so we at least get a description
+                        description = ItemMapper.getItemDescription(sku).ifBlank { sku }
+                    }
+                }
+
+                // ... (rest of the quantity and pricing logic remains the same)
+
+                // 2. FUZZY MATCH FALLBACK (Catches OCR errors)
+                // If description is blank, the exact match failed.
+                if (description.isBlank()) {
+                    // Fetch your full list of valid database SKUs
+                    val allKnownSkus = ItemMapper.getAllSkus()
+
+                    val bestMatch = allKnownSkus
+                        .associateWith { sku.levenshteinDistance(it) }
+                        .filterValues { distance -> distance <= 3 } // Strict threshold
+                        .minByOrNull { it.value }?.key
+
+                    if (bestMatch != null) {
+                        sku = bestMatch // Overwrite the bad OCR SKU with the valid DB SKU
+                        description = ItemMapper.getItemDescription(sku)
+                    } else {
+                        description = sku // Fallback to raw parsed text if no fuzzy match is close enough
+                    }
+                }
+
                 val rawQty = item.quantity ?: 0.0
                 val exportQty = getUomAdjustedQuantity(
                     sku = sku,
@@ -98,8 +141,6 @@ class OrderEnricher {
         }
 
         // Dove-specific exceptions:
-        // these SKUs already arrive with the correct "Total Each" raw quantity
-        // and must NOT be divided by the 4VB segment.
         if (customerId == "DOVE MATERIAL" && normalizedSku in setOf(
                 "145-4VB-100",
                 "106-QR5-4VB-100"
@@ -138,4 +179,31 @@ class OrderEnricher {
 
         return rawQuantity
     }
+}
+
+/**
+ * Calculates the Levenshtein distance between two strings.
+ * A lower number means the strings are more similar. (0 = exact match)
+ */
+private fun String.levenshteinDistance(other: String): Int {
+    val lhsLength = this.length
+    val rhsLength = other.length
+
+    var cost = IntArray(lhsLength + 1) { it }
+    var newCost = IntArray(lhsLength + 1) { 0 }
+
+    for (i in 1..rhsLength) {
+        newCost[0] = i
+        for (j in 1..lhsLength) {
+            val match = if (this[j - 1] == other[i - 1]) 0 else 1
+            val costReplace = cost[j - 1] + match
+            val costInsert = cost[j] + 1
+            val costDelete = newCost[j - 1] + 1
+            newCost[j] = minOf(costInsert, costDelete, costReplace)
+        }
+        val swap = cost
+        cost = newCost
+        newCost = swap
+    }
+    return cost[lhsLength]
 }

@@ -6,58 +6,68 @@ import org.apache.pdfbox.rendering.PDFRenderer
 import java.awt.geom.AffineTransform
 import java.awt.image.BufferedImage
 import java.io.File
-import java.nio.charset.Charset
 import java.nio.file.Files
 import javax.imageio.ImageIO
 
+/**
+ * Extractor that handles OCR processing and image normalization (rotation).
+ * Returns a flat list of lines. Segmentation is handled upstream by OrderFileParser.
+ */
 class OcrPdfTextExtractor(
     private val tesseractCommand: String = defaultTesseractCommand()
 ) {
 
-    fun extractLines(pdfFile: File): List<PdfLine> {
-        Loader.loadPDF(pdfFile).use { document ->
-            val renderer = PDFRenderer(document)
-            val allLines = mutableListOf<PdfLine>()
+    /**
+     * Extracts text and returns a flat list of lines.
+     */
+    fun extractLines(file: File): List<PdfLine> {
+        return performOcr(file)
+    }
 
-            // Create a single temp directory for this file's OCR process
-            val tempDir = Files.createTempDirectory("po-parser-ocr").toFile()
+    private fun performOcr(file: File): List<PdfLine> {
+        val allLines = mutableListOf<PdfLine>()
+        val tempDir = Files.createTempDirectory("po_parser_ocr").toFile()
 
-            try {
-                for (pageIndex in 0 until document.numberOfPages) {
-                    // Render at 300 DPI for high OCR accuracy
-                    val sourceImage = renderer.renderImageWithDPI(pageIndex, 300f, ImageType.RGB)
+        try {
+            Loader.loadPDF(file).use { document ->
+                val renderer = PDFRenderer(document)
+                for (i in 0 until document.numberOfPages) {
+                    // 300 DPI is optimal for noisy fax documents
+                    val sourceImage = renderer.renderImageWithDPI(i, 300f, ImageType.RGB)
 
-                    // FISHER FIX: If width > height, it's a landscape scan rotated 90 deg.
-                    // We normalize it to portrait here so Tesseract reads rows correctly.
-                    val normalizedImage = if (sourceImage.width > sourceImage.height) {
+                    // Normalize: Rotate 90deg if it's a landscape scan (common in Fisher PO faxes)
+                    val processedImage = if (sourceImage.width > sourceImage.height) {
                         rotateImage(sourceImage, 90.0)
                     } else {
                         sourceImage
                     }
 
-                    // Save the normalized image to disk for Tesseract to consume
-                    val pageImageFile = File(tempDir, "page_${pageIndex}.png")
-                    ImageIO.write(normalizedImage, "png", pageImageFile)
+                    val tempImageFile = File(tempDir, "page_$i.png")
+                    ImageIO.write(processedImage, "png", tempImageFile)
 
-                    // Run Tesseract and get the text
-                    val outputBase = File(tempDir, "page_${pageIndex}_out")
-                    val pageText = runTesseract(pageImageFile, outputBase)
-
-                    // Clean up and convert text into the app's internal PdfLine format
-                    val lines = pageText.lines()
-                        .map { it.replace(Regex("\\s+"), " ").trim() }
+                    val pageText = runTesseract(tempImageFile)
+                    pageText.lines()
                         .filter { it.isNotBlank() }
-                        .map { PdfLine(tokens = emptyList(), text = it) }
+                        .forEach { allLines.add(PdfLine(tokens = emptyList(), text = it.trim())) }
 
-                    allLines.addAll(lines)
+                    tempImageFile.delete()
                 }
-            } finally {
-                // Ensure we clean up all images/text files from the temp directory
-                tempDir.deleteRecursively()
             }
-
-            return allLines
+        } finally {
+            tempDir.deleteRecursively()
         }
+        return allLines
+    }
+
+    private fun runTesseract(inputFile: File): String {
+        // PSM 3: Fully automatic page segmentation (best for varied structured documents)
+        val process = ProcessBuilder(tesseractCommand, inputFile.absolutePath, "stdout", "--psm", "3", "quiet")
+            .redirectErrorStream(true)
+            .start()
+
+        val output = process.inputStream.bufferedReader().use { it.readText() }
+        process.waitFor()
+        return output
     }
 
     private fun rotateImage(image: BufferedImage, angle: Double): BufferedImage {
@@ -66,51 +76,24 @@ class OcrPdfTextExtractor(
         val cos = Math.abs(Math.cos(rads))
         val w = image.width
         val h = image.height
-
         val newWidth = Math.floor(w * cos + h * sin).toInt()
         val newHeight = Math.floor(h * cos + w * sin).toInt()
 
         val rotated = BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB)
         val g2d = rotated.createGraphics()
-
         val at = AffineTransform()
         at.translate((newWidth - w) / 2.0, (newHeight - h) / 2.0)
         at.rotate(rads, w / 2.0, h / 2.0)
-
         g2d.transform = at
         g2d.drawImage(image, 0, 0, null)
         g2d.dispose()
-
         return rotated
-    }
-
-    private fun runTesseract(inputFile: File, outputBase: File): String {
-        val process = ProcessBuilder(tesseractCommand, inputFile.absolutePath, outputBase.absolutePath)
-            .redirectErrorStream(true)
-            .start()
-
-        process.waitFor()
-
-        val txtFile = File("${outputBase.absolutePath}.txt")
-        return if (txtFile.exists()) {
-            txtFile.readText(Charsets.UTF_8)
-        } else {
-            ""
-        }
     }
 
     companion object {
         private fun defaultTesseractCommand(): String {
             val os = System.getProperty("os.name").lowercase()
-            val appDir = File(System.getProperty("user.dir"))
-
-            return if (os.contains("win")) {
-                val bundled = File(appDir, "ocr/tesseract.exe")
-                if (bundled.exists()) bundled.absolutePath else "tesseract.exe"
-            } else {
-                val bundled = File(appDir, "ocr/tesseract")
-                if (bundled.exists()) bundled.absolutePath else "tesseract"
-            }
+            return if (os.contains("win")) "tesseract.exe" else "tesseract"
         }
     }
 }

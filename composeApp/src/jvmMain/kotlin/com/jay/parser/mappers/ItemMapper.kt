@@ -57,4 +57,13 @@ object ItemMapper {
 
         return 0.0
     }
+
+    // --- NEW FUNCTION ADDED BELOW ---
+
+    /**
+     * Exposes all known database SKUs for fuzzy matching in the OrderEnricher.
+     */
+    fun getAllSkus(): List<String> {
+        return catalog.descriptions.keys.toList()
+    }
 }
