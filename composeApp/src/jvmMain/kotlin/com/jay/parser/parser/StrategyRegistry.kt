@@ -14,6 +14,7 @@ class StrategyRegistry(
             return StrategyRegistry(
                 listOf(
                     AllPointsIlLayoutStrategy(),
+                    AquaPhoenixScientificLayoutStrategy(),
                     AquaResearchLayoutStrategy(),
                     AutoChlorSystemTnLayoutStrategy(),
                     BaileysTestStripsLayoutStrategy(),
@@ -31,6 +32,7 @@ class StrategyRegistry(
                     EcolabPeruLayoutStrategy(),
                     EiscoSciLayoutStrategy(),
                     EtdDirectSupplyLayoutStrategy(),
+                    FisherScientificCoLayoutStrategy(),
                     FreseniusMedicalLayoutStrategy(),
                     KrowneLayoutStrategy(),
                     MedlineLayoutStrategy(),
@@ -39,6 +41,7 @@ class StrategyRegistry(
                     PinetreeInstrumentsLayoutStrategy(),
                     PrecisionEuropeLayoutStrategy(),
                     TcdPartsLayoutStrategy(),
+                    UsaBlueBookLayoutStrategy(),
                     VwrLayoutStrategy(),
                     WebbChemicalAndPaperLayoutStrategy()
 

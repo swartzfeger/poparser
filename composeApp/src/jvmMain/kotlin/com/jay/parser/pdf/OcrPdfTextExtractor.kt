@@ -3,6 +3,7 @@ package com.jay.parser.pdf
 import org.apache.pdfbox.Loader
 import org.apache.pdfbox.rendering.ImageType
 import org.apache.pdfbox.rendering.PDFRenderer
+import java.awt.geom.AffineTransform
 import java.awt.image.BufferedImage
 import java.io.File
 import java.nio.charset.Charset
@@ -18,91 +19,84 @@ class OcrPdfTextExtractor(
             val renderer = PDFRenderer(document)
             val allLines = mutableListOf<PdfLine>()
 
+            // Create a single temp directory for this file's OCR process
             val tempDir = Files.createTempDirectory("po-parser-ocr").toFile()
+
             try {
                 for (pageIndex in 0 until document.numberOfPages) {
-                    val image = renderer.renderImageWithDPI(pageIndex, 300f, ImageType.RGB)
+                    // Render at 300 DPI for high OCR accuracy
+                    val sourceImage = renderer.renderImageWithDPI(pageIndex, 300f, ImageType.RGB)
 
-                    val rawText = runTesseractOnImage(
-                        image = image,
-                        tempDir = tempDir,
-                        pageIndex = pageIndex
-                    )
+                    // FISHER FIX: If width > height, it's a landscape scan rotated 90 deg.
+                    // We normalize it to portrait here so Tesseract reads rows correctly.
+                    val normalizedImage = if (sourceImage.width > sourceImage.height) {
+                        rotateImage(sourceImage, 90.0)
+                    } else {
+                        sourceImage
+                    }
 
-                    val pageLines = rawText
-                        .lines()
-                        .map { it.replace(Regex("""\s+"""), " ").trim() }
-                        .filter { it.isNotBlank() && it != "<>" }
-                        .map { line ->
-                            PdfLine(
-                                tokens = emptyList(),
-                                text = line
-                            )
-                        }
+                    // Save the normalized image to disk for Tesseract to consume
+                    val pageImageFile = File(tempDir, "page_${pageIndex}.png")
+                    ImageIO.write(normalizedImage, "png", pageImageFile)
 
-                    allLines.addAll(pageLines)
+                    // Run Tesseract and get the text
+                    val outputBase = File(tempDir, "page_${pageIndex}_out")
+                    val pageText = runTesseract(pageImageFile, outputBase)
+
+                    // Clean up and convert text into the app's internal PdfLine format
+                    val lines = pageText.lines()
+                        .map { it.replace(Regex("\\s+"), " ").trim() }
+                        .filter { it.isNotBlank() }
+                        .map { PdfLine(tokens = emptyList(), text = it) }
+
+                    allLines.addAll(lines)
                 }
-
-                return allLines
             } finally {
+                // Ensure we clean up all images/text files from the temp directory
                 tempDir.deleteRecursively()
             }
+
+            return allLines
         }
     }
 
-    private fun runTesseractOnImage(
-        image: BufferedImage,
-        tempDir: File,
-        pageIndex: Int
-    ): String {
-        val inputFile = File(tempDir, "page-${pageIndex + 1}.png")
-        val outputBase = File(tempDir, "page-${pageIndex + 1}")
+    private fun rotateImage(image: BufferedImage, angle: Double): BufferedImage {
+        val rads = Math.toRadians(angle)
+        val sin = Math.abs(Math.sin(rads))
+        val cos = Math.abs(Math.cos(rads))
+        val w = image.width
+        val h = image.height
 
-        ImageIO.write(image, "png", inputFile)
+        val newWidth = Math.floor(w * cos + h * sin).toInt()
+        val newHeight = Math.floor(h * cos + w * sin).toInt()
 
-        val exeFile = File(tesseractCommand)
-        val tessdataDir = exeFile.parentFile?.let { File(it, "tessdata") }
+        val rotated = BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB)
+        val g2d = rotated.createGraphics()
 
-        val command = mutableListOf(
-            tesseractCommand,
-            inputFile.absolutePath,
-            outputBase.absolutePath,
-            "-l",
-            "eng",
-            "--psm",
-            "6"
-        )
+        val at = AffineTransform()
+        at.translate((newWidth - w) / 2.0, (newHeight - h) / 2.0)
+        at.rotate(rads, w / 2.0, h / 2.0)
 
-        if (tessdataDir != null && tessdataDir.exists()) {
-            command.add("--tessdata-dir")
-            command.add(tessdataDir.absolutePath)
-        }
+        g2d.transform = at
+        g2d.drawImage(image, 0, 0, null)
+        g2d.dispose()
 
-        val process = ProcessBuilder(command)
+        return rotated
+    }
+
+    private fun runTesseract(inputFile: File, outputBase: File): String {
+        val process = ProcessBuilder(tesseractCommand, inputFile.absolutePath, outputBase.absolutePath)
             .redirectErrorStream(true)
             .start()
 
-        val processOutput = process.inputStream.bufferedReader().use { it.readText() }
-        val exitCode = process.waitFor()
-
-        if (exitCode != 0) {
-            throw IllegalStateException(
-                "Tesseract OCR failed on page ${pageIndex + 1}. Exit code: $exitCode. Output: $processOutput"
-            )
-        }
+        process.waitFor()
 
         val txtFile = File("${outputBase.absolutePath}.txt")
-        if (!txtFile.exists()) {
-            throw IllegalStateException(
-                "Tesseract OCR did not produce output text file for page ${pageIndex + 1}"
-            )
+        return if (txtFile.exists()) {
+            txtFile.readText(Charsets.UTF_8)
+        } else {
+            ""
         }
-
-        return txtFile.readText(detectCharset())
-    }
-
-    private fun detectCharset(): Charset {
-        return Charsets.UTF_8
     }
 
     companion object {
@@ -110,16 +104,13 @@ class OcrPdfTextExtractor(
             val os = System.getProperty("os.name").lowercase()
             val appDir = File(System.getProperty("user.dir"))
 
-            if (os.contains("win")) {
+            return if (os.contains("win")) {
                 val bundled = File(appDir, "ocr/tesseract.exe")
-                if (bundled.exists()) return bundled.absolutePath
-                return "tesseract.exe"
+                if (bundled.exists()) bundled.absolutePath else "tesseract.exe"
+            } else {
+                val bundled = File(appDir, "ocr/tesseract")
+                if (bundled.exists()) bundled.absolutePath else "tesseract"
             }
-
-            val bundled = File(appDir, "ocr/tesseract")
-            if (bundled.exists()) return bundled.absolutePath
-
-            return "tesseract"
         }
     }
 }

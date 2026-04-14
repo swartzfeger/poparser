@@ -17,14 +17,33 @@ class OrderFileParser(
     fun parse(file: File): ParsedPdfFields {
         return when (file.extension.lowercase()) {
             "pdf" -> {
-                val extractedLines = pdfTextExtractor.extractLines(file)
-                val hasUsableText = extractedLines.any { it.text.isNotBlank() }
 
-                val linesToParse = if (hasUsableText) {
-                    extractedLines
-                } else {
-                    println("OCR fallback triggered for ${file.name}")
-                    ocrPdfTextExtractor.extractLines(file)
+                val extractedLines = pdfTextExtractor.extractLines(file)
+
+                val joined = extractedLines.joinToString("\n") { it.text }
+
+                val looksLikeFisher =
+                    joined.contains("FISHER", true) ||
+                            file.name.contains("FAX", true) ||
+                            file.name.matches(Regex("""\d{6,}\.pdf"""))
+
+                val hasGoodStructure =
+                    extractedLines.size > 10 &&
+                            listOf("ORDER", "SHIP", "ITEM", "TOTAL")
+                                .count { joined.contains(it, ignoreCase = true) } >= 2
+
+                val linesToParse = when {
+                    looksLikeFisher -> {
+                        println("Forcing OCR for Fisher: ${file.name}")
+                        ocrPdfTextExtractor.extractLines(file)
+                    }
+                    hasGoodStructure -> {
+                        extractedLines
+                    }
+                    else -> {
+                        println("OCR fallback triggered for ${file.name}")
+                        ocrPdfTextExtractor.extractLines(file)
+                    }
                 }
 
                 pdfFieldParser.parse(linesToParse)

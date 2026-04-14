@@ -7,10 +7,10 @@ import java.io.File
 fun main() {
     val testFiles = listOf(
         //"testpdf/Dove PO-00226-D - Prec Lab.pdf",
-        //"testpdf/Dove PO-00348-D - Prec Lab.pdf",
-        //"testpdf/Dove PO-00452-D - Prec Lab.pdf",
-        "testpdf/COVENANT AVIATION - TSA DISTRIBUTOR Scan2026-01-19_112238 precision.pdf",
-        //"testpdf/Dove POD-0087 - PrecLab.pdf"
+        //"testpdf/VWR FEDEX - 4518937877.pdf",
+        "testpdf/FAX_20260303_1772496110_257.pdf",
+        "testpdf/1417145.pdf",
+        "testpdf/1417370.pdf"
     )
 
     val fileParser = OrderFileParser()
