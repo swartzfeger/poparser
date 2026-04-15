@@ -107,7 +107,19 @@ class OcrPdfTextExtractor(
     companion object {
         private fun defaultTesseractCommand(): String {
             val os = System.getProperty("os.name").lowercase()
-            return if (os.contains("win")) "tesseract.exe" else "tesseract"
+
+            if (os.contains("win")) {
+                return "tesseract.exe"
+            }
+
+            val candidates = listOf(
+                "/opt/homebrew/bin/tesseract",      // Apple Silicon Homebrew
+                "/usr/local/bin/tesseract",         // Intel Homebrew
+                "/opt/local/bin/tesseract",         // MacPorts
+                "/usr/bin/tesseract"                // less common, but harmless to try
+            )
+
+            return candidates.firstOrNull { File(it).exists() } ?: "tesseract"
         }
     }
 }
