@@ -10,16 +10,13 @@ import java.nio.file.Files
 import javax.imageio.ImageIO
 
 /**
- * Extractor that handles OCR processing and image normalization (rotation).
- * Returns a flat list of lines. Segmentation is handled upstream by OrderFileParser.
+ * Extractor that handles OCR processing and image normalization.
+ * Improved with Binarization to help Tesseract see faint fax text.
  */
 class OcrPdfTextExtractor(
     private val tesseractCommand: String = defaultTesseractCommand()
 ) {
 
-    /**
-     * Extracts text and returns a flat list of lines.
-     */
     fun extractLines(file: File): List<PdfLine> {
         return performOcr(file)
     }
@@ -32,15 +29,18 @@ class OcrPdfTextExtractor(
             Loader.loadPDF(file).use { document ->
                 val renderer = PDFRenderer(document)
                 for (i in 0 until document.numberOfPages) {
-                    // 300 DPI is optimal for noisy fax documents
-                    val sourceImage = renderer.renderImageWithDPI(i, 300f, ImageType.RGB)
+                    // 1. Render at 400 DPI in GRAYSCALE (Better for binarization)
+                    val sourceImage = renderer.renderImageWithDPI(i, 400f, ImageType.GRAY)
 
-                    // Normalize: Rotate 90deg if it's a landscape scan (common in Fisher PO faxes)
-                    val processedImage = if (sourceImage.width > sourceImage.height) {
+                    // 2. Normalize rotation
+                    var processedImage = if (sourceImage.width > sourceImage.height) {
                         rotateImage(sourceImage, 90.0)
                     } else {
                         sourceImage
                     }
+
+                    // 3. Apply Binarization (Thresholding) to strip fax noise
+                    processedImage = binarizeImage(processedImage)
 
                     val tempImageFile = File(tempDir, "page_$i.png")
                     ImageIO.write(processedImage, "png", tempImageFile)
@@ -59,8 +59,22 @@ class OcrPdfTextExtractor(
         return allLines
     }
 
+    /**
+     * Converts a grayscale image to high-contrast black and white (binarized).
+     */
+    private fun binarizeImage(source: BufferedImage): BufferedImage {
+        val width = source.width
+        val height = source.height
+        val binarized = BufferedImage(width, height, BufferedImage.TYPE_BYTE_BINARY)
+
+        val g2d = binarized.createGraphics()
+        g2d.drawImage(source, 0, 0, null)
+        g2d.dispose()
+
+        return binarized
+    }
+
     private fun runTesseract(inputFile: File): String {
-        // PSM 3: Fully automatic page segmentation (best for varied structured documents)
         val process = ProcessBuilder(tesseractCommand, inputFile.absolutePath, "stdout", "--psm", "3", "quiet")
             .redirectErrorStream(true)
             .start()

@@ -27,140 +27,202 @@ class FisherScientificCoLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         val textLines = nonBlankLines(lines)
         val fullText = textLines.joinToString("\n").uppercase()
 
-        // Attempt to resolve the perfect address using the extracted Zip Code
-        val addressData = resolveAddressFromZip(fullText)
+        val shipToBlock = extractShipToBlock(textLines)
+        val primaryAddressData = resolveAddressFromShipToBlock(shipToBlock)
+            ?: resolveAddressFromStreet(shipToBlock ?: fullText)
+            ?: emptyMap()
+
+        val addressData = if (primaryAddressData["addressLine1"].isNullOrBlank()) {
+            resolveAddressFromStreet(fullText) ?: primaryAddressData
+        } else {
+            primaryAddressData
+        }
 
         return ParsedPdfFields(
             customerName = "FISHER SCIENTIFIC CO",
             orderNumber = findOrderNumber(fullText, textLines),
             shipToCustomer = "FISHER SCIENTIFIC COMPANY",
-            addressLine1 = addressData["addressLine1"]?.takeIf { it.isNotBlank() } ?: findDynamicAddressLine1(textLines),
-            addressLine2 = addressData["addressLine2"]?.takeIf { it.isNotBlank() },
-            city = addressData["city"]?.takeIf { it.isNotBlank() },
-            state = addressData["state"]?.takeIf { it.isNotBlank() } ?: findDynamicState(fullText),
-            zip = addressData["zip"]?.takeIf { it.isNotBlank() } ?: findDynamicZip(fullText),
+            addressLine1 = addressData["addressLine1"],
+            addressLine2 = addressData["addressLine2"],
+            city = addressData["city"],
+            state = addressData["state"],
+            zip = addressData["zip"],
             terms = null,
             items = findItems(textLines)
         )
     }
 
-    /**
-     * Maps the unique Ship-To zip code to the exact clean address block.
-     * Bypasses OCR text drops and severe mangling.
-     */
-    private fun resolveAddressFromZip(fullText: String): Map<String, String> {
-        val matches = Regex("""\b([A-Z]{2})[.\s]+(\d{3,5})\b""").findAll(fullText)
-
-        for (match in matches) {
-            var state = match.groupValues[1].uppercase()
-            val rawZip = match.groupValues[2]
-
-            // Fix common OCR state letter swaps
-            if (state == "HA") state = "MA"
-            if (state == "FA") state = "PA"
-
-            // Expanded Ignore List to catch OCR misreads of the corporate Zips
-            val ignoreZips = setOf("15275", "16275", "18275", "15230", "16230", "18230", "86326", "6326")
-            if (rawZip in ignoreZips || state == "AZ") continue
-
-            // Fix common OCR zip number swaps
-            val cleanZip = when (rawZip) {
-                "31708" -> "91708"
-                "164" -> "18064"
-                else -> rawZip
-            }
-
-            return when (cleanZip) {
-                "75241" -> mapOf("addressLine1" to "4951 LANGDON RD SUITE 170", "city" to "DALLAS", "state" to "TX", "zip" to "75241")
-                "01001" -> mapOf("addressLine1" to "325 BOWLES ROAD", "city" to "AGAWAM", "state" to "MA", "zip" to "01001")
-                "91708" -> mapOf("addressLine1" to "6722 BICKMORE AVENUE", "city" to "CHINO", "state" to "CA", "zip" to "91708")
-                "30024" -> mapOf("addressLine1" to "2775 HORIZON RIDGE COURT", "city" to "SUWANEE", "state" to "GA", "zip" to "30024")
-                "41042" -> mapOf("addressLine1" to "CDC RECEIVING DEPARTMENT", "addressLine2" to "SUITE B, 7383 EMPIRE DRIVE", "city" to "FLORENCE", "state" to "KY", "zip" to "41042")
-                "60133" -> mapOf("addressLine1" to "4500 TURNBERRY DRIVE", "city" to "HANOVER PARK", "state" to "IL", "zip" to "60133")
-                "18064" -> mapOf("addressLine1" to "6771 SILVER CREST ROAD", "city" to "NAZARETH", "state" to "PA", "zip" to "18064")
-                else -> mapOf("addressLine1" to "", "addressLine2" to "", "city" to "", "state" to state, "zip" to cleanZip)
-            }
+    private fun extractShipToBlock(lines: List<String>): String? {
+        val startIdx = lines.indexOfFirst {
+            val u = it.uppercase()
+            u.contains("SHIP TO INFORMATION") || u.contains("SNO TO INFORMATION")
         }
-        return emptyMap()
-    }
-
-    /**
-     * Fallback extractor if Fisher ships to a brand new facility not in the map.
-     */
-    private fun findDynamicAddressLine1(lines: List<String>): String? {
-        val startIdx = lines.indexOfFirst { line ->
-            val upper = line.uppercase()
-            upper.contains("FISHER SC") && !upper.contains("LLC") && !upper.contains("LLG") && !upper.contains("LEO") && !upper.contains("INDUSTRY") && !upper.contains("PITTSBURGH")
-        }
-
         if (startIdx == -1) return null
 
-        for (i in 1..6) {
-            if (startIdx + i > lines.lastIndex) break
-            var line = lines[startIdx + i].uppercase()
+        val block = mutableListOf<String>()
+        for (i in startIdx..minOf(startIdx + 14, lines.lastIndex)) {
+            val line = normalizeAddressText(lines[i])
+            if (line.isBlank()) continue
 
-            line = line.replace(Regex("""415\s+A[IT]RPARK\s+DRIVE"""), "")
-            line = line.replace(Regex("""[COQ][OQ]TT[OQ]N[VW]OOD.*"""), "")
-            line = line.replace(Regex("""AZ\.?\s*[8S${'$'}]?6326"""), "") // Escaped Kotlin interpolation fix
-            line = line.replace(Regex("""T:\s*800\s*733-0266"""), "")
-            line = line.replace(Regex("""F:\s*928\s*649-2306"""), "")
-            line = line.replace(Regex("""PRECISION LABORATORIES.*"""), "")
-            line = line.replace(Regex("""P[O0][.,]?\s*BOX\s*1768"""), "")
-            line = line.replace(Regex("""R[O0][.,]?\s*BOX\s*1768"""), "")
-            line = line.replace(Regex("""PITTSBURGH,?\s*PA\.?\s*1[568]230"""), "")
-            line = line.replace("ADDRESS: FISHER SCIENTIFIC", "")
-            line = line.replace("EMAIL: APVENDOR@THERMOFISHER.COM", "")
-            line = line.replace("EMAIL: APVENDOR@THERMOFISHERCEM", "")
+            val stop = listOf(
+                "SEND INVOICE",
+                "ACCOUNTS PAYABLE",
+                "PURCHASING AGENT",
+                "CUSTOMER PURCHASE ORDER NUMBER",
+                "ORDER NOTES AND INSTRUCTIONS",
+                "FISHER SCIENTIFIC SUPPLIER NUMBER",
+                "SUPPLIER CATALOG",
+                "PRODUCT DESCRIPTION"
+            ).any { line.contains(it) }
 
-            line = line.replace("|", "").replace("(", "").replace(")", "").replace("[", "").replace("]", "").trim()
-            line = line.replace(Regex("""\s+"""), " ")
-
-            if (line.length > 5 && (line.matches(Regex(""".*\d+.*""")) || line.contains("CDC") || line.contains("SUITE"))) {
-                return line
-            }
+            if (stop) break
+            block += line
         }
+
+        return block.joinToString("\n").ifBlank { null }
+    }
+
+    private fun resolveAddressFromShipToBlock(block: String?): Map<String, String>? {
+        if (block.isNullOrBlank()) return null
+        val text = block.uppercase()
+
+        return when {
+            text.contains("LANGDON") || text.contains("DALLAS") || text.contains("75241") ->
+                mapOf(
+                    "addressLine1" to "4951 LANGDON RD SUITE 170",
+                    "city" to "DALLAS",
+                    "state" to "TX",
+                    "zip" to "75241"
+                )
+
+            text.contains("FLOREN") || text.contains("41042") ->
+                mapOf(
+                    "addressLine1" to "CDC RECEIVING DEPARTMENT",
+                    "addressLine2" to "SUITE B, 7383 EMPIRE DRIVE",
+                    "city" to "FLORENCE",
+                    "state" to "KY",
+                    "zip" to "41042"
+                )
+
+            text.contains("BOWLES") || text.contains("AGAWAM") || text.contains("01001") ->
+                mapOf(
+                    "addressLine1" to "325 BOWLES ROAD",
+                    "city" to "AGAWAM",
+                    "state" to "MA",
+                    "zip" to "01001"
+                )
+
+            text.contains("BICKMORE") || text.contains("CHINO") || text.contains("91708") || text.contains("31708") || text.contains("31709") ->
+                mapOf(
+                    "addressLine1" to "6722 BICKMORE AVENUE",
+                    "city" to "CHINO",
+                    "state" to "CA",
+                    "zip" to "91708"
+                )
+
+            text.contains("HORIZON RIDGE") || text.contains("SUWANEE") || text.contains("SUPAHEE") || text.contains("30024") || text.contains("300S4") || text.contains("30054") ->
+                mapOf(
+                    "addressLine1" to "2775 HORIZON RIDGE COURT",
+                    "city" to "SUWANEE",
+                    "state" to "GA",
+                    "zip" to "30024"
+                )
+
+            text.contains("TURNBERRY") || text.contains("HANOVER PARK") || text.contains("60133") ->
+                mapOf(
+                    "addressLine1" to "4500 TURNBERRY DRIVE",
+                    "city" to "HANOVER PARK",
+                    "state" to "IL",
+                    "zip" to "60133"
+                )
+
+            text.contains("SILVER CREST") || text.contains("NAZARETH") || text.contains("18064") || text.contains("16064") ->
+                mapOf(
+                    "addressLine1" to "6771 SILVER CREST ROAD",
+                    "city" to "NAZARETH",
+                    "state" to "PA",
+                    "zip" to "18064"
+                )
+
+            text.contains("EMPIRE") || text.contains("FLORENCE") || text.contains("41042") ->
+                mapOf(
+                    "addressLine1" to "CDC RECEIVING DEPARTMENT",
+                    "addressLine2" to "SUITE B, 7383 EMPIRE DRIVE",
+                    "city" to "FLORENCE",
+                    "state" to "KY",
+                    "zip" to "41042"
+                )
+
+            else -> null
+        }
+    }
+
+    private fun resolveAddressFromStreet(fullText: String): Map<String, String>? {
+        val text = fullText.uppercase()
+        if (text.contains("LANGDON")) return mapOf("addressLine1" to "4951 LANGDON RD SUITE 170", "city" to "DALLAS", "state" to "TX", "zip" to "75241")
+        if (text.contains("FLOREN") || text.contains("41042")) {
+            return mapOf(
+                "addressLine1" to "CDC RECEIVING DEPARTMENT",
+                "addressLine2" to "SUITE B, 7383 EMPIRE DRIVE",
+                "city" to "FLORENCE",
+                "state" to "KY",
+                "zip" to "41042"
+            )
+        }
+        if (text.contains("BOWLES")) return mapOf("addressLine1" to "325 BOWLES ROAD", "city" to "AGAWAM", "state" to "MA", "zip" to "01001")
+        if (text.contains("BICKMORE")) return mapOf("addressLine1" to "6722 BICKMORE AVENUE", "city" to "CHINO", "state" to "CA", "zip" to "91708")
+        if (text.contains("HORIZON RIDGE") || text.contains("SUPAHEE")) return mapOf("addressLine1" to "2775 HORIZON RIDGE COURT", "city" to "SUWANEE", "state" to "GA", "zip" to "30024")
+        if (text.contains("EMPIRE")) return mapOf("addressLine1" to "CDC RECEIVING DEPARTMENT", "addressLine2" to "SUITE B, 7383 EMPIRE DRIVE", "city" to "FLORENCE", "state" to "KY", "zip" to "41042")
+        if (text.contains("TURNBERRY")) return mapOf("addressLine1" to "4500 TURNBERRY DRIVE", "city" to "HANOVER PARK", "state" to "IL", "zip" to "60133")
+        if (text.contains("SILVER CREST")) return mapOf("addressLine1" to "6771 SILVER CREST ROAD", "city" to "NAZARETH", "state" to "PA", "zip" to "18064")
         return null
     }
 
-    private fun findDynamicState(fullText: String): String? {
-        val matches = Regex("""\b([A-Z]{2})[.\s]+(\d{5})\b""").findAll(fullText)
-        val ignoreZips = setOf("15275", "16275", "18275", "15230", "16230", "18230", "86326", "6326")
-        for (match in matches) {
-            val state = match.groupValues[1]
-            val zip = match.groupValues[2]
-            if (zip in ignoreZips || state == "AZ") continue
-            return state.replace("HA", "MA").replace("FA", "PA")
-        }
-        return null
-    }
-
-    private fun findDynamicZip(fullText: String): String? {
-        val matches = Regex("""\b([A-Z]{2})[.\s]+(\d{5})\b""").findAll(fullText)
-        val ignoreZips = setOf("15275", "16275", "18275", "15230", "16230", "18230", "86326", "6326")
-        for (match in matches) {
-            val state = match.groupValues[1]
-            val zip = match.groupValues[2]
-            if (zip in ignoreZips || state == "AZ") continue
-            return zip
-        }
-        return null
+    private fun normalizeAddressText(raw: String): String {
+        return raw.uppercase()
+            .replace("|", " ")
+            .replace("BISHER", "FISHER")
+            .replace("SCTENTIFIC", "SCIENTIFIC")
+            .replace("SCLENTIFIC", "SCIENTIFIC")
+            .replace("OOTTONHOOD", "COTTONWOOD")
+            .replace("COTTONVYDOD", "COTTONWOOD")
+            .replace("PITISHURGH", "PITTSBURGH")
+            .replace("SUPAHEE", "SUWANEE")
+            .replace(Regex("""\s+"""), " ")
+            .trim()
     }
 
     private fun findOrderNumber(fullText: String, lines: List<String>): String? {
-        val prMatch = Regex("""\b[P|F][R|K]\d{6,8}\b""", RegexOption.IGNORE_CASE).find(fullText)
-        if (prMatch != null) return prMatch.value.uppercase().replace("FK", "PR").replace("FR", "PR").replace("PK", "PR")
 
-        val labelIdx = lines.indexOfFirst { it.uppercase().contains("CUSTOMER PURCHASE ORDER") }
-        if (labelIdx >= 0) {
-            for (i in labelIdx until (labelIdx + 15).coerceAtMost(lines.lastIndex)) {
-                val match = Regex("""\b(\d{6,8})\b""").find(lines[i])
-                if (match != null) {
-                    val candidate = match.value
-                    if (candidate.startsWith("0") && (candidate.endsWith("25") || candidate.endsWith("26") || candidate.endsWith("27"))) continue
-                    return candidate
-                }
-            }
+        val normalized = fullText.uppercase()
+            .replace("FK", "PR")
+            .replace("FR", "PR")
+            .replace("PK", "PR")
+            .replace(Regex("""PR\s*41\s+(\d{4})"""), "PR41$1")
+
+        // 1. Strong global match
+        Regex("""\bPR\d{7,8}\b""")
+            .find(normalized)
+            ?.let { return it.value }
+
+        // 2. Catch split format like "PR41 40884"
+        Regex("""PR\s*\d{2}\s*\d{4,5}""")
+            .find(normalized)
+            ?.let { return it.value.replace(" ", "") }
+
+        // 3. Search line-by-line (important for OCR fragments)
+        for (line in lines) {
+            val u = line.uppercase()
+                .replace("FK", "PR")
+                .replace("FR", "PR")
+                .replace("PK", "PR")
+                .replace(Regex("""PR\s*41\s+(\d{4})"""), "PR41$1")
+
+            Regex("""\bPR\d{7,8}\b""")
+                .find(u)
+                ?.let { return it.value }
         }
+
         return null
     }
 
@@ -172,68 +234,115 @@ class FisherScientificCoLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
                 .replace("|", " | ")
                 .replace("—", "-")
                 .replace("~", "-")
-                .replace("“", "/")
+                .replace("“", "")
+                .replace("”", "")
                 .replace(Regex("""\s+"""), " ")
                 .trim()
 
             if (line.length < 20) continue
+            if (line.contains("FISHER PO LINE")) continue
 
             val knownOcrErrors = mapOf(
                 "130-129-100" to "120-12V-100",
                 "175-247-100/ERDR" to "175-24V-100",
+                "175-249-100" to "175-24V-100",
+                "175-249--LO0ERDE" to "175-24V-100",
+                "175-249-LO0ERDE" to "175-24V-100",
                 "PHOOLS-1FB-SO" to "PH0015-1B-50",
+                "PHOOIS-1B-SO" to "PH0015-1B-50",
                 "1K0-24-100" to "160-24V-100",
                 "160-247-100" to "160-24V-100",
+                "180-247-100" to "180-24V-100",
+                "185-247-100" to "185-24V-100",
                 "1AAS-24AYV-100" to "185-24V-100",
-                "1AAS-24V-100" to "185-24V-100",
-                "03-04-Z8" to "",
-                "O3-O4-Z8" to ""
+                "1AAS-24V-100" to "185-24V-100"
             )
 
             for ((badOcr, goodSku) in knownOcrErrors) {
-                if (line.contains(badOcr)) {
-                    line = line.replace(badOcr, goodSku)
-                }
+                if (line.contains(badOcr)) line = line.replace(badOcr, goodSku)
             }
 
             val parts = line.split("|").map { it.trim() }.filter { it.isNotEmpty() }
 
-            var precisionSku = parts.find { part ->
-                part.contains("-") && part.matches(Regex("""[A-Z0-9-]{6,}"""))
-            }?.replace(Regex("""[^A-Z0-9-]"""), "")
+            fun normalizeCandidateSku(raw: String): String {
+                var s = raw.uppercase()
+                    .replace("—", "-")
+                    .replace("~", "-")
+                    .replace("“", "")
+                    .replace("”", "")
+                    .replace(Regex("""[^A-Z0-9-]"""), "")
 
-            if (precisionSku == null) {
-                precisionSku = parts.find { it.matches(Regex("""\d{3,}-\d{2,3}[A-Z]?[-]?\d{2,3}""")) }
-                    ?.replace(Regex("""[^A-Z0-9-]"""), "")
+                // Fisher-specific OCR fixes
+                s = when (s) {
+                    "PHOOIS-1B-SO" -> "PH0015-1B-50"
+                    "PHOOLS-1FB-SO" -> "PH0015-1B-50"
+                    "PHOOIS-1FB-SO" -> "PH0015-1B-50"
+                    "130-129-100" -> "120-12V-100"
+                    "175-247-100ERDR" -> "175-24V-100"
+                    "175-249-100" -> "175-24V-100"
+                    "175-249--LO0ERDE" -> "175-24V-100"
+                    "175-249-LO0ERDE" -> "175-24V-100"
+                    "1K0-24-100" -> "160-24V-100"
+                    "160-247-100" -> "160-24V-100"
+                    "180-247-100" -> "180-24V-100"
+                    "185-247-100" -> "185-24V-100"
+                    "1AAS-24AYV-100" -> "185-24V-100"
+                    "1AAS-24V-100" -> "185-24V-100"
+                    else -> s
+                }
+
+                return s
             }
 
-            if (precisionSku == null || precisionSku.length < 5 || seen.contains(precisionSku)) continue
-
-            val fisherCatalog = parts.find { it.matches(Regex("""\d{4,}""")) }
-                ?.replace(Regex("""[^A-Z0-9-]"""), "")
-
-            val cleanLineForQty = line.replace("|", "")
-            val qtyRegex = Regex("""\b(\d{1,4})\s*[)|\]]?\s*(?:PK|PE|PEK|EA|CS|BX)\b""", RegexOption.IGNORE_CASE)
-            val inlineQtyMatch = qtyRegex.find(cleanLineForQty)
-
-            val qty = if (inlineQtyMatch != null) {
-                inlineQtyMatch.groupValues[1].toDoubleOrNull() ?: 1.0
-            } else {
-                val uomIndex = parts.indexOfFirst { it.uppercase().replace(Regex("[^A-Z]"), "") in setOf("PK", "PE", "PEK", "EA", "CS", "BX") }
-                if (uomIndex > 0) {
-                    parts[uomIndex - 1].replace(Regex("""[^\d]"""), "").toDoubleOrNull() ?: 1.0
-                } else 1.0
+            fun isBadTrailingToken(s: String): Boolean {
+                val cleaned = s.uppercase()
+                return cleaned.matches(Regex("""O?\d{2}-\d{2}-\d{2,4}""")) ||
+                        cleaned.matches(Regex("""\d{2}-\d{2}-\d{2,4}"""))
             }
 
-            val priceCandidates = line.split(" ")
-                .map { it.replace(",", ".") }
-                .mapNotNull { it.toDoubleOrNull() }
-                .filter { it in 0.01..999.99 }
+            fun looksLikePrecisionSku(s: String): Boolean {
+                if (s.length < 6) return false
+                if (isBadTrailingToken(s)) return false
+                if (!s.contains("-")) return false
 
-            val unitPrice = priceCandidates.lastOrNull()
+                // Must start with either a 3-digit family or PH...
+                return s.matches(Regex("""\d{3}-[A-Z0-9]{2,4}-\d{2,4}""")) ||
+                        s.matches(Regex("""PH\d{4}-[A-Z0-9]{1,2}-\d{2,3}"""))
+            }
+
+            val normalizedParts = parts.map { normalizeCandidateSku(it) }
+
+            val precisionSku = normalizedParts.firstOrNull { looksLikePrecisionSku(it) }
+
+            if (precisionSku == null || seen.contains(precisionSku)) continue
+
+            val fisherCatalog = parts.firstOrNull { it.matches(Regex("""\d{4,5}""")) }
+
+            val qty = Regex("""\b(\d{1,4})\s*(?:PK|PE|PEK|EA|CS|BX|PR)\b""")
+                .find(line.replace("|", " "))
+                ?.groupValues?.get(1)
+                ?.toDoubleOrNull()
+                ?: 1.0
+
+            val money = Regex("""\b\d{1,3}\.\d{2}\b""")
+                .findAll(line.replace(",", "."))
+                .map { it.value.toDouble() }
+                .toList()
+
+            val unitPrice = when {
+                money.size >= 2 -> money[money.size - 2]
+                money.size == 1 -> money[0]
+                else -> null
+            }
 
             if (unitPrice != null && unitPrice > 0) {
-                val descriptionRaw = parts.getOrNull(1)?.trim() ?: precisionSku
+                val descriptionRaw = parts.firstOrNull { part ->
+                    val p = part.uppercase().trim()
+                    p != precisionSku &&
+                            !p.matches(Regex("""\d+(\.\d+)?""")) &&
+                            p !in setOf("PK", "PE", "PEK", "EA", "CS", "BX", "PR") &&
+                            !p.matches(Regex("""O?\d{2}-\d{2}-\d{2,4}"""))
+                } ?: precisionSku
                 val mapperDesc = fisherCatalog?.let { ItemMapper.getItemDescription(it) }?.ifBlank { null }
 
                 add(

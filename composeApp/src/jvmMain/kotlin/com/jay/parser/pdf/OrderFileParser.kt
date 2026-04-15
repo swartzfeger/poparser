@@ -3,8 +3,8 @@ package com.jay.parser.parser
 import com.jay.parser.pdf.OcrPdfTextExtractor
 import com.jay.parser.pdf.ParsedPdfFields
 import com.jay.parser.pdf.PdfFieldParser
-import com.jay.parser.pdf.PdfTextExtractor
 import com.jay.parser.pdf.PdfLine
+import com.jay.parser.pdf.PdfTextExtractor
 import java.io.File
 
 class OrderFileParser(
@@ -24,28 +24,90 @@ class OrderFileParser(
     }
 
     private fun parsePdf(file: File): List<ParsedPdfFields> {
-        val extractedLines = pdfTextExtractor.extractLines(file)
-        val joined = extractedLines.joinToString("\n") { it.text }
+        println("DEBUG: I am definitely running the code in the /parser folder!")
 
-        val isFisher = joined.contains("FISHER", true) ||
+        val extractedLines = pdfTextExtractor.extractLines(file)
+        val joinedNative = extractedLines.joinToString("\n") { it.text }
+
+        val isFisher = joinedNative.contains("FISHER", true) ||
                 file.name.contains("FAX", true) ||
                 file.name.matches(Regex("""\d{6,}\.pdf"""))
 
-        // CRITICAL FIX: Do NOT force OCR on clean digital PDFs.
-        // If it has plenty of text, let native extraction do its job.
-        val needsOcr = extractedLines.size < 15 || joined.length < 500 || file.name.contains("FAX", true)
-
-        val linesToProcess = if (needsOcr) {
+        val linesToProcess = if (isFisher || extractedLines.size < 15) {
             ocrPdfTextExtractor.extractLines(file)
         } else {
             extractedLines
         }
 
         val orderChunks = segmentLines(linesToProcess, isFisher)
-
-        return orderChunks.mapNotNull { chunk ->
+        val parsedOrders = orderChunks.mapNotNull { chunk ->
             pdfFieldParser.parse(chunk)
         }
+
+        if (isFisher) {
+            val nativePrs = joinedNative.uppercase()
+                .replace("FK", "PR")
+                .replace("FR", "PR")
+                .replace("PK", "PR")
+                .replace(Regex("""PR\s*41\s+(\d{4})"""), "PR41$1")
+                .let { normalized ->
+                    Regex("""\bPR\d{7,8}\b""")
+                        .findAll(normalized)
+                        .map { it.value }
+                        .distinct()
+                        .toList()
+                }
+
+            val ordersAfterNativeRecovery = if (nativePrs.isNotEmpty()) {
+                parsedOrders.mapIndexed { index, order ->
+                    if (order.orderNumber.isNullOrBlank() && index < nativePrs.size) {
+                        ParsedPdfFields(
+                            customerName = order.customerName,
+                            orderNumber = nativePrs[index],
+                            shipToCustomer = order.shipToCustomer,
+                            addressLine1 = order.addressLine1,
+                            addressLine2 = order.addressLine2,
+                            city = order.city,
+                            state = order.state,
+                            zip = order.zip,
+                            terms = order.terms,
+                            items = order.items
+                        )
+                    } else {
+                        order
+                    }
+                }
+            } else {
+                parsedOrders
+            }
+
+            val filenamePr = if (file.nameWithoutExtension.matches(Regex("""\d{6,8}"""))) {
+                "PR${file.nameWithoutExtension}"
+            } else {
+                null
+            }
+
+            return ordersAfterNativeRecovery.map { order ->
+                if (order.orderNumber.isNullOrBlank() && filenamePr != null) {
+                    ParsedPdfFields(
+                        customerName = order.customerName,
+                        orderNumber = filenamePr,
+                        shipToCustomer = order.shipToCustomer,
+                        addressLine1 = order.addressLine1,
+                        addressLine2 = order.addressLine2,
+                        city = order.city,
+                        state = order.state,
+                        zip = order.zip,
+                        terms = order.terms,
+                        items = order.items
+                    )
+                } else {
+                    order
+                }
+            }
+        }
+
+        return parsedOrders
     }
 
     private fun segmentLines(lines: List<PdfLine>, isFisher: Boolean): List<List<PdfLine>> {
@@ -54,15 +116,24 @@ class OrderFileParser(
 
         val chunks = mutableListOf<MutableList<PdfLine>>()
         var currentChunk = mutableListOf<PdfLine>()
+        var lastSplitIndex = -1000
 
-        for (line in lines) {
-            val upper = line.text.uppercase()
+        for ((index, line) in lines.withIndex()) {
+            val upper = line.text.uppercase().trim()
 
-            val isNewOrderStart = upper == "PURCHASE ORDER" || upper.contains("FISHER SCIENTIFIC ORDER NUMBER")
+            val isHeaderLine =
+                upper.contains("FISHER SCIENTIFIC COMPANY") &&
+                        upper.length < 80
 
-            if (isNewOrderStart && currentChunk.size > 15) {
+            val isRealPageBreak =
+                isHeaderLine &&
+                        currentChunk.size > 25 &&
+                        (index - lastSplitIndex > 25)
+
+            if (isRealPageBreak) {
                 chunks.add(currentChunk)
                 currentChunk = mutableListOf()
+                lastSplitIndex = index
             }
 
             currentChunk.add(line)
@@ -72,7 +143,10 @@ class OrderFileParser(
             chunks.add(currentChunk)
         }
 
-        return chunks.filter { it.size > 8 }
+        return chunks.filter { chunk ->
+            chunk.size > 10 &&
+                    chunk.any { it.text.contains("FISHER", true) }
+        }
     }
 
     private fun parseExcel(file: File): List<ParsedPdfFields> {
