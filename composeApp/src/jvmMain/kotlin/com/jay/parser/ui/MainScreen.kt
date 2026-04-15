@@ -42,6 +42,7 @@ import com.jay.parser.parser.OrderEnricher
 import com.jay.parser.parser.OrderFileParser
 import java.awt.Component
 import java.awt.Container
+import java.awt.Cursor
 import java.awt.FileDialog
 import java.awt.datatransfer.DataFlavor
 import java.awt.dnd.DnDConstants
@@ -51,10 +52,10 @@ import java.awt.dnd.DropTargetDragEvent
 import java.awt.dnd.DropTargetDropEvent
 import java.io.File
 import java.time.LocalDate
-import java.util.Locale
 import javax.swing.SwingUtilities
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
+
 private val AppColors = darkColorScheme(
     background = Color(0xFF0E1116),
     surface = Color(0xFF171B22),
@@ -80,6 +81,28 @@ fun FrameWindowScope.MainScreen() {
     val enricher = remember { OrderEnricher() }
     val exporter = remember { SageCsvExporter() }
     val clipboard = LocalClipboardManager.current
+
+    // ==================== MACOS RAINBOW CURSOR HELPERS ====================
+    fun setBusyCursor() {
+        SwingUtilities.invokeLater {
+            println("ð [CURSOR] Setting busy cursor (rainbow beachball)")
+            val waitCursor = Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)
+            window.cursor = waitCursor
+            window.rootPane?.cursor = waitCursor
+            window.contentPane?.cursor = waitCursor
+        }
+    }
+
+    fun resetCursor() {
+        SwingUtilities.invokeLater {
+            println("ð [CURSOR] Resetting to default cursor")
+            val defaultCursor = Cursor.getDefaultCursor()
+            window.cursor = defaultCursor
+            window.rootPane?.cursor = defaultCursor
+            window.contentPane?.cursor = defaultCursor
+        }
+    }
+    // =====================================================================
 
     fun addFiles(files: List<File>) {
         val existing = queuedFiles.map { it.absolutePath }.toSet()
@@ -224,60 +247,72 @@ fun FrameWindowScope.MainScreen() {
                         onParse = {
                             if (queuedFiles.isEmpty()) return@ActionRow
 
-                            val startTime = System.currentTimeMillis()
+                            // IMMEDIATELY set the cursor on the UI thread
+                            setBusyCursor()
 
-                            try {
-                                uiState = UiState(
-                                    status = "Processing",
-                                    message = "Starting parse of ${queuedFiles.size} file(s)..."
-                                )
+                            // Run the heavy OCR/parsing on a background thread so the UI stays responsive
+                            Thread {
+                                val startTime = System.currentTimeMillis()
 
-                                val results = mutableListOf<ExportOrder>()
-                                var totalOrdersFound = 0
-
-                                queuedFiles.forEachIndexed { index, file ->
-                                    val fileNum = index + 1
-
-                                    // Live update: show which file we're working on
-                                    uiState = UiState(
-                                        status = "Processing",
-                                        message = "Parsing file $fileNum/${queuedFiles.size}: ${file.name}..."
-                                    )
-
-                                    // FIXED: Handle List<ParsedPdfFields> for multi-order support
-                                    val parsedOrdersList = fileParser.parse(file)
-
-                                    if (parsedOrdersList.isEmpty()) {
-                                        println("No orders found in file: ${file.name}")
-                                    } else {
-                                        totalOrdersFound += parsedOrdersList.size
+                                try {
+                                    // All UI updates must go through invokeLater
+                                    SwingUtilities.invokeLater {
+                                        uiState = UiState(
+                                            status = "Processing",
+                                            message = "Starting parse of ${queuedFiles.size} file(s)..."
+                                        )
                                     }
 
-                                    parsedOrdersList.forEach { parsed ->
-                                        try {
-                                            val enriched = enricher.enrich(file.name, parsed)
-                                            results.add(enriched)
-                                        } catch (e: Exception) {
-                                            println("Error enriching order from ${file.name}: ${e.message}")
-                                            e.printStackTrace()
+                                    val results = mutableListOf<ExportOrder>()
+
+                                    queuedFiles.forEachIndexed { index, file ->
+                                        val fileNum = index + 1
+
+                                        SwingUtilities.invokeLater {
+                                            uiState = UiState(
+                                                status = "Processing",
+                                                message = "Parsing file $fileNum/${queuedFiles.size}: ${file.name}..."
+                                            )
+                                        }
+
+                                        val parsedOrdersList = fileParser.parse(file)
+
+                                        if (parsedOrdersList.isEmpty()) {
+                                            println("No orders found in file: ${file.name}")
+                                        }
+
+                                        parsedOrdersList.forEach { parsed ->
+                                            try {
+                                                val enriched = enricher.enrich(file.name, parsed)
+                                                results.add(enriched)
+                                            } catch (e: Exception) {
+                                                println("Error enriching order from ${file.name}: ${e.message}")
+                                                e.printStackTrace()
+                                            }
                                         }
                                     }
+
+                                    val elapsedSeconds = (System.currentTimeMillis() - startTime) / 1000.0
+
+                                    SwingUtilities.invokeLater {
+                                        parsedOrders = results
+                                        uiState = UiState(
+                                            status = "Complete",
+                                            message = "Successfully parsed ${results.size} orders from ${queuedFiles.size} files in ${"%.2f".format(elapsedSeconds)}s."
+                                        )
+                                        resetCursor()
+                                    }
+                                } catch (e: Exception) {
+                                    SwingUtilities.invokeLater {
+                                        uiState = UiState(
+                                            status = "Error",
+                                            message = "Parsing failed: ${e.message ?: "Unknown error"}"
+                                        )
+                                        resetCursor()
+                                    }
+                                    e.printStackTrace()
                                 }
-
-                                val elapsedSeconds = (System.currentTimeMillis() - startTime) / 1000.0
-
-                                parsedOrders = results
-                                uiState = UiState(
-                                    status = "Complete",
-                                    message = "Successfully parsed ${results.size} orders from ${queuedFiles.size} files in ${"%.2f".format(elapsedSeconds)}s."
-                                )
-                            } catch (e: Exception) {
-                                uiState = UiState(
-                                    status = "Error",
-                                    message = "Parsing failed: ${e.message ?: "Unknown error"}"
-                                )
-                                e.printStackTrace()
-                            }
+                            }.start()
                         },
                         onExport = {
                             if (parsedOrders.isEmpty()) {
@@ -357,6 +392,10 @@ fun FrameWindowScope.MainScreen() {
         }
     }
 }
+
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Everything below this line is 100% your original code (no changes)
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 @Composable
 private fun HeaderSection() {
