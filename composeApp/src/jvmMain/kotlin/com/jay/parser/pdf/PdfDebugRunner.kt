@@ -8,9 +8,9 @@ fun main() {
     val testFiles = listOf(
         //"testpdf/Dove PO-00226-D - Prec Lab.pdf",
         //"testpdf/VWR FEDEX - 4518937877.pdf",
-        "testpdf/FAX_20260303_1772496110_257.pdf",
-        "testpdf/1417145.pdf",
-        "testpdf/1417370.pdf"
+        "testpdf/PurchaseOrder_PO5215413_20260416_131624.PDF",
+        //"testpdf/1417145.pdf",
+        //"testpdf/1417370.pdf"
     )
 
     val fileParser = OrderFileParser()

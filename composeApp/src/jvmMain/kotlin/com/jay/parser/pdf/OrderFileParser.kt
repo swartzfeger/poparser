@@ -33,7 +33,9 @@ class OrderFileParser(
                 file.name.contains("FAX", true) ||
                 file.name.matches(Regex("""\d{6,}\.pdf"""))
 
-        val linesToProcess = if (isFisher || extractedLines.size < 15) {
+        val linesToProcess = if (isFisher) {
+            ocrPdfTextExtractor.extractLines(file)
+        } else if (extractedLines.size < 3) {
             ocrPdfTextExtractor.extractLines(file)
         } else {
             extractedLines
