@@ -88,6 +88,11 @@ class UsaBlueBookLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         var state: String? = null
         var zip: String? = null
 
+        val knownAddresses = listOf(
+            Triple("800 Highland Drive, Suite 800-B", "Westampton", Regex("""(Westampton)\s*,\s*(NJ)\s+(08060(?:-\d{4})?)""", RegexOption.IGNORE_CASE)),
+            Triple("1940 W Oak Circle", "Marietta", Regex("""(Marietta)\s*,\s*(GA)\s+(30062(?:-\d{4})?)""", RegexOption.IGNORE_CASE))
+        )
+
         for (lineRaw in lines) {
             val line = lineRaw.replace(Regex("""\s+"""), " ").trim()
             val c = compact(line)
@@ -96,20 +101,21 @@ class UsaBlueBookLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
                 shipToCustomer = "USABlueBook"
             }
 
-            if (addressLine1 == null && line.contains("800 Highland Drive, Suite 800-B", ignoreCase = true)) {
-                addressLine1 = "800 Highland Drive, Suite 800-B"
+            if (addressLine1 == null) {
+                knownAddresses.firstOrNull { line.contains(it.first, ignoreCase = true) }?.let {
+                    addressLine1 = it.first
+                }
             }
 
-            if (city == null || state == null || zip == null) {
-                val cszMatch = Regex(
-                    """(Westampton)\s*,\s*(NJ)\s+(08060(?:-\d{4})?)""",
-                    RegexOption.IGNORE_CASE
-                ).find(line)
-
-                if (cszMatch != null) {
-                    city = "Westampton"
-                    state = "NJ"
-                    zip = cszMatch.groupValues[3].trim()
+            if (city == null) {
+                for ((_, knownCity, regex) in knownAddresses) {
+                    val match = regex.find(line)
+                    if (match != null) {
+                        city = knownCity
+                        state = match.groupValues[2].trim().uppercase()
+                        zip = match.groupValues[3].trim()
+                        break
+                    }
                 }
             }
         }
