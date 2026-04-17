@@ -107,19 +107,29 @@ class OcrPdfTextExtractor(
     companion object {
         private fun defaultTesseractCommand(): String {
             val os = System.getProperty("os.name").lowercase()
+            val userDir = System.getProperty("user.dir")
 
             if (os.contains("win")) {
-                return "tesseract.exe"
+                val candidates = listOf(
+                    File(userDir, "tesseract.exe"),                 // running from app folder
+                    File(userDir, "bin/tesseract.exe"),            // bundled bin folder
+                    File(userDir, "app/tesseract.exe"),            // possible packaged location
+                    File("tesseract.exe"),                         // local working dir
+                    File("C:/Program Files/Tesseract-OCR/tesseract.exe"),
+                    File("C:/Program Files (x86)/Tesseract-OCR/tesseract.exe")
+                )
+
+                return candidates.firstOrNull { it.exists() }?.absolutePath ?: "tesseract.exe"
             }
 
-            val candidates = listOf(
-                "/opt/homebrew/bin/tesseract",      // Apple Silicon Homebrew
-                "/usr/local/bin/tesseract",         // Intel Homebrew
-                "/opt/local/bin/tesseract",         // MacPorts
-                "/usr/bin/tesseract"                // less common, but harmless to try
+            val macCandidates = listOf(
+                File("/opt/homebrew/bin/tesseract"),   // Apple Silicon Homebrew
+                File("/usr/local/bin/tesseract"),      // Intel Homebrew
+                File("/opt/local/bin/tesseract"),      // MacPorts
+                File("/usr/bin/tesseract")
             )
 
-            return candidates.firstOrNull { File(it).exists() } ?: "tesseract"
+            return macCandidates.firstOrNull { it.exists() }?.absolutePath ?: "tesseract"
         }
     }
 }
