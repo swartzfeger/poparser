@@ -30,8 +30,7 @@ class OrderFileParser(
         val joinedNative = extractedLines.joinToString("\n") { it.text }
 
         val isFisher = joinedNative.contains("FISHER", true) ||
-                file.name.contains("FAX", true) ||
-                file.name.matches(Regex("""\d{6,}\.pdf"""))
+                file.name.contains("FAX", true)
 
         val linesToProcess = if (isFisher) {
             ocrPdfTextExtractor.extractLines(file)

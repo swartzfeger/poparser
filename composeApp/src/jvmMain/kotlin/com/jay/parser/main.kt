@@ -23,7 +23,7 @@ import androidx.compose.ui.window.rememberWindowState
 import com.jay.parser.ui.MainScreen
 
 private const val APP_NAME = "PO Parser"
-private const val APP_VERSION = "1.1.1"
+private const val APP_VERSION = "1.1.2"
 private const val APP_VENDOR = "Jay Swartzfeger"
 private const val APP_COPYRIGHT = "© 2026 Precision Laboratories"
 

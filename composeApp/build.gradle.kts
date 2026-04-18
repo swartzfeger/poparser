@@ -1,6 +1,6 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
-val appVersion = "1.1.1"
+val appVersion = "1.1.2"
 val appVendor = "Jay Swartzfeger"
 val appCopyright = "© 2026 Precision Laboratories"
 val appBaseName = "PO Parser"

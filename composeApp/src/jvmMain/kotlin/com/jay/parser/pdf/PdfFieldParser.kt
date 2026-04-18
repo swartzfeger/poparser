@@ -10,15 +10,32 @@ class PdfFieldParser(
     fun parse(lines: List<PdfLine>): ParsedPdfFields {
         val textLines = lines.map { it.text.trim() }.filter { it.isNotBlank() }
 
+        println("==================================================")
+        println("PDF FIELD PARSER")
+        println("==================================================")
+        println("Input lines: ${textLines.size}")
+
+        if (textLines.isNotEmpty()) {
+            println("---- TEXT LINES ----")
+            textLines.forEachIndexed { index, line ->
+                println("${index + 1}: $line")
+            }
+        } else {
+            println("No text lines supplied to PdfFieldParser.")
+        }
+
+        println("---- STRATEGY SELECTION ----")
         val strategy = registry.choose(textLines)
 
         return if (strategy != null) {
             println("PdfFieldParser using strategy: ${strategy.name}")
 
+            val parsed = strategy.parse(textLines)
+
             if (strategy.name == "FRESENIUS MEDICAL") {
-                parseFreseniusWithFallback(lines, strategy.parse(textLines))
+                parseFreseniusWithFallback(lines, parsed)
             } else {
-                strategy.parse(textLines)
+                parsed
             }
         } else {
             println("PdfFieldParser using strategy: Generic")
@@ -56,7 +73,8 @@ class PdfFieldParser(
                 for (j in (i - 1) downTo maxOf(0, i - 8)) {
                     val candidate = normalize(cleanedLines[j])
 
-                    if (description == null &&
+                    if (
+                        description == null &&
                         candidate.isNotBlank() &&
                         !candidate.contains("PURCHASE ORDER", true) &&
                         !candidate.contains("FRESENIUS", true) &&
