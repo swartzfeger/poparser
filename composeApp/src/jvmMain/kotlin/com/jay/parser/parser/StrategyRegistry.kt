@@ -42,13 +42,18 @@ class StrategyRegistry(
                     MedlineLayoutStrategy(),
                     NalcoCompanyLayoutStrategy(),
                     NationalChemicalsLayoutStrategy(),
+                    PdqManufacturingLayoutStrategy(),
                     PinetreeInstrumentsLayoutStrategy(),
                     PrecisionEuropeLayoutStrategy(),
+                    QualityScienceLabsLayoutStrategy(),
+                    SanitechLayoutStrategy(),
                     SchoolSpecialtyLayoutStrategy(),
+                    ScienceFirstLayoutStrategy(),
                     SensonicsIntlLayoutStrategy(),
                     TcdPartsLayoutStrategy(),
                     UnipakLayoutStrategy(),
                     UsaBlueBookLayoutStrategy(),
+                    VikingPureLayoutStrategy(),
                     VwrLayoutStrategy(),
                     WebbChemicalAndPaperLayoutStrategy()
 
