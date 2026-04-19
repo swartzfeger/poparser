@@ -44,6 +44,7 @@ class StrategyRegistry(
                     NationalChemicalsLayoutStrategy(),
                     PdqManufacturingLayoutStrategy(),
                     PinetreeInstrumentsLayoutStrategy(),
+                    PlantProductsLayoutStrategy(),
                     PrecisionEuropeLayoutStrategy(),
                     QualityScienceLabsLayoutStrategy(),
                     SanitechLayoutStrategy(),

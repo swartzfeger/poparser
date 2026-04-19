@@ -7,9 +7,9 @@ import java.io.File
 fun main() {
     val testFiles = listOf(
         //"testpdf/JAYHAWK SALES WI -PO_2581_from_Jayhawk_Midwest_LLC_73844.pdf",
-        "testpdf/Purchase Order 10373 PrecisionLabs.pdf",
-        "testpdf/Purchase Order 10436 PrecisionLabs.pdf",
-        "testpdf/Purchase Order 10462 PrecisionLabs.pdf",
+        "testpdf/Purchase Orders - Foreign_000000000068529.pdf",
+        "testpdf/Purchase Orders - Foreign_000000000069505.pdf",
+        "testpdf/Purchase Orders - Foreign_000000000069640.pdf",
         //"testpdf/1417370.pdf"
     )
 
@@ -38,7 +38,12 @@ fun main() {
 
         // It might be helpful to print the raw OCR lines once per file
         val ocrExtractor = OcrPdfTextExtractor()
-        val rawOcrLines = try { ocrExtractor.extractLines(inputFile) } catch (e: Exception) { emptyList() }
+        val rawOcrLines = try {
+            ocrExtractor.extractLines(inputFile)
+        } catch (e: Exception) {
+            println("OCR failed: ${e.message}")
+            emptyList()
+        }
 
         if (rawOcrLines.isNotEmpty()) {
             println("---- RAW OCR LINES ----")
