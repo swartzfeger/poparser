@@ -45,7 +45,9 @@ class StrategyRegistry(
                     PinetreeInstrumentsLayoutStrategy(),
                     PrecisionEuropeLayoutStrategy(),
                     SchoolSpecialtyLayoutStrategy(),
+                    SensonicsIntlLayoutStrategy(),
                     TcdPartsLayoutStrategy(),
+                    UnipakLayoutStrategy(),
                     UsaBlueBookLayoutStrategy(),
                     VwrLayoutStrategy(),
                     WebbChemicalAndPaperLayoutStrategy()
