@@ -35,6 +35,7 @@ class StrategyRegistry(
                     FisherScientificCoLayoutStrategy(),
                     FlinnScientificLayoutStrategy(),
                     FreseniusMedicalLayoutStrategy(),
+                    HomeScienceToolsLayoutStrategy(),
                     InterconChemicalLayoutStrategy(),
                     JayhawkSalesTxLayoutStrategy(),
                     JayhawkSalesWiLayoutStrategy(),
