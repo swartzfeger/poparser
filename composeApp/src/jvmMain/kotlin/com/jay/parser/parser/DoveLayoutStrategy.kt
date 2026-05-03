@@ -198,9 +198,7 @@ class DoveLayoutStrategy : BaseLayoutStrategy() {
         val window = listOfNotNull(
             lines.getOrNull(index),
             lines.getOrNull(index + 1),
-            lines.getOrNull(index + 2),
-            lines.getOrNull(index + 3),
-            lines.getOrNull(index + 4)
+            lines.getOrNull(index + 2)
         ).joinToString(" ")
 
         val compact = window
@@ -216,26 +214,23 @@ class DoveLayoutStrategy : BaseLayoutStrategy() {
                 "145-500V-100"
 
             compact.contains("145-4VB-100") ||
-                    (compact.contains("145-4VB-") && compact.contains("100")) ||
-                    (compact.contains("4VB-100") && compact.contains("145-4VB-")) ->
+                    (compact.contains("145-4VB-") && compact.contains("100")) ->
                 "145-4VB-100"
 
-            compact.contains("106-QR5-500V-100") ||
-                    (compact.contains("106-QR5-") && compact.contains("500V-100")) ||
-                    (compact.contains("106-QR5-") && compact.contains("500V-") && compact.contains("100")) ||
-                    (compact.contains("QACQRS BARCODE") && compact.contains("106-QR5-")) ->
-                "106-QR5-500V-100"
+            compact.contains("145-QR5-2VB-100") ||
+                    (compact.contains("145-QR5-") && compact.contains("2VB-100")) ||
+                    (compact.contains("COMBO") && compact.contains("145-QR5-") && compact.contains("2VB-")) ->
+                "145-QR5-2VB-100"
 
             compact.contains("106-QR5-4VB-100") ||
                     (compact.contains("106-QR5-") && compact.contains("4VB-100")) ||
                     (compact.contains("QR5 4-PACK") && compact.contains("106-QR5-")) ->
                 "106-QR5-4VB-100"
 
-            compact.contains("145-QR5-2VB-100") ||
-                    (compact.contains("145-QR5-") && compact.contains("2VB-100")) ||
-                    (compact.contains("PRECLAB-") && compact.contains("145-QR5-") && compact.contains("2VB-100")) ||
-                    (compact.contains("COMBO") && compact.contains("2VB-100")) ->
-                "145-QR5-2VB-100 - COMBO"
+            compact.contains("106-QR5-500V-100") ||
+                    (compact.contains("106-QR5-") && compact.contains("500V-100")) ||
+                    (compact.contains("106-QR5-") && compact.contains("500V-") && compact.contains("100")) ->
+                "106-QR5-500V-100"
 
             else -> null
         }
@@ -243,12 +238,14 @@ class DoveLayoutStrategy : BaseLayoutStrategy() {
 
     private fun normalizeDoveSku(raw: String): String {
         return raw
+            .uppercase()
             .replace('\uFFFE', '-')
             .replace("–", "-")
             .replace("—", "-")
-            .replace(Regex("""\s+"""), " ")
+            .replace(Regex("""\s+"""), "")
             .replace(Regex("""-CANADA\b""", RegexOption.IGNORE_CASE), "")
-            .replace(Regex("""\s*-\s*COMBO$""", RegexOption.IGNORE_CASE), " - COMBO")
+            .replace(Regex("""\s*-\s*COMBO\b""", RegexOption.IGNORE_CASE), "")
+            .replace(Regex("""-COMBO\b""", RegexOption.IGNORE_CASE), "")
             .trim()
             .removeSuffix("-")
     }

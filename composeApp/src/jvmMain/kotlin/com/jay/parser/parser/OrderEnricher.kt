@@ -136,7 +136,8 @@ class OrderEnricher {
 
         if (customerId == "DOVE MATERIAL" && normalizedSku in setOf(
                 "145-4VB-100",
-                "106-QR5-4VB-100"
+                "106-QR5-4VB-100",
+                "145-QR5-2VB-100"
             )
         ) {
             return rawQuantity

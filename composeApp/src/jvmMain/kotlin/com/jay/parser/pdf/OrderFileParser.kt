@@ -32,12 +32,28 @@ class OrderFileParser(
         val isFisher = joinedNative.contains("FISHER", true) ||
                 file.name.contains("FAX", true)
 
-        val linesToProcess = if (isFisher) {
-            ocrPdfTextExtractor.extractLines(file)
-        } else if (extractedLines.size < 3) {
+        val aquaOcrLines = if (!isFisher && looksLikeCorruptedAquaCandidate(extractedLines)) {
             ocrPdfTextExtractor.extractLines(file)
         } else {
-            extractedLines
+            emptyList()
+        }
+
+        val useAquaOcrOnly = shouldUseOcrForAquaPhoenixOnly(
+            textLines = extractedLines,
+            ocrLines = aquaOcrLines
+        )
+
+        val linesToProcess = when {
+            isFisher -> ocrPdfTextExtractor.extractLines(file)
+
+            useAquaOcrOnly -> {
+                println("DEBUG: Using OCR lines for Aqua Phoenix due to corrupted embedded text layer")
+                aquaOcrLines
+            }
+
+            extractedLines.size < 3 -> ocrPdfTextExtractor.extractLines(file)
+
+            else -> extractedLines
         }
 
         val orderChunks = segmentLines(linesToProcess, isFisher)
@@ -109,6 +125,40 @@ class OrderFileParser(
         }
 
         return parsedOrders
+    }
+
+    private fun looksLikeCorruptedAquaCandidate(lines: List<PdfLine>): Boolean {
+        val text = lines.joinToString("") { it.text }
+        if (text.isBlank()) return false
+
+        val privateUseCount = text.count { it.code in 0xE000..0xF8FF }
+        val asciiLetterOrDigitCount = text.count { it.isLetterOrDigit() && it.code < 128 }
+
+        return privateUseCount > asciiLetterOrDigitCount
+    }
+
+    private fun shouldUseOcrForAquaPhoenixOnly(
+        textLines: List<PdfLine>,
+        ocrLines: List<PdfLine>
+    ): Boolean {
+        if (ocrLines.isEmpty()) return false
+
+        val nativeText = textLines.joinToString("") { it.text }
+        val ocrText = ocrLines.joinToString(" ") { it.text }.uppercase()
+
+        val looksLikeAqua =
+            ocrText.contains("AQUAPHOENIX") ||
+                    ocrText.contains("AQUA PHOENIX") ||
+                    ocrText.contains("AQUAPHOENIX SCIENTIFIC") ||
+                    ocrText.contains("AQUA PHOENIX SCIENTIFIC") ||
+                    ocrText.contains("PURCHASE ORDER - PO26030078")
+
+        if (!looksLikeAqua) return false
+
+        val privateUseCount = nativeText.count { it.code in 0xE000..0xF8FF }
+        val asciiLetterOrDigitCount = nativeText.count { it.isLetterOrDigit() && it.code < 128 }
+
+        return privateUseCount > asciiLetterOrDigitCount
     }
 
     private fun segmentLines(lines: List<PdfLine>, isFisher: Boolean): List<List<PdfLine>> {
