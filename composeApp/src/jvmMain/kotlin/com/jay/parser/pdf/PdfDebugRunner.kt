@@ -7,9 +7,9 @@ import java.io.File
 fun main() {
     val testFiles = listOf(
         //"testpdf/JAYHAWK SALES WI -PO_2581_from_Jayhawk_Midwest_LLC_73844.pdf",
-        "testpdf/Dove PO-00643-D - Prec Lab.pdf",
-        //"testpdf/IM - 375.pdf",
-        //"testpdf/IM - 383.pdf",
+        "testpdf/ECA_PO_K79682.pdf",
+        "testpdf/ECA_PO_K80094.pdf",
+        "testpdf/ECA_PO_K80655.pdf",
         //"testpdf/1417370.pdf"
     )
 
