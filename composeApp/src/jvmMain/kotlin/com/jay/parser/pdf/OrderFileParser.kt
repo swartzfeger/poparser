@@ -29,8 +29,14 @@ class OrderFileParser(
         val extractedLines = pdfTextExtractor.extractLines(file)
         val joinedNative = extractedLines.joinToString("\n") { it.text }
 
-        val isFisher = joinedNative.contains("FISHER", true) ||
-                file.name.contains("FAX", true)
+        val isChosun = joinedNative.contains("CHOSUN MEASUREMENT", true) ||
+                file.name.contains("CHOSUN", true)
+
+        val isFisher = !isChosun && (
+                joinedNative.contains("FISHER SCIENTIFIC", true) ||
+                        joinedNative.contains("FISHER HEALTHCARE", true) ||
+                        file.name.contains("FAX", true)
+                )
 
         val aquaOcrLines = if (!isFisher && looksLikeCorruptedAquaCandidate(extractedLines)) {
             ocrPdfTextExtractor.extractLines(file)
