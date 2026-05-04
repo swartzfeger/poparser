@@ -21,6 +21,7 @@ class StrategyRegistry(
                     BartovationLayoutStrategy(),
                     CarolinaBiologicalLayoutStrategy(),
                     ChemSupplyLayoutStrategy(),
+                    ChosunMeasurementLayoutStrategy(),
                     CovenantAviationLayoutStrategy(),
                     CovidienCtLayoutStrategy(),
                     DiversifiedFoodserviceLayoutStrategy(),
