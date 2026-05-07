@@ -38,7 +38,9 @@ class OrderFileParser(
                         file.name.contains("FAX", true)
                 )
 
-        val aquaOcrLines = if (!isFisher && looksLikeCorruptedAquaCandidate(extractedLines)) {
+        val needsOcrCandidate = !isFisher && looksLikeCorruptedTextLayer(extractedLines)
+
+        val ocrCandidateLines = if (needsOcrCandidate) {
             ocrPdfTextExtractor.extractLines(file)
         } else {
             emptyList()
@@ -46,7 +48,12 @@ class OrderFileParser(
 
         val useAquaOcrOnly = shouldUseOcrForAquaPhoenixOnly(
             textLines = extractedLines,
-            ocrLines = aquaOcrLines
+            ocrLines = ocrCandidateLines
+        )
+
+        val useCovidienOcrOnly = shouldUseOcrForCovidienOnly(
+            textLines = extractedLines,
+            ocrLines = ocrCandidateLines
         )
 
         val linesToProcess = when {
@@ -54,7 +61,12 @@ class OrderFileParser(
 
             useAquaOcrOnly -> {
                 println("DEBUG: Using OCR lines for Aqua Phoenix due to corrupted embedded text layer")
-                aquaOcrLines
+                ocrCandidateLines
+            }
+
+            useCovidienOcrOnly -> {
+                println("DEBUG: Using OCR lines for Covidien due to corrupted embedded text layer")
+                ocrCandidateLines
             }
 
             extractedLines.size < 3 -> ocrPdfTextExtractor.extractLines(file)
@@ -133,14 +145,16 @@ class OrderFileParser(
         return parsedOrders
     }
 
-    private fun looksLikeCorruptedAquaCandidate(lines: List<PdfLine>): Boolean {
+    private fun looksLikeCorruptedTextLayer(lines: List<PdfLine>): Boolean {
         val text = lines.joinToString("") { it.text }
         if (text.isBlank()) return false
 
         val privateUseCount = text.count { it.code in 0xE000..0xF8FF }
         val asciiLetterOrDigitCount = text.count { it.isLetterOrDigit() && it.code < 128 }
+        val totalNonWhitespace = text.count { !it.isWhitespace() }
 
-        return privateUseCount > asciiLetterOrDigitCount
+        return privateUseCount > asciiLetterOrDigitCount ||
+                (totalNonWhitespace > 0 && asciiLetterOrDigitCount < totalNonWhitespace / 2)
     }
 
     private fun shouldUseOcrForAquaPhoenixOnly(
@@ -163,8 +177,34 @@ class OrderFileParser(
 
         val privateUseCount = nativeText.count { it.code in 0xE000..0xF8FF }
         val asciiLetterOrDigitCount = nativeText.count { it.isLetterOrDigit() && it.code < 128 }
+        val totalNonWhitespace = nativeText.count { !it.isWhitespace() }
 
-        return privateUseCount > asciiLetterOrDigitCount
+        return privateUseCount > asciiLetterOrDigitCount ||
+                (totalNonWhitespace > 0 && asciiLetterOrDigitCount < totalNonWhitespace / 2)
+    }
+
+    private fun shouldUseOcrForCovidienOnly(
+        textLines: List<PdfLine>,
+        ocrLines: List<PdfLine>
+    ): Boolean {
+        if (ocrLines.isEmpty()) return false
+
+        val nativeText = textLines.joinToString("") { it.text }
+        val ocrText = ocrLines.joinToString(" ") { it.text }.uppercase()
+
+        val looksLikeCovidien =
+            ocrText.contains("COVIDIEN") ||
+                    ocrText.contains("MEDTRONIC") ||
+                    ocrText.contains("PURCHASE ORDER NUMBER:") ||
+                    ocrText.contains("VND ITEM: 290-1-1515") ||
+                    ocrText.contains("SURGICAL SOLUTIONS")
+
+        if (!looksLikeCovidien) return false
+
+        val asciiLetterOrDigitCount = nativeText.count { it.isLetterOrDigit() && it.code < 128 }
+        val totalNonWhitespace = nativeText.count { !it.isWhitespace() }
+
+        return totalNonWhitespace > 0 && asciiLetterOrDigitCount < totalNonWhitespace / 2
     }
 
     private fun segmentLines(lines: List<PdfLine>, isFisher: Boolean): List<List<PdfLine>> {
