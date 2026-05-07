@@ -32,7 +32,10 @@ class OrderFileParser(
         val isChosun = joinedNative.contains("CHOSUN MEASUREMENT", true) ||
                 file.name.contains("CHOSUN", true)
 
-        val isFisher = !isChosun && (
+        val isCharlotte = joinedNative.contains("CHARLOTTE PRODUCTS", true) ||
+                file.name.contains("PRELAB", true)
+
+        val isFisher = !isChosun && !isCharlotte && (
                 joinedNative.contains("FISHER SCIENTIFIC", true) ||
                         joinedNative.contains("FISHER HEALTHCARE", true) ||
                         file.name.contains("FAX", true)

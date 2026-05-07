@@ -20,6 +20,7 @@ class StrategyRegistry(
                     BaileysTestStripsLayoutStrategy(),
                     BartovationLayoutStrategy(),
                     CarolinaBiologicalLayoutStrategy(),
+                    CharlotteProductsLayoutStrategy(),
                     ChemSupplyLayoutStrategy(),
                     ChosunMeasurementLayoutStrategy(),
                     CovenantAviationLayoutStrategy(),

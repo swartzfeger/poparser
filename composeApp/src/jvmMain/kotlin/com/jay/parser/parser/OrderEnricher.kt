@@ -179,6 +179,7 @@ class OrderEnricher {
     private fun isUomCustomer(customerId: String): Boolean {
         val uomCustomerIds = setOf(
             "DIVERSIFIED FOODSERV",
+            "CHARLOTTE PRODUCTS",
             "TCD PARTS",
             "DRAKE SPECIALITIES",
             "EISCO SCI",
