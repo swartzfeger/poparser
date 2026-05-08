@@ -14,3 +14,4 @@ build/
 # Local test files
 testpdf/
 test-output.csv
+.kotlin/
