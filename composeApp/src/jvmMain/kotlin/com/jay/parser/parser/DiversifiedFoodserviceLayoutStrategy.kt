@@ -15,7 +15,8 @@ class DiversifiedFoodserviceLayoutStrategy : BaseLayoutStrategy(), LayoutStrateg
         val hasDfs =
             raw.contains("DDFFSS") ||
                     normalized.contains("DFS") ||
-                    normalized.contains("DIVERSIFIED FOODSERVICE")
+                    normalized.contains("DIVERSIFIED FOODSERVICE") ||
+                    normalized.contains("FOODSERVICE SUPPLY")
 
         val hasPurchaseOrder =
             raw.contains("PPUURRCCHHAASSEE OORRDDEERR") ||
@@ -48,17 +49,30 @@ class DiversifiedFoodserviceLayoutStrategy : BaseLayoutStrategy(), LayoutStrateg
 
         if (normalized.contains("8079625-00")) score += 30
         if (normalized.contains("354524-00")) score += 30
+        if (normalized.contains("445436-00")) score += 30
+        if (normalized.contains("368544-00")) score += 30
+        if (normalized.contains("1126502-00")) score += 30
 
         if (normalized.contains("8955 E WARNER RD")) score += 50
         if (normalized.contains("MESA, AZ 85212")) score += 50
-
         if (normalized.contains("101 MOUNT HOLLY BYPASS")) score += 50
         if (normalized.contains("LUMBERTON, NJ 08048")) score += 50
+        if (normalized.contains("620 DARLING DR")) score += 50
+        if (normalized.contains("VERNON HILLS")) score += 40
+        if (normalized.contains("8787 WEST ROAD")) score += 50
+        if (normalized.contains("HOUSTON, TX 77064")) score += 50
 
-        if (normalized.contains("145-144V-100 DFS")) score += 40
-        if (normalized.contains("PAA-50-1V-100 DFS")) score += 40
-        if (normalized.contains("CHL-1000-1V-100 DFS")) score += 40
+        if (normalized.contains("145-144V-100")) score += 40
+        if (normalized.contains("PAA-50-1V-100")) score += 40
+        if (normalized.contains("CHL-1000-1V-100")) score += 40
         if (normalized.contains("PH3060-1B-50")) score += 40
+        if (normalized.contains("QAC-400B")) score += 40
+
+        if (normalized.contains("1421362")) score += 20
+        if (normalized.contains("851351")) score += 20
+        if (normalized.contains("1421556")) score += 20
+        if (normalized.contains("81403")) score += 20
+        if (normalized.contains("1421363")) score += 20
 
         return score
     }
@@ -230,41 +244,40 @@ class DiversifiedFoodserviceLayoutStrategy : BaseLayoutStrategy(), LayoutStrateg
                 ?.replace(Regex("""\s+"""), " ")
                 ?.trim()
 
-            if (!value.isNullOrBlank()) return value
+            if (!value.isNullOrBlank()) return cleanCityStateOcr(value)
         }
 
-        return cleaned
+        return cleanCityStateOcr(cleaned)
     }
 
     private fun parseItems(lines: List<String>): List<ParsedPdfItem> {
         val items = mutableListOf<ParsedPdfItem>()
         val seen = mutableSetOf<String>()
 
-        for (i in lines.indices) {
-            val current = decodeDoubledLine(lines[i])
-                .replace(Regex("""\s+"""), " ")
-                .trim()
+        val decoded = lines.map { decodeDoubledLine(it).replace(Regex("""\s+"""), " ").trim() }
 
-            val next = lines.getOrNull(i + 1)
-                ?.let { decodeDoubledLine(it) }
-                ?.replace(Regex("""\s+"""), " ")
-                ?.trim()
-                .orEmpty()
+        for (i in decoded.indices) {
+            val current = decoded[i]
+            val next = decoded.getOrNull(i + 1).orEmpty()
+            val next2 = decoded.getOrNull(i + 2).orEmpty()
 
             val qty = parseLeadingQuantity(current) ?: continue
             val money = parseTrailingMoneyAndDate(current) ?: continue
 
-            /*
-             * Important:
-             * DFS OCR often pollutes the main item row with email/address fragments.
-             * The cleaner SKU is usually on the following PACK | SKU DFS | / EACH | SKU DFS | line.
-             * So we intentionally check the bar/pipe row first.
-             */
+            if (!looksLikeItemMoneyRow(current)) continue
+
             val sku = chooseBestSku(
                 candidates = listOfNotNull(
                     parseSkuFromBarLine(next),
-                    parseSkuAfterUnitToken(current),
                     parseSkuFromBarLine(current),
+                    parseSkuAfterUnitToken(current),
+                    parseKnownSkuFromLine(current),
+                    parseKnownSkuFromLine(next),
+                    parseKnownSkuFromUppercaseSignal(current),
+                    parseKnownSkuFromUppercaseSignal(next),
+                    parseSkuFromDfsNumber(current),
+                    parseSkuFromDfsNumber(next),
+                    parseSkuFromDfsNumber(next2),
                     parseSkuFromLine(current),
                     parseSkuFromLine(next)
                 )
@@ -276,11 +289,17 @@ class DiversifiedFoodserviceLayoutStrategy : BaseLayoutStrategy(), LayoutStrateg
             val key = "$sku|$qty|${money.unitPrice}"
             if (!seen.add(key)) continue
 
+            val adjustedQuantity = if (sku == "DFS-QAC-400B") {
+                qty * 12.0
+            } else {
+                qty
+            }
+
             items.add(
                 item(
                     sku = sku,
                     description = description,
-                    quantity = qty,
+                    quantity = adjustedQuantity,
                     unitPrice = money.unitPrice
                 )
             )
@@ -289,15 +308,33 @@ class DiversifiedFoodserviceLayoutStrategy : BaseLayoutStrategy(), LayoutStrateg
         return items
     }
 
+    private fun looksLikeItemMoneyRow(line: String): Boolean {
+        val normalized = normalizeForMatch(line)
+
+        if (normalized.contains("PURCHASE TOTAL")) return false
+        if (normalized.contains("PREPAY VENDOR") && !containsKnownItemSignal(line)) return false
+
+        return parseTrailingMoneyAndDate(line) != null && parseLeadingQuantity(line) != null
+    }
+
+    private fun containsKnownItemSignal(line: String): Boolean {
+        val normalized = normalizeForMatch(line)
+        val signal = uppercaseSignal(line)
+
+        return knownDiversifiedSkus.any { normalized.contains(it) || signal.contains(it) } ||
+                dfsNumberToSku.keys.any { normalized.contains(it) || signal.contains(it) }
+    }
+
     private fun chooseBestSku(candidates: List<String>): String? {
         if (candidates.isEmpty()) return null
 
         val cleaned = candidates
-            .map { it.trim().uppercase() }
+            .map { normalizeDiversifiedSku(it) }
             .filter { it.isNotBlank() }
             .filterNot { it.contains("@") }
             .filterNot { it.contains("_") }
             .filterNot { it.contains(".") }
+            .filterNot { it.length > 40 }
             .distinct()
 
         if (cleaned.isEmpty()) return null
@@ -339,21 +376,54 @@ class DiversifiedFoodserviceLayoutStrategy : BaseLayoutStrategy(), LayoutStrateg
             ?.get(1)
             ?.trim()
             ?.uppercase()
-            ?.let { return it }
+            ?.let { return normalizeDiversifiedSku(it) }
 
         return null
     }
 
     private fun parseSkuAfterUnitToken(line: String): String? {
         Regex(
-            """\b(?:PACK|EACH)\s+([A-Z0-9]+(?:-[A-Z0-9]+){2,})(?:\s+DFS)?\b""",
+            """\b(?:PACK|EACH|PKG\s+OF\s+12)\s+([A-Z0-9]+(?:-[A-Z0-9]+){2,})(?:\s+DFS)?\b""",
             RegexOption.IGNORE_CASE
         ).find(line)
             ?.groupValues
             ?.get(1)
             ?.trim()
             ?.uppercase()
-            ?.let { return it }
+            ?.let { return normalizeDiversifiedSku(it) }
+
+        return null
+    }
+
+    private fun parseKnownSkuFromLine(line: String): String? {
+        val normalized = normalizeForMatch(line)
+
+        for (sku in knownDiversifiedSkus) {
+            if (normalized.contains(sku)) return normalizeDiversifiedSku(sku)
+        }
+
+        return null
+    }
+
+    private fun parseKnownSkuFromUppercaseSignal(line: String): String? {
+        val signal = uppercaseSignal(line)
+
+        for (sku in knownDiversifiedSkus) {
+            if (signal.contains(sku)) return normalizeDiversifiedSku(sku)
+        }
+
+        return null
+    }
+
+    private fun parseSkuFromDfsNumber(line: String): String? {
+        val normalized = normalizeForMatch(line)
+        val signal = uppercaseSignal(line)
+
+        for ((dfsNumber, sku) in dfsNumberToSku) {
+            if (normalized.contains(dfsNumber) || signal.contains(dfsNumber)) {
+                return normalizeDiversifiedSku(sku)
+            }
+        }
 
         return null
     }
@@ -367,7 +437,7 @@ class DiversifiedFoodserviceLayoutStrategy : BaseLayoutStrategy(), LayoutStrateg
             ?.get(1)
             ?.trim()
             ?.uppercase()
-            ?.let { return it }
+            ?.let { return normalizeDiversifiedSku(it) }
 
         return null
     }
@@ -376,22 +446,43 @@ class DiversifiedFoodserviceLayoutStrategy : BaseLayoutStrategy(), LayoutStrateg
         val normalized = normalizeForMatch(line)
 
         val match = Regex(
-            """\b(PACK|EACH)\s*\|\s*(.*?)\s*\|\s*${Regex.escape(sku)}(?:\s+DFS)?\s*\|""",
+            """\b(PACK|EACH|PKG\s+OF\s+12)\s*\|\s*(.*?)\s*\|\s*(?:${Regex.escape(sku)}(?:\s+DFS)?|\d{4,8})\s*\|""",
             RegexOption.IGNORE_CASE
         ).find(normalized)
 
         return match?.groupValues?.get(2)?.trim().orEmpty()
     }
 
+    private fun normalizeDiversifiedSku(rawSku: String): String {
+        val sku = rawSku
+            .trim()
+            .uppercase()
+            .removeSuffix("DFS")
+            .trim()
+
+        return when (sku) {
+            "QAC-400B" -> "DFS-QAC-400B"
+            else -> sku
+        }
+    }
+
+    private fun uppercaseSignal(line: String): String {
+        return line
+            .filter { it.isUpperCase() || it.isDigit() || it == '-' }
+            .uppercase()
+    }
+
     private fun looksLikeCityStateZip(line: String): Boolean {
+        val cleaned = cleanCityStateOcr(line)
+
         return Regex(
             """.*?,?\s+[A-Z]{2}\s+\d{5}(?:-\d{4})?\s*$""",
             RegexOption.IGNORE_CASE
-        ).containsMatchIn(line.trim())
+        ).containsMatchIn(cleaned.trim())
     }
 
     private fun parseCityStateZip(line: String): CityStateZip {
-        val cleaned = line
+        val cleaned = cleanCityStateOcr(line)
             .replace(Regex("""\s+"""), " ")
             .replace(" ,", ",")
             .trim()
@@ -423,6 +514,15 @@ class DiversifiedFoodserviceLayoutStrategy : BaseLayoutStrategy(), LayoutStrateg
         } else {
             CityStateZip(null, null, null)
         }
+    }
+
+    private fun cleanCityStateOcr(value: String): String {
+        return value
+            .replace("|L", "IL", ignoreCase = true)
+            .replace("1L", "IL", ignoreCase = true)
+            .replace(" ,", ",")
+            .replace(Regex("""\s+"""), " ")
+            .trim()
     }
 
     private fun decodeDoubledLine(line: String): String {
@@ -494,6 +594,23 @@ class DiversifiedFoodserviceLayoutStrategy : BaseLayoutStrategy(), LayoutStrateg
 
         return sb.toString()
     }
+
+    private val knownDiversifiedSkus = listOf(
+        "145-144V-100",
+        "PAA-50-1V-100",
+        "CHL-1000-1V-100",
+        "PH3060-1B-50",
+        "QAC-400B",
+        "DFS-QAC-400B"
+    )
+
+    private val dfsNumberToSku = mapOf(
+        "1421362" to "145-144V-100",
+        "851351" to "PAA-50-1V-100",
+        "1421556" to "CHL-1000-1V-100",
+        "81403" to "PH3060-1B-50",
+        "1421363" to "DFS-QAC-400B"
+    )
 
     private data class ShipToBlock(
         val shipToCustomer: String?,

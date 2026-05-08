@@ -3,6 +3,7 @@ package com.jay.parser.parser
 import com.jay.parser.mappers.CustomerMapper
 import com.jay.parser.mappers.GLAccountMapper
 import com.jay.parser.mappers.ItemMapper
+import com.jay.parser.mappers.QtyDiscountMapper
 import com.jay.parser.models.ExportOrder
 import com.jay.parser.models.ExportOrderLine
 import com.jay.parser.models.ResolvedCustomer
@@ -65,11 +66,21 @@ class OrderEnricher {
                     priceLevel = resolvedCustomer?.priceLevel.orEmpty()
                 )
 
-                val resolvedUnitPrice = getUomAdjustedUnitPrice(
+                val uomAdjustedUnitPrice = getUomAdjustedUnitPrice(
                     sku = sku,
                     mappedUnitPrice = mappedUnitPrice,
                     resolvedCustomer = resolvedCustomer
                 )
+
+                val qtyDiscountResult = QtyDiscountMapper.applyQtyDiscount(
+                    customerId = resolvedCustomer?.id ?: resolvedCustomer?.name,
+                    sku = sku,
+                    quantity = exportQty,
+                    unitPrice = uomAdjustedUnitPrice,
+                    priceLevel = resolvedCustomer?.priceLevel
+                )
+
+                val resolvedUnitPrice = qtyDiscountResult.unitPrice
 
                 val glAccount = GLAccountMapper.getGLAccount(sku)
 
@@ -140,6 +151,14 @@ class OrderEnricher {
                 "145-QR5-2VB-100"
             )
         ) {
+            return rawQuantity
+        }
+
+        /*
+         * DFS-QAC-400B is handled at the Diversified layout level because their PO
+         * explicitly says PKG OF 12. Do not divide it back down here.
+         */
+        if (customerId == "DIVERSIFIED FOODSERV" && normalizedSku == "DFS-QAC-400B") {
             return rawQuantity
         }
 
