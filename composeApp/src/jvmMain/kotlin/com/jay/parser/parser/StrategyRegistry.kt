@@ -45,6 +45,7 @@ class StrategyRegistry(
                     JayhawkSalesWiLayoutStrategy(),
                     KrowneLayoutStrategy(),
                     MedlineLayoutStrategy(),
+                    MirOilLayoutStrategy(),
                     MoreFlavorLayoutStrategy(),
                     NalcoCompanyLayoutStrategy(),
                     NationalChemicalsLayoutStrategy(),
