@@ -28,48 +28,65 @@ class OrderFileParser(
 
         val extractedLines = pdfTextExtractor.extractLines(file)
         val joinedNative = extractedLines.joinToString("\n") { it.text }
+        val nativeLooksCorrupted = looksLikeCorruptedTextLayer(extractedLines)
 
-        val isChosun = joinedNative.contains("CHOSUN MEASUREMENT", true) ||
-                file.name.contains("CHOSUN", true)
-
-        val isCharlotte = joinedNative.contains("CHARLOTTE PRODUCTS", true) ||
-                file.name.contains("PRELAB", true)
-
-        val isFisher = !isChosun && !isCharlotte && (
-                joinedNative.contains("FISHER SCIENTIFIC", true) ||
-                        joinedNative.contains("FISHER HEALTHCARE", true) ||
-                        file.name.contains("FAX", true)
-                )
-
-        val needsOcrCandidate = !isFisher && looksLikeCorruptedTextLayer(extractedLines)
-
-        val ocrCandidateLines = if (needsOcrCandidate) {
+        val preOcrCandidateLines = if (
+            nativeLooksCorrupted ||
+            joinedNative.contains("FISHER", true) ||
+            file.name.contains("FAX", true) ||
+            file.nameWithoutExtension.matches(Regex("""\d{6,8}"""))
+        ) {
             ocrPdfTextExtractor.extractLines(file)
         } else {
             emptyList()
         }
 
+        val joinedOcrCandidate = preOcrCandidateLines.joinToString("\n") { it.text }
+
+        val isChosun = joinedNative.contains("CHOSUN MEASUREMENT", true) ||
+                joinedOcrCandidate.contains("CHOSUN MEASUREMENT", true) ||
+                file.name.contains("CHOSUN", true)
+
+        val isCharlotte = joinedNative.contains("CHARLOTTE PRODUCTS", true) ||
+                joinedOcrCandidate.contains("CHARLOTTE PRODUCTS", true) ||
+                file.name.contains("PRELAB", true)
+
+        val isFisher = !isChosun && !isCharlotte && (
+                joinedNative.contains("FISHER SCIENTIFIC", true) ||
+                        joinedNative.contains("FISHER HEALTHCARE", true) ||
+                        joinedOcrCandidate.contains("FISHER SCIENTIFIC", true) ||
+                        joinedOcrCandidate.contains("FISHER SCTENTIF", true) ||
+                        joinedOcrCandidate.contains("FISHER SCLANTIFIC", true) ||
+                        file.name.contains("FAX", true)
+                )
+
         val useAquaOcrOnly = shouldUseOcrForAquaPhoenixOnly(
             textLines = extractedLines,
-            ocrLines = ocrCandidateLines
+            ocrLines = preOcrCandidateLines
         )
 
         val useCovidienOcrOnly = shouldUseOcrForCovidienOnly(
             textLines = extractedLines,
-            ocrLines = ocrCandidateLines
+            ocrLines = preOcrCandidateLines
         )
 
         val linesToProcess = when {
-            isFisher -> ocrPdfTextExtractor.extractLines(file)
+            isFisher -> {
+                if (preOcrCandidateLines.isNotEmpty()) {
+                    preOcrCandidateLines
+                } else {
+                    ocrPdfTextExtractor.extractLines(file)
+                }
+            }
 
             useAquaOcrOnly -> {
                 println("DEBUG: Using OCR lines for Aqua Phoenix due to corrupted embedded text layer")
-                ocrCandidateLines
+                preOcrCandidateLines
             }
 
             useCovidienOcrOnly -> {
                 println("DEBUG: Using OCR lines for Covidien due to corrupted embedded text layer")
-                ocrCandidateLines
+                preOcrCandidateLines
             }
 
             extractedLines.size < 3 -> ocrPdfTextExtractor.extractLines(file)
@@ -78,16 +95,18 @@ class OrderFileParser(
         }
 
         val orderChunks = segmentLines(linesToProcess, isFisher)
+
         val parsedOrders = orderChunks.mapNotNull { chunk ->
             pdfFieldParser.parse(chunk)
         }
 
         if (isFisher) {
-            val nativePrs = joinedNative.uppercase()
+            val nativePrs = (joinedNative + "\n" + joinedOcrCandidate)
+                .uppercase()
                 .replace("FK", "PR")
                 .replace("FR", "PR")
                 .replace("PK", "PR")
-                .replace(Regex("""PR\s*41\s+(\d{4})"""), "PR41$1")
+                .replace(Regex("""PR\s*41\s+(\d{4,5})"""), "PR41$1")
                 .let { normalized ->
                     Regex("""\bPR\d{7,8}\b""")
                         .findAll(normalized)
@@ -96,21 +115,20 @@ class OrderFileParser(
                         .toList()
                 }
 
-            val ordersAfterNativeRecovery = if (nativePrs.isNotEmpty()) {
+            /*
+             * Only use positional PR recovery when the counts line up. In multi-order
+             * Fisher files, the first page sometimes has no recoverable PR while later
+             * pages do. Blind positional assignment causes the first order to steal the
+             * second order's PR number.
+             */
+            val ordersAfterNativeRecovery = if (
+                nativePrs.isNotEmpty() &&
+                parsedOrders.count { it.orderNumber.isNullOrBlank() } == nativePrs.size &&
+                parsedOrders.size == nativePrs.size
+            ) {
                 parsedOrders.mapIndexed { index, order ->
                     if (order.orderNumber.isNullOrBlank() && index < nativePrs.size) {
-                        ParsedPdfFields(
-                            customerName = order.customerName,
-                            orderNumber = nativePrs[index],
-                            shipToCustomer = order.shipToCustomer,
-                            addressLine1 = order.addressLine1,
-                            addressLine2 = order.addressLine2,
-                            city = order.city,
-                            state = order.state,
-                            zip = order.zip,
-                            terms = order.terms,
-                            items = order.items
-                        )
+                        order.copy(orderNumber = nativePrs[index])
                     } else {
                         order
                     }
@@ -125,20 +143,9 @@ class OrderFileParser(
                 null
             }
 
-            return ordersAfterNativeRecovery.map { order ->
-                if (order.orderNumber.isNullOrBlank() && filenamePr != null) {
-                    ParsedPdfFields(
-                        customerName = order.customerName,
-                        orderNumber = filenamePr,
-                        shipToCustomer = order.shipToCustomer,
-                        addressLine1 = order.addressLine1,
-                        addressLine2 = order.addressLine2,
-                        city = order.city,
-                        state = order.state,
-                        zip = order.zip,
-                        terms = order.terms,
-                        items = order.items
-                    )
+            return ordersAfterNativeRecovery.mapIndexed { index, order ->
+                if (order.orderNumber.isNullOrBlank() && filenamePr != null && index == 0) {
+                    order.copy(orderNumber = filenamePr)
                 } else {
                     order
                 }
@@ -223,12 +230,23 @@ class OrderFileParser(
 
             val isHeaderLine =
                 upper.contains("FISHER SCIENTIFIC COMPANY") &&
-                        upper.length < 80
+                        upper.length < 120
+
+            val currentHasOrderContent = currentChunk.any {
+                val t = it.text.uppercase()
+                t.contains("FISHER PO LINE") ||
+                        t.contains("PISHER FPO LINE") ||
+                        t.contains("TOTAL:") ||
+                        t.contains("TOTAL -") ||
+                        t.contains("SUPPLIER") ||
+                        t.contains("CATALOG")
+            }
 
             val isRealPageBreak =
                 isHeaderLine &&
-                        currentChunk.size > 25 &&
-                        (index - lastSplitIndex > 25)
+                        currentChunk.size >= 20 &&
+                        currentHasOrderContent &&
+                        (index - lastSplitIndex > 12)
 
             if (isRealPageBreak) {
                 chunks.add(currentChunk)
@@ -244,8 +262,15 @@ class OrderFileParser(
         }
 
         return chunks.filter { chunk ->
-            chunk.size > 10 &&
-                    chunk.any { it.text.contains("FISHER", true) }
+            chunk.size > 8 &&
+                    chunk.any { it.text.contains("FISHER", true) } &&
+                    chunk.any {
+                        it.text.contains("SUPPLIER", true) ||
+                                it.text.contains("CATALOG", true) ||
+                                it.text.contains("FISHER PO LINE", true) ||
+                                it.text.contains("PISHER FPO LINE", true) ||
+                                it.text.contains("TOTAL", true)
+                    }
         }
     }
 

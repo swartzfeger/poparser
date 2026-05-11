@@ -2,24 +2,42 @@ package com.jay.parser.parser
 
 import com.jay.parser.mappers.ItemMapper
 import com.jay.parser.pdf.ParsedPdfFields
+import kotlin.math.abs
+import kotlin.math.roundToInt
 
 class FisherScientificCoLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
 
     override val name: String = "Fisher Scientific Co"
 
     override fun matches(lines: List<String>): Boolean {
-        val text = lines.joinToString(" ").replace("|", " ").uppercase()
+        val text = lines.joinToString(" ")
+            .replace("|", " ")
+            .uppercase()
+
         return text.contains("FISHER") &&
-                (text.contains("PRECISION") || text.contains("PRECISTON") || text.contains("LABORATORIES"))
+                (
+                        text.contains("PRECISION") ||
+                                text.contains("PRECISTON") ||
+                                text.contains("PREC ISITON") ||
+                                text.contains("LABORATORIES")
+                        )
     }
 
     override fun score(lines: List<String>): Int {
         val text = lines.joinToString("\n").uppercase()
+
         var score = 0
         if (text.contains("FISHER")) score += 100
-        if (text.contains("PRECISION") || text.contains("PRECISTON") || text.contains("LABORATORIES")) score += 80
+        if (
+            text.contains("PRECISION") ||
+            text.contains("PRECISTON") ||
+            text.contains("PREC ISITON") ||
+            text.contains("LABORATORIES")
+        ) score += 80
         if (text.contains("ORDER NOTES AND INSTRUCTIONS")) score += 60
         if (text.contains("CATALOG")) score += 40
+        if (text.contains("FISHER PO LINE") || text.contains("PISHER FPO LINE")) score += 60
+
         return score
     }
 
@@ -55,12 +73,17 @@ class FisherScientificCoLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
     private fun extractShipToBlock(lines: List<String>): String? {
         val startIdx = lines.indexOfFirst {
             val u = it.uppercase()
-            u.contains("SHIP TO INFORMATION") || u.contains("SNO TO INFORMATION")
+            u.contains("SHIP TO INFORMATION") ||
+                    u.contains("SNO TO INFORMATION") ||
+                    u.contains("SHIP TO INFORMAT") ||
+                    u.contains("SHIP TO")
         }
+
         if (startIdx == -1) return null
 
         val block = mutableListOf<String>()
-        for (i in startIdx..minOf(startIdx + 14, lines.lastIndex)) {
+
+        for (i in startIdx..minOf(startIdx + 18, lines.lastIndex)) {
             val line = normalizeAddressText(lines[i])
             if (line.isBlank()) continue
 
@@ -72,10 +95,12 @@ class FisherScientificCoLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
                 "ORDER NOTES AND INSTRUCTIONS",
                 "FISHER SCIENTIFIC SUPPLIER NUMBER",
                 "SUPPLIER CATALOG",
-                "PRODUCT DESCRIPTION"
+                "PRODUCT DESCRIPTION",
+                "FISHER PO LINE",
+                "TOTAL:"
             ).any { line.contains(it) }
 
-            if (stop) break
+            if (stop && block.size >= 3) break
             block += line
         }
 
@@ -95,16 +120,7 @@ class FisherScientificCoLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
                     "zip" to "75241"
                 )
 
-            text.contains("FLOREN") || text.contains("41042") ->
-                mapOf(
-                    "addressLine1" to "CDC RECEIVING DEPARTMENT",
-                    "addressLine2" to "SUITE B, 7383 EMPIRE DRIVE",
-                    "city" to "FLORENCE",
-                    "state" to "KY",
-                    "zip" to "41042"
-                )
-
-            text.contains("BOWLES") || text.contains("AGAWAM") || text.contains("01001") ->
+            text.contains("BOWLES") || text.contains("AGAWAM") || text.contains("01001") || text.contains("DLOG1") ->
                 mapOf(
                     "addressLine1" to "325 BOWLES ROAD",
                     "city" to "AGAWAM",
@@ -112,7 +128,13 @@ class FisherScientificCoLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
                     "zip" to "01001"
                 )
 
-            text.contains("BICKMORE") || text.contains("CHINO") || text.contains("91708") || text.contains("31708") || text.contains("31709") ->
+            text.contains("BICKMORE") ||
+                    text.contains("BDICKEORE") ||
+                    text.contains("CHINO") ||
+                    text.contains("91708") ||
+                    text.contains("31708") ||
+                    text.contains("31709") ||
+                    text.contains("SLYU8") ->
                 mapOf(
                     "addressLine1" to "6722 BICKMORE AVENUE",
                     "city" to "CHINO",
@@ -120,7 +142,13 @@ class FisherScientificCoLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
                     "zip" to "91708"
                 )
 
-            text.contains("HORIZON RIDGE") || text.contains("SUWANEE") || text.contains("SUPAHEE") || text.contains("30024") || text.contains("300S4") || text.contains("30054") ->
+            text.contains("HORIZON RIDGE") ||
+                    text.contains("HORTZOH RIDGE") ||
+                    text.contains("SUWANEE") ||
+                    text.contains("SUPAHEE") ||
+                    text.contains("30024") ||
+                    text.contains("300S4") ||
+                    text.contains("30054") ->
                 mapOf(
                     "addressLine1" to "2775 HORIZON RIDGE COURT",
                     "city" to "SUWANEE",
@@ -136,7 +164,11 @@ class FisherScientificCoLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
                     "zip" to "60133"
                 )
 
-            text.contains("SILVER CREST") || text.contains("NAZARETH") || text.contains("18064") || text.contains("16064") ->
+            text.contains("SILVER CREST") ||
+                    text.contains("NAZARETH") ||
+                    text.contains("NACARETH") ||
+                    text.contains("18064") ||
+                    text.contains("16064") ->
                 mapOf(
                     "addressLine1" to "6771 SILVER CREST ROAD",
                     "city" to "NAZARETH",
@@ -144,7 +176,7 @@ class FisherScientificCoLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
                     "zip" to "18064"
                 )
 
-            text.contains("EMPIRE") || text.contains("FLORENCE") || text.contains("41042") ->
+            text.contains("EMPIRE") || text.contains("FLOREN") || text.contains("41042") ->
                 mapOf(
                     "addressLine1" to "CDC RECEIVING DEPARTMENT",
                     "addressLine2" to "SUITE B, 7383 EMPIRE DRIVE",
@@ -159,8 +191,62 @@ class FisherScientificCoLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
 
     private fun resolveAddressFromStreet(fullText: String): Map<String, String>? {
         val text = fullText.uppercase()
-        if (text.contains("LANGDON")) return mapOf("addressLine1" to "4951 LANGDON RD SUITE 170", "city" to "DALLAS", "state" to "TX", "zip" to "75241")
-        if (text.contains("FLOREN") || text.contains("41042")) {
+
+        if (text.contains("LANGDON")) {
+            return mapOf(
+                "addressLine1" to "4951 LANGDON RD SUITE 170",
+                "city" to "DALLAS",
+                "state" to "TX",
+                "zip" to "75241"
+            )
+        }
+
+        if (text.contains("BOWLES")) {
+            return mapOf(
+                "addressLine1" to "325 BOWLES ROAD",
+                "city" to "AGAWAM",
+                "state" to "MA",
+                "zip" to "01001"
+            )
+        }
+
+        if (text.contains("BICKMORE") || text.contains("BDICKEORE") || text.contains("CHINO")) {
+            return mapOf(
+                "addressLine1" to "6722 BICKMORE AVENUE",
+                "city" to "CHINO",
+                "state" to "CA",
+                "zip" to "91708"
+            )
+        }
+
+        if (text.contains("HORIZON RIDGE") || text.contains("HORTZOH RIDGE") || text.contains("SUWANEE") || text.contains("SUPAHEE")) {
+            return mapOf(
+                "addressLine1" to "2775 HORIZON RIDGE COURT",
+                "city" to "SUWANEE",
+                "state" to "GA",
+                "zip" to "30024"
+            )
+        }
+
+        if (text.contains("TURNBERRY")) {
+            return mapOf(
+                "addressLine1" to "4500 TURNBERRY DRIVE",
+                "city" to "HANOVER PARK",
+                "state" to "IL",
+                "zip" to "60133"
+            )
+        }
+
+        if (text.contains("SILVER CREST") || text.contains("NAZARETH") || text.contains("NACARETH")) {
+            return mapOf(
+                "addressLine1" to "6771 SILVER CREST ROAD",
+                "city" to "NAZARETH",
+                "state" to "PA",
+                "zip" to "18064"
+            )
+        }
+
+        if (text.contains("EMPIRE") || text.contains("FLOREN") || text.contains("41042")) {
             return mapOf(
                 "addressLine1" to "CDC RECEIVING DEPARTMENT",
                 "addressLine2" to "SUITE B, 7383 EMPIRE DRIVE",
@@ -169,12 +255,7 @@ class FisherScientificCoLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
                 "zip" to "41042"
             )
         }
-        if (text.contains("BOWLES")) return mapOf("addressLine1" to "325 BOWLES ROAD", "city" to "AGAWAM", "state" to "MA", "zip" to "01001")
-        if (text.contains("BICKMORE")) return mapOf("addressLine1" to "6722 BICKMORE AVENUE", "city" to "CHINO", "state" to "CA", "zip" to "91708")
-        if (text.contains("HORIZON RIDGE") || text.contains("SUPAHEE")) return mapOf("addressLine1" to "2775 HORIZON RIDGE COURT", "city" to "SUWANEE", "state" to "GA", "zip" to "30024")
-        if (text.contains("EMPIRE")) return mapOf("addressLine1" to "CDC RECEIVING DEPARTMENT", "addressLine2" to "SUITE B, 7383 EMPIRE DRIVE", "city" to "FLORENCE", "state" to "KY", "zip" to "41042")
-        if (text.contains("TURNBERRY")) return mapOf("addressLine1" to "4500 TURNBERRY DRIVE", "city" to "HANOVER PARK", "state" to "IL", "zip" to "60133")
-        if (text.contains("SILVER CREST")) return mapOf("addressLine1" to "6771 SILVER CREST ROAD", "city" to "NAZARETH", "state" to "PA", "zip" to "18064")
+
         return null
     }
 
@@ -184,177 +265,386 @@ class FisherScientificCoLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
             .replace("BISHER", "FISHER")
             .replace("SCTENTIFIC", "SCIENTIFIC")
             .replace("SCLENTIFIC", "SCIENTIFIC")
+            .replace("SCTENTIF TC", "SCIENTIFIC")
             .replace("OOTTONHOOD", "COTTONWOOD")
             .replace("COTTONVYDOD", "COTTONWOOD")
+            .replace("COP TORWYOOD", "COTTONWOOD")
             .replace("PITISHURGH", "PITTSBURGH")
             .replace("SUPAHEE", "SUWANEE")
+            .replace("HORTZOH", "HORIZON")
+            .replace("BDICKEORE", "BICKMORE")
+            .replace("NACARETH", "NAZARETH")
             .replace(Regex("""\s+"""), " ")
             .trim()
     }
 
     private fun findOrderNumber(fullText: String, lines: List<String>): String? {
+        val normalized = normalizeOrderNumberText(fullText)
 
-        val normalized = fullText.uppercase()
-            .replace("FK", "PR")
-            .replace("FR", "PR")
-            .replace("PK", "PR")
-            .replace(Regex("""PR\s*41\s+(\d{4})"""), "PR41$1")
-
-        // 1. Strong global match
         Regex("""\bPR\d{7,8}\b""")
             .find(normalized)
             ?.let { return it.value }
 
-        // 2. Catch split format like "PR41 40884"
         Regex("""PR\s*\d{2}\s*\d{4,5}""")
             .find(normalized)
-            ?.let { return it.value.replace(" ", "") }
+            ?.let { return it.value.replace(Regex("""\s+"""), "") }
 
-        // 3. Search line-by-line (important for OCR fragments)
         for (line in lines) {
-            val u = line.uppercase()
-                .replace("FK", "PR")
-                .replace("FR", "PR")
-                .replace("PK", "PR")
-                .replace(Regex("""PR\s*41\s+(\d{4})"""), "PR41$1")
+            val u = normalizeOrderNumberText(line)
 
             Regex("""\bPR\d{7,8}\b""")
                 .find(u)
                 ?.let { return it.value }
+
+            Regex("""PR\s*\d{2}\s*\d{4,5}""")
+                .find(u)
+                ?.let { return it.value.replace(Regex("""\s+"""), "") }
         }
 
         return null
+    }
+
+    private fun normalizeOrderNumberText(value: String): String {
+        return value.uppercase()
+            .replace("FK", "PR")
+            .replace("FR", "PR")
+            .replace("PK", "PR")
+            .replace("P R", "PR")
+            .replace(Regex("""PR\s*41\s+(\d{4,5})"""), "PR41$1")
+            .replace(Regex("""PR\s+(\d{7,8})"""), "PR$1")
     }
 
     private fun findItems(lines: List<String>) = buildList {
         val seen = mutableSetOf<String>()
 
         for (raw in lines) {
-            var line = raw.uppercase()
-                .replace("|", " | ")
-                .replace("—", "-")
-                .replace("~", "-")
-                .replace("“", "")
-                .replace("”", "")
-                .replace(Regex("""\s+"""), " ")
-                .trim()
+            val line = normalizeItemLine(raw)
 
-            if (line.length < 20) continue
+            if (line.length < 18) continue
             if (line.contains("FISHER PO LINE")) continue
+            if (line.contains("PISHER FPO LINE")) continue
+            if (!line.contains("|")) continue
 
-            val knownOcrErrors = mapOf(
-                "130-129-100" to "120-12V-100",
-                "175-247-100/ERDR" to "175-24V-100",
-                "175-249-100" to "175-24V-100",
-                "175-249--LO0ERDE" to "175-24V-100",
-                "175-249-LO0ERDE" to "175-24V-100",
-                "PHOOLS-1FB-SO" to "PH0015-1B-50",
-                "PHOOIS-1B-SO" to "PH0015-1B-50",
-                "1K0-24-100" to "160-24V-100",
-                "160-247-100" to "160-24V-100",
-                "180-247-100" to "180-24V-100",
-                "185-247-100" to "185-24V-100",
-                "1AAS-24AYV-100" to "185-24V-100",
-                "1AAS-24V-100" to "185-24V-100"
-            )
-
-            for ((badOcr, goodSku) in knownOcrErrors) {
-                if (line.contains(badOcr)) line = line.replace(badOcr, goodSku)
-            }
-
-            val parts = line.split("|").map { it.trim() }.filter { it.isNotEmpty() }
-
-            fun normalizeCandidateSku(raw: String): String {
-                var s = raw.uppercase()
-                    .replace("—", "-")
-                    .replace("~", "-")
-                    .replace("“", "")
-                    .replace("”", "")
-                    .replace(Regex("""[^A-Z0-9-]"""), "")
-
-                // Fisher-specific OCR fixes
-                s = when (s) {
-                    "PHOOIS-1B-SO" -> "PH0015-1B-50"
-                    "PHOOLS-1FB-SO" -> "PH0015-1B-50"
-                    "PHOOIS-1FB-SO" -> "PH0015-1B-50"
-                    "130-129-100" -> "120-12V-100"
-                    "175-247-100ERDR" -> "175-24V-100"
-                    "175-249-100" -> "175-24V-100"
-                    "175-249--LO0ERDE" -> "175-24V-100"
-                    "175-249-LO0ERDE" -> "175-24V-100"
-                    "1K0-24-100" -> "160-24V-100"
-                    "160-247-100" -> "160-24V-100"
-                    "180-247-100" -> "180-24V-100"
-                    "185-247-100" -> "185-24V-100"
-                    "1AAS-24AYV-100" -> "185-24V-100"
-                    "1AAS-24V-100" -> "185-24V-100"
-                    else -> s
-                }
-
-                return s
-            }
-
-            fun isBadTrailingToken(s: String): Boolean {
-                val cleaned = s.uppercase()
-                return cleaned.matches(Regex("""O?\d{2}-\d{2}-\d{2,4}""")) ||
-                        cleaned.matches(Regex("""\d{2}-\d{2}-\d{2,4}"""))
-            }
-
-            fun looksLikePrecisionSku(s: String): Boolean {
-                if (s.length < 6) return false
-                if (isBadTrailingToken(s)) return false
-                if (!s.contains("-")) return false
-
-                // Must start with either a 3-digit family or PH...
-                return s.matches(Regex("""\d{3}-[A-Z0-9]{2,4}-\d{2,4}""")) ||
-                        s.matches(Regex("""PH\d{4}-[A-Z0-9]{1,2}-\d{2,3}"""))
-            }
+            val correctedLine = applyKnownOcrSkuCorrections(line)
+            val parts = correctedLine.split("|")
+                .map { it.trim() }
+                .filter { it.isNotEmpty() }
 
             val normalizedParts = parts.map { normalizeCandidateSku(it) }
+            val precisionSku = normalizedParts.firstOrNull { looksLikePrecisionSku(it) } ?: continue
 
-            val precisionSku = normalizedParts.firstOrNull { looksLikePrecisionSku(it) }
+            val moneyValues = extractMoneyValues(correctedLine)
+            val unitPrice = extractUnitPrice(correctedLine, moneyValues) ?: continue
 
-            if (precisionSku == null || seen.contains(precisionSku)) continue
+            val quantity = parseFisherQuantity(
+                line = correctedLine,
+                parts = parts,
+                unitPrice = unitPrice,
+                moneyValues = moneyValues
+            ) ?: 1.0
 
-            val fisherCatalog = parts.firstOrNull { it.matches(Regex("""\d{4,5}""")) }
+            val key = "$precisionSku|$quantity|$unitPrice"
+            if (!seen.add(key)) continue
 
-            val qty = Regex("""\b(\d{1,4})\s*(?:PK|PE|PEK|EA|CS|BX|PR)\b""")
-                .find(line.replace("|", " "))
-                ?.groupValues?.get(1)
-                ?.toDoubleOrNull()
-                ?: 1.0
+            val fisherCatalog = parts.firstOrNull { it.matches(Regex("""\d{4,6}""")) }
 
-            val money = Regex("""\b\d{1,3}\.\d{2}\b""")
-                .findAll(line.replace(",", "."))
-                .map { it.value.toDouble() }
-                .toList()
+            val descriptionRaw = parts.firstOrNull { part ->
+                val p = part.uppercase().trim()
+                val candidateSku = normalizeCandidateSku(p)
 
-            val unitPrice = when {
-                money.size >= 2 -> money[money.size - 2]
-                money.size == 1 -> money[0]
-                else -> null
-            }
+                candidateSku != precisionSku &&
+                        !looksLikePrecisionSku(candidateSku) &&
+                        !p.matches(Regex("""\d+(\.\d+)?""")) &&
+                        p !in unitTokens &&
+                        !p.matches(Regex("""O?\d{2}-\d{2}-\d{2,4}""")) &&
+                        !p.matches(Regex("""\d{4,6}""")) &&
+                        !p.contains("SUPPLIER") &&
+                        !p.contains("CATALOG")
+            } ?: precisionSku
 
-            if (unitPrice != null && unitPrice > 0) {
-                val descriptionRaw = parts.firstOrNull { part ->
-                    val p = part.uppercase().trim()
-                    p != precisionSku &&
-                            !p.matches(Regex("""\d+(\.\d+)?""")) &&
-                            p !in setOf("PK", "PE", "PEK", "EA", "CS", "BX", "PR") &&
-                            !p.matches(Regex("""O?\d{2}-\d{2}-\d{2,4}"""))
-                } ?: precisionSku
-                val mapperDesc = fisherCatalog?.let { ItemMapper.getItemDescription(it) }?.ifBlank { null }
+            val mapperDesc = fisherCatalog
+                ?.let { ItemMapper.getItemDescription(it) }
+                ?.ifBlank { null }
 
-                add(
-                    item(
-                        sku = precisionSku,
-                        description = mapperDesc ?: descriptionRaw,
-                        quantity = qty,
-                        unitPrice = unitPrice
-                    )
+            add(
+                item(
+                    sku = precisionSku,
+                    description = mapperDesc ?: descriptionRaw,
+                    quantity = quantity,
+                    unitPrice = unitPrice
                 )
-                seen.add(precisionSku)
-            }
+            )
         }
     }
+
+    private fun normalizeItemLine(raw: String): String {
+        return raw.uppercase()
+            .replace("|", " | ")
+            .replace("—", "-")
+            .replace("–", "-")
+            .replace("~", "-")
+            .replace("“", "")
+            .replace("”", "")
+            .replace("¥", "V")
+            .replace("§", "S")
+            .replace("]", " | ")
+            .replace("[", " | ")
+            .replace("WHIT", "UNIT")
+            .replace("FE ", "PE ")
+            .replace(" I ", " | ")
+            .replace(Regex("""\s+"""), " ")
+            .replace(Regex("""-{2,}"""), "-")
+            .trim()
+    }
+
+    private fun applyKnownOcrSkuCorrections(input: String): String {
+        var line = input
+
+        for ((badOcr, goodSku) in knownOcrErrors) {
+            val bad = normalizeItemLine(badOcr)
+            if (line.contains(bad)) {
+                line = line.replace(bad, goodSku)
+            }
+        }
+
+        return line
+    }
+
+    private fun normalizeCandidateSku(raw: String): String {
+        var s = raw.uppercase()
+            .replace("—", "-")
+            .replace("–", "-")
+            .replace("~", "-")
+            .replace("“", "")
+            .replace("”", "")
+            .replace("¥", "V")
+            .replace(Regex("""[^A-Z0-9-]"""), "")
+            .replace(Regex("""-{2,}"""), "-")
+
+        s = when (s) {
+            "130-129-100" -> "120-12V-100"
+            "120-127-100" -> "120-12V-100"
+
+            "150-127-100" -> "150-12V-100"
+
+            "160-247-100" -> "160-24V-100"
+            "160-249-100" -> "160-24V-100"
+            "160-249-L00" -> "160-24V-100"
+            "160-249-LOO" -> "160-24V-100"
+            "160-249-L0O" -> "160-24V-100"
+            "1K0-24-100" -> "160-24V-100"
+
+            "175-247-100ERDR" -> "175-24V-100"
+            "175-247-100-ERDR" -> "175-24V-100"
+            "175-249-100" -> "175-24V-100"
+            "175-249-LO0ERDE" -> "175-24V-100"
+            "175-249-L00ERDE" -> "175-24V-100"
+            "175-249-LOOERDE" -> "175-24V-100"
+
+            "180-247-100" -> "180-24V-100"
+
+            "185-247-100" -> "185-24V-100"
+            "1AAS-24AYV-100" -> "185-24V-100"
+            "1AAS-24V-100" -> "185-24V-100"
+
+            "PHOOLS-1FB-SO" -> "PH0015-1B-50"
+            "PHOOIS-1B-SO" -> "PH0015-1B-50"
+            "PHOOIS-1FB-SO" -> "PH0015-1B-50"
+            "PHOO15-1B-SO" -> "PH0015-1B-50"
+            "PHOO15-1B-50" -> "PH0015-1B-50"
+            "PH001S-1B-50" -> "PH0015-1B-50"
+            "PHOOIS-1B-50" -> "PH0015-1B-50"
+
+            "PHOO25-1B-5O" -> "PH0025-1B-50"
+            "PHOO25-1B-50" -> "PH0025-1B-50"
+            "PH0025-1B-5O" -> "PH0025-1B-50"
+
+            "PHSOSO-1B-50" -> "PH5090-1B-50"
+            "PH5OSO-1B-50" -> "PH5090-1B-50"
+            "PH509O-1B-50" -> "PH5090-1B-50"
+
+            else -> s
+        }
+
+        return s
+    }
+
+    private fun looksLikePrecisionSku(s: String): Boolean {
+        if (s.length < 6) return false
+        if (isBadTrailingToken(s)) return false
+        if (!s.contains("-")) return false
+
+        return s.matches(Regex("""\d{3}-[A-Z0-9]{2,4}-\d{2,4}""")) ||
+                s.matches(Regex("""PH\d{4}-[A-Z0-9]{1,2}-\d{2,3}"""))
+    }
+
+    private fun isBadTrailingToken(s: String): Boolean {
+        val cleaned = s.uppercase()
+        return cleaned.matches(Regex("""O?\d{2}-\d{2}-\d{2,4}""")) ||
+                cleaned.matches(Regex("""\d{2}-\d{2}-\d{2,4}"""))
+    }
+
+    private fun parseFisherQuantity(
+        line: String,
+        parts: List<String>,
+        unitPrice: Double,
+        moneyValues: List<Double>
+    ): Double? {
+        val normalizedLine = line
+            .uppercase()
+            .replace("FE", "PE")
+            .replace("WHIT", "UNIT")
+            .replace(Regex("""\s+"""), " ")
+            .trim()
+
+        Regex("""\|\s*(\d{1,4})\s*\|\s*(?:PK|PE|PEK|EA|CS|BX|PR)\b""", RegexOption.IGNORE_CASE)
+            .find(normalizedLine)
+            ?.groupValues
+            ?.getOrNull(1)
+            ?.toDoubleOrNull()
+            ?.let { return it }
+
+        Regex("""\b(\d{1,4})\s*(?:PK|PE|PEK|EA|CS|BX|PR)\b""", RegexOption.IGNORE_CASE)
+            .find(normalizedLine.replace("|", " "))
+            ?.groupValues
+            ?.getOrNull(1)
+            ?.toDoubleOrNull()
+            ?.let { return it }
+
+        val qtyPart = findQuantityPartFromPipes(parts)
+
+        when (qtyPart) {
+            ">" -> return 2.0
+            "Q" -> return 9.0
+            "I", "L", "l" -> return 1.0
+        }
+
+        qtyPart
+            ?.replace("O", "0")
+            ?.replace("I", "1")
+            ?.replace("L", "1")
+            ?.toDoubleOrNull()
+            ?.let { return it }
+
+        val extended = moneyValues.lastOrNull()
+        if (extended != null && unitPrice > 0.0 && extended > unitPrice) {
+            val calculated = extended / unitPrice
+            val rounded = calculated.roundToInt().toDouble()
+
+            if (rounded > 0.0 && abs(calculated - rounded) <= 0.15) {
+                return rounded
+            }
+        }
+
+        return null
+    }
+
+    private fun findQuantityPartFromPipes(parts: List<String>): String? {
+        val unitIndex = parts.indexOfFirst { it.trim().uppercase() in unitTokens }
+        if (unitIndex <= 0) return null
+
+        for (i in (unitIndex - 1) downTo 0) {
+            val part = parts[i].trim().uppercase()
+            if (part.isBlank()) continue
+            if (looksLikePrecisionSku(normalizeCandidateSku(part))) continue
+            if (part.matches(Regex("""\d{4,6}"""))) continue
+
+            if (
+                part.matches(Regex("""\d{1,4}""")) ||
+                part.matches(Regex("""[QOIL>]""")) ||
+                part.matches(Regex("""[IL]\d{1,2}"""))
+            ) {
+                return part
+            }
+        }
+
+        return null
+    }
+
+    private fun extractMoneyValues(line: String): List<Double> {
+        val normalized = line
+            .replace(",", ".")
+            .replace("S$", "$")
+            .replace("S300", "53.00")
+            .replace("S 300", "53.00")
+            .replace(Regex("""\b(\d{1,4})\s+(\d{2})\b"""), "$1.$2")
+
+        return Regex("""\b\d{1,5}\.\d{2}\b""")
+            .findAll(normalized)
+            .mapNotNull { it.value.toDoubleOrNull() }
+            .filter { it > 0.0 }
+            .toList()
+    }
+
+    private fun extractUnitPrice(line: String, moneyValues: List<Double>): Double? {
+        if (moneyValues.isEmpty()) return null
+
+        /*
+         * Typical Fisher item rows contain unit price and extended price.
+         * If only one money value survived OCR, it is usually the unit price.
+         */
+        if (moneyValues.size == 1) return moneyValues[0]
+
+        /*
+         * Prefer the value before the extended total.
+         */
+        return moneyValues[moneyValues.size - 2]
+            .takeIf { it > 0.0 }
+            ?: moneyValues.firstOrNull()
+    }
+
+    private val unitTokens = setOf("PK", "PE", "PEK", "EA", "CS", "BX", "PR", "FE")
+
+    private val knownOcrErrors = mapOf(
+        "130-129-100" to "120-12V-100",
+        "120-127-100" to "120-12V-100",
+        "120-127—100" to "120-12V-100",
+        "120-127~100" to "120-12V-100",
+
+        "150-127-100" to "150-12V-100",
+        "150-127—100" to "150-12V-100",
+        "150-127~100" to "150-12V-100",
+
+        "160-247-100" to "160-24V-100",
+        "160-249-100" to "160-24V-100",
+        "160~—249~L00" to "160-24V-100",
+        "160~249~L00" to "160-24V-100",
+        "160-249-L00" to "160-24V-100",
+        "160-249-LOO" to "160-24V-100",
+        "160-249-L0O" to "160-24V-100",
+        "1K0-24-100" to "160-24V-100",
+
+        "175-247-100/ERDR" to "175-24V-100",
+        "175-247-100ERDR" to "175-24V-100",
+        "175-247-100-ERDR" to "175-24V-100",
+        "175-249-100" to "175-24V-100",
+        "175~249—~LO0”ERDE" to "175-24V-100",
+        "175~249—~LO0ERDE" to "175-24V-100",
+        "175~249~LO0ERDE" to "175-24V-100",
+        "175-249--LO0ERDE" to "175-24V-100",
+        "175-249-LO0ERDE" to "175-24V-100",
+
+        "180-247-100" to "180-24V-100",
+
+        "185-247-100" to "185-24V-100",
+        "1AAS-24AYV-100" to "185-24V-100",
+        "1AAS-24V-100" to "185-24V-100",
+
+        "PHOOLS-1FB-SO" to "PH0015-1B-50",
+        "PHOOIS-1B-SO" to "PH0015-1B-50",
+        "PHOOIS-1FB-SO" to "PH0015-1B-50",
+        "PHOO15-1B-SO" to "PH0015-1B-50",
+        "PHOO15-1B-50" to "PH0015-1B-50",
+        "PH001S-1B-50" to "PH0015-1B-50",
+        "PHOOIS-1B-50" to "PH0015-1B-50",
+
+        "PHOO25-1B—5o" to "PH0025-1B-50",
+        "PHOO25-1B-5O" to "PH0025-1B-50",
+        "PHOO25-1B-50" to "PH0025-1B-50",
+        "PH0025-1B-5O" to "PH0025-1B-50",
+
+        "PHSOSO-1B-50" to "PH5090-1B-50",
+        "PH5OSO-1B-50" to "PH5090-1B-50",
+        "PH509O-1B-50" to "PH5090-1B-50"
+    )
 }
