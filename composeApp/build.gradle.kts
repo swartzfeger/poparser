@@ -4,7 +4,7 @@ val appVersion = "1.1.9"
 val appVendor = "Jay Swartzfeger"
 val appCopyright = "© 2026 Precision Laboratories"
 val appBaseName = "PO Parser"
-val appDisplayName = "$appBaseName $appVersion"
+val appDisplayName = appBaseName
 
 // This must stay the same for every future release of the same Windows app.
 val windowsUpgradeUuid = "8d9c2db0-3f1d-4b45-9f9d-7d7f0d6b4b2d"
