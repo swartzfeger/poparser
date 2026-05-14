@@ -21,6 +21,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
@@ -76,6 +77,7 @@ fun FrameWindowScope.MainScreen() {
     var parsedOrders by remember { mutableStateOf<List<ExportOrder>>(emptyList()) }
     var uiState by remember { mutableStateOf(UiState()) }
     var isDragOver by remember { mutableStateOf(false) }
+    var noShipVia by remember { mutableStateOf(true) }
 
     val fileParser = remember { OrderFileParser() }
     val enricher = remember { OrderEnricher() }
@@ -235,6 +237,8 @@ fun FrameWindowScope.MainScreen() {
                     FilePickerBanner(isDragOver = isDragOver)
 
                     ActionRow(
+                        noShipVia = noShipVia,
+                        onNoShipViaChange = { noShipVia = it },
                         onChooseFiles = {
                             val selected = pickOrderFiles()
                             addFiles(selected)
@@ -327,7 +331,8 @@ fun FrameWindowScope.MainScreen() {
                                         exporter.export(
                                             orders = parsedOrders,
                                             outputFile = outputFile,
-                                            orderDate = LocalDate.now()
+                                            orderDate = LocalDate.now(),
+                                            noShipVia = noShipVia
                                         )
 
                                         uiState = UiState(
@@ -473,6 +478,8 @@ private fun FilePickerBanner(isDragOver: Boolean) {
 
 @Composable
 private fun ActionRow(
+    noShipVia: Boolean,
+    onNoShipViaChange: (Boolean) -> Unit,
     onChooseFiles: () -> Unit,
     onClear: () -> Unit,
     onParse: () -> Unit,
@@ -488,6 +495,23 @@ private fun ActionRow(
 
         OutlinedButton(onClick = onClear) {
             Text("Clear Queue")
+        }
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "No Ship Via",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Switch(
+                checked = noShipVia,
+                onCheckedChange = onNoShipViaChange
+            )
         }
 
         Spacer(modifier = Modifier.width(8.dp))

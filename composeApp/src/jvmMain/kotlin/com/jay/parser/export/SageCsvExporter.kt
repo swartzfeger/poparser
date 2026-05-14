@@ -35,13 +35,22 @@ class SageCsvExporter {
         "Displayed Terms"
     )
 
-    fun export(orders: List<ExportOrder>, outputFile: File, orderDate: LocalDate = LocalDate.now()) {
-        val csv = buildCsv(orders, orderDate)
+    fun export(
+        orders: List<ExportOrder>,
+        outputFile: File,
+        orderDate: LocalDate = LocalDate.now(),
+        noShipVia: Boolean = true
+    ) {
+        val csv = buildCsv(orders, orderDate, noShipVia)
         val bytes = encodeWindows1252(csv)
         outputFile.writeBytes(bytes)
     }
 
-    fun buildCsv(orders: List<ExportOrder>, orderDate: LocalDate = LocalDate.now()): String {
+    fun buildCsv(
+        orders: List<ExportOrder>,
+        orderDate: LocalDate = LocalDate.now(),
+        noShipVia: Boolean = true
+    ): String {
         val rows = mutableListOf<List<String>>()
         rows += header
 
@@ -75,7 +84,7 @@ class SageCsvExporter {
                     distributionCount.toString(),
                     (index + 1).toString(),
                     "1",
-                    order.customer?.shipVia.orEmpty(),
+                    if (noShipVia) "" else order.customer?.shipVia.orEmpty(),
                     order.termsResolved.orEmpty()
                 )
             }
