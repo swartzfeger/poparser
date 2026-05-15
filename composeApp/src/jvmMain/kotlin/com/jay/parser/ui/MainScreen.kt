@@ -78,6 +78,7 @@ fun FrameWindowScope.MainScreen() {
     var uiState by remember { mutableStateOf(UiState()) }
     var isDragOver by remember { mutableStateOf(false) }
     var noShipVia by remember { mutableStateOf(true) }
+    var noShipTo by remember { mutableStateOf(true) }
 
     val fileParser = remember { OrderFileParser() }
     val enricher = remember { OrderEnricher() }
@@ -87,7 +88,7 @@ fun FrameWindowScope.MainScreen() {
     // ==================== MACOS RAINBOW CURSOR HELPERS ====================
     fun setBusyCursor() {
         SwingUtilities.invokeLater {
-            println("ð [CURSOR] Setting busy cursor (rainbow beachball)")
+            println("Ã°ÂÂÂ [CURSOR] Setting busy cursor (rainbow beachball)")
             val waitCursor = Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)
             window.cursor = waitCursor
             window.rootPane?.cursor = waitCursor
@@ -97,7 +98,7 @@ fun FrameWindowScope.MainScreen() {
 
     fun resetCursor() {
         SwingUtilities.invokeLater {
-            println("ð [CURSOR] Resetting to default cursor")
+            println("Ã°ÂÂÂ [CURSOR] Resetting to default cursor")
             val defaultCursor = Cursor.getDefaultCursor()
             window.cursor = defaultCursor
             window.rootPane?.cursor = defaultCursor
@@ -239,6 +240,8 @@ fun FrameWindowScope.MainScreen() {
                     ActionRow(
                         noShipVia = noShipVia,
                         onNoShipViaChange = { noShipVia = it },
+                        noShipTo = noShipTo,
+                        onNoShipToChange = { noShipTo = it },
                         onChooseFiles = {
                             val selected = pickOrderFiles()
                             addFiles(selected)
@@ -332,7 +335,8 @@ fun FrameWindowScope.MainScreen() {
                                             orders = parsedOrders,
                                             outputFile = outputFile,
                                             orderDate = LocalDate.now(),
-                                            noShipVia = noShipVia
+                                            noShipVia = noShipVia,
+                                            noShipTo = noShipTo
                                         )
 
                                         uiState = UiState(
@@ -398,9 +402,9 @@ fun FrameWindowScope.MainScreen() {
     }
 }
 
-// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 // Everything below this line is 100% your original code (no changes)
-// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 
 @Composable
 private fun HeaderSection() {
@@ -480,6 +484,8 @@ private fun FilePickerBanner(isDragOver: Boolean) {
 private fun ActionRow(
     noShipVia: Boolean,
     onNoShipViaChange: (Boolean) -> Unit,
+    noShipTo: Boolean,
+    onNoShipToChange: (Boolean) -> Unit,
     onChooseFiles: () -> Unit,
     onClear: () -> Unit,
     onParse: () -> Unit,
@@ -511,6 +517,21 @@ private fun ActionRow(
             Switch(
                 checked = noShipVia,
                 onCheckedChange = onNoShipViaChange
+            )
+        }
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "No Ship To",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Switch(
+                checked = noShipTo,
+                onCheckedChange = onNoShipToChange
             )
         }
 

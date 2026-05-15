@@ -39,9 +39,10 @@ class SageCsvExporter {
         orders: List<ExportOrder>,
         outputFile: File,
         orderDate: LocalDate = LocalDate.now(),
-        noShipVia: Boolean = true
+        noShipVia: Boolean = true,
+        noShipTo: Boolean = true
     ) {
-        val csv = buildCsv(orders, orderDate, noShipVia)
+        val csv = buildCsv(orders, orderDate, noShipVia, noShipTo)
         val bytes = encodeWindows1252(csv)
         outputFile.writeBytes(bytes)
     }
@@ -49,7 +50,8 @@ class SageCsvExporter {
     fun buildCsv(
         orders: List<ExportOrder>,
         orderDate: LocalDate = LocalDate.now(),
-        noShipVia: Boolean = true
+        noShipVia: Boolean = true,
+        noShipTo: Boolean = true
     ): String {
         val rows = mutableListOf<List<String>>()
         rows += header
@@ -62,18 +64,25 @@ class SageCsvExporter {
                 val unitPrice = negativeMoney(line.unitPriceResolved)
                 val amount = negativeMoney(line.unitPriceResolved * line.quantityForExport)
 
+                val shipToName = if (noShipTo) "" else order.shipToCustomer.orEmpty()
+                val shipToAddressLine1 = if (noShipTo) "" else order.addressLine1.orEmpty()
+                val shipToAddressLine2 = if (noShipTo) "" else order.addressLine2.orEmpty()
+                val shipToCity = if (noShipTo) "" else order.city.orEmpty()
+                val shipToState = if (noShipTo) "" else order.state.orEmpty()
+                val shipToZip = if (noShipTo) "" else order.zip.orEmpty()
+
                 rows += listOf(
                     dateString,
                     order.customer?.id.orEmpty(),
                     order.customer?.name.orEmpty(),
                     order.orderNumber,
                     order.orderNumber,
-                    order.shipToCustomer.orEmpty(),
-                    order.addressLine1.orEmpty(),
-                    order.addressLine2.orEmpty(),
-                    order.city.orEmpty(),
-                    order.state.orEmpty(),
-                    order.zip.orEmpty(),
+                    shipToName,
+                    shipToAddressLine1,
+                    shipToAddressLine2,
+                    shipToCity,
+                    shipToState,
+                    shipToZip,
                     line.sku,
                     line.description,
                     formatQuantity(line.quantityForExport),
