@@ -16,8 +16,10 @@ class EcolabLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
                 (
                         text.contains("PONUMBER") ||
                                 text.contains("FOODSAFETYSPECIALTIESUS75") ||
+                                text.contains("ECOLABGATEWAYEQUIPECCCUS82") ||
                                 text.contains("SUPPLIERMATL") ||
-                                text.contains("2152RIVERBENDWESTDRIVE")
+                                text.contains("2152RIVERBENDWESTDRIVE") ||
+                                text.contains("1630APEXDR")
                         )
     }
 
@@ -26,14 +28,18 @@ class EcolabLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
 
         var score = 0
         if (text.contains("ECOLABPRODUCTIONLLC")) score += 100
-        if (text.contains("PONUMBER5504330257")) score += 90
+        if (text.contains("PONUMBER")) score += 60
         if (text.contains("FOODSAFETYSPECIALTIESUS75")) score += 80
+        if (text.contains("ECOLABGATEWAYEQUIPECCCUS82")) score += 80
         if (text.contains("2152RIVERBENDWESTDRIVE")) score += 70
+        if (text.contains("1630APEXDR")) score += 70
         if (text.contains("FORTWORTHTX76118")) score += 70
+        if (text.contains("BELOITWI53511")) score += 70
         if (text.contains("PAYMENTTERMSDUEIN60DAYSEOM1D")) score += 40
         if (text.contains("SUPPLIERMATL")) score += 60
         if (text.contains("CLK50V100")) score += 40
         if (text.contains("CHL30025V100")) score += 40
+        if (text.contains("LAC1V100")) score += 40
 
         return score
     }
@@ -53,7 +59,7 @@ class EcolabLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
             city = shipTo.city,
             state = shipTo.state,
             zip = shipTo.zip,
-            terms = mappedCustomer?.terms,
+            terms = mappedCustomer?.terms ?: parseTerms(clean),
             items = parseItems(clean)
         )
     }
@@ -76,13 +82,24 @@ class EcolabLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
             if (inline != null) {
                 return inline.groupValues[1].trim()
             }
+
+            val compactLine = compact(normalized)
+            Regex("""PONUMBER(\d{8,12})""")
+                .find(compactLine)
+                ?.let { return it.groupValues[1].trim() }
         }
 
         val joined = lines.joinToString(" ")
-        return Regex(
+        Regex(
             """PO\s*Number\s*[:#]?\s*(\d{8,12})""",
             RegexOption.IGNORE_CASE
-        ).find(joined)?.groupValues?.get(1)?.trim()
+        ).find(joined)?.let { return it.groupValues[1].trim() }
+
+        return Regex("""PONUMBER(\d{8,12})""")
+            .find(compact(joined))
+            ?.groupValues
+            ?.get(1)
+            ?.trim()
     }
 
     private fun parseTerms(lines: List<String>): String? {
@@ -128,6 +145,36 @@ class EcolabLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
     }
 
     private fun parseShipTo(lines: List<String>): ShipToBlock {
+        val fullCompact = compact(lines.joinToString(" "))
+
+        if (fullCompact.contains("ECOLABGATEWAYEQUIPECCCUS82") ||
+            fullCompact.contains("1630APEXDR") ||
+            fullCompact.contains("BELOITWI53511")
+        ) {
+            return ShipToBlock(
+                shipToCustomer = "Ecolab - Gateway Equip ECCC US82",
+                addressLine1 = "1630 APEX DR",
+                addressLine2 = null,
+                city = "BELOIT",
+                state = "WI",
+                zip = "53511"
+            )
+        }
+
+        if (fullCompact.contains("FOODSAFETYSPECIALTIESUS75") ||
+            fullCompact.contains("2152RIVERBENDWESTDRIVE") ||
+            fullCompact.contains("FORTWORTHTX76118")
+        ) {
+            return ShipToBlock(
+                shipToCustomer = "Food Safety Specialties US75",
+                addressLine1 = "2152 Riverbend West Drive",
+                addressLine2 = null,
+                city = "Fort Worth",
+                state = "TX",
+                zip = "76118"
+            )
+        }
+
         var shipToCustomer: String? = null
         var addressLine1: String? = null
         var addressLine2: String? = null
@@ -152,19 +199,29 @@ class EcolabLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
                 continue
             }
 
+            if (shipToCustomer == null && compactLine.contains("ECOLABGATEWAYEQUIPECCCUS82")) {
+                shipToCustomer = "Ecolab - Gateway Equip ECCC US82"
+                continue
+            }
+
             if (addressLine1 == null && compactLine.contains("2152RIVERBENDWESTDRIVE")) {
                 addressLine1 = "2152 Riverbend West Drive"
                 continue
             }
 
+            if (addressLine1 == null && compactLine.contains("1630APEXDR")) {
+                addressLine1 = "1630 APEX DR"
+                continue
+            }
+
             val cszMatch = Regex(
-                """^(Fort\s+Worth),\s*(TX)\s+(\d{5}(?:-\d{4})?)$""",
+                """^(.*?),\s*([A-Z]{2})\s+(\d{5}(?:-\d{4})?)$""",
                 RegexOption.IGNORE_CASE
             ).find(trimmed)
 
             if (cszMatch != null) {
-                city = "Fort Worth"
-                state = "TX"
+                city = normalizeCity(cszMatch.groupValues[1].trim())
+                state = cszMatch.groupValues[2].uppercase().trim()
                 zip = cszMatch.groupValues[3].trim()
                 continue
             }
@@ -174,29 +231,11 @@ class EcolabLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
                 state = "TX"
                 zip = "76118"
             }
-        }
 
-        if (shipToCustomer == null) {
-            shipToCustomer = lines.firstOrNull {
-                compact(it).contains("FOODSAFETYSPECIALTIESUS75")
-            }?.let { "Food Safety Specialties US75" }
-        }
-
-        if (addressLine1 == null) {
-            addressLine1 = lines.firstOrNull {
-                compact(it).contains("2152RIVERBENDWESTDRIVE")
-            }?.let { "2152 Riverbend West Drive" }
-        }
-
-        if (city == null || state == null || zip == null) {
-            val cszLine = lines.firstOrNull {
-                compact(it).contains("FORTWORTHTX76118")
-            }
-
-            if (cszLine != null) {
-                city = "Fort Worth"
-                state = "TX"
-                zip = "76118"
+            if (city == null && state == null && zip == null && compactLine.contains("BELOITWI53511")) {
+                city = "BELOIT"
+                state = "WI"
+                zip = "53511"
             }
         }
 
@@ -218,7 +257,7 @@ class EcolabLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
             val current = lines[i].replace(Regex("""\s+"""), " ").trim()
 
             val skuMatch = Regex(
-                """Supplier\s*Mat.?l\s*#:\s*([A-Z0-9-]+)""",
+                """Supplier\s*Mat.?l\s*#:\s*(?:VENDOR#\s*)?([A-Z0-9-]+)""",
                 RegexOption.IGNORE_CASE
             ).find(current) ?: continue
 
@@ -228,32 +267,53 @@ class EcolabLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
             var unitPrice: Double? = null
             var description: String? = null
 
-            for (j in (i - 1) downTo maxOf(0, i - 3)) {
+            for (j in (i - 1) downTo maxOf(0, i - 4)) {
                 val row = lines[j].replace(Regex("""\s+"""), " ").trim()
                 if (row.isBlank()) continue
                 if (row.contains("Supplier", ignoreCase = true)) continue
                 if (row.contains("Notes", ignoreCase = true)) continue
+                if (row.contains("Description", ignoreCase = true) && row.contains("Item", ignoreCase = true)) continue
 
                 val rowMatch = Regex(
-                    """^\d+\s+([A-Z0-9-]+)\s+(\d+(?:,\d{3})?)\s+[A-Z][a-z]{2}\d{1,2},\s+(\d+(?:,\d{3})?)\s+\$([\d,]+\.\d{2}).*$""",
+                    """^\d+\s+(.+?)\s+(\d{1,3}(?:,\d{3})+|\d+)\s+[A-Z][a-z]{2}\s*\d{1,2},\s+(\d{1,3}(?:,\d{3})+|\d+)\s+\$([\d,]+\.\d{2})(?:\s+(\d{1,3}(?:,\d{3})+|\d+))?.*$""",
                     RegexOption.IGNORE_CASE
                 ).find(row)
 
                 if (rowMatch != null) {
                     description = rowMatch.groupValues[1].trim()
                     quantity = rowMatch.groupValues[2].replace(",", "").toDoubleOrNull()
-                    unitPrice = rowMatch.groupValues[4].replace(",", "").toDoubleOrNull()
+
+                    val price = rowMatch.groupValues[4].replace(",", "").toDoubleOrNull()
+                    val per = rowMatch.groupValues.getOrNull(5)
+                        ?.replace(",", "")
+                        ?.toDoubleOrNull()
+
+                    unitPrice = if (price != null && per != null && per > 1.0) {
+                        price / per
+                    } else {
+                        price
+                    }
                     break
                 }
 
-                val fallbackQty = Regex("""\s(\d+(?:,\d{3})?)\s+[A-Z][a-z]{2}\d{1,2},""").find(row)
-                val fallbackPrice = Regex("""\$([\d,]+\.\d{2})""").find(row)
-                val fallbackDesc = Regex("""^\d+\s+([A-Z0-9-]+)""").find(row)
+                val fallbackQty = Regex("""\s(\d{1,3}(?:,\d{3})+|\d+)\s+[A-Z][a-z]{2}\s*\d{1,2},""").find(row)
+                val fallbackPrice = Regex("""\$([\d,]+\.\d{2})(?:\s+(\d{1,3}(?:,\d{3})+|\d+))?""").find(row)
+                val fallbackDesc = Regex("""^\d+\s+(.+?)\s+(\d{1,3}(?:,\d{3})+|\d+)\s+[A-Z][a-z]{2}""").find(row)
 
                 if (fallbackQty != null && fallbackPrice != null && fallbackDesc != null) {
                     description = fallbackDesc.groupValues[1].trim()
                     quantity = fallbackQty.groupValues[1].replace(",", "").toDoubleOrNull()
-                    unitPrice = fallbackPrice.groupValues[1].replace(",", "").toDoubleOrNull()
+
+                    val price = fallbackPrice.groupValues[1].replace(",", "").toDoubleOrNull()
+                    val per = fallbackPrice.groupValues.getOrNull(2)
+                        ?.replace(",", "")
+                        ?.toDoubleOrNull()
+
+                    unitPrice = if (price != null && per != null && per > 1.0) {
+                        price / per
+                    } else {
+                        price
+                    }
                     break
                 }
             }
@@ -278,6 +338,14 @@ class EcolabLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         }
 
         return items
+    }
+
+    private fun normalizeCity(value: String): String {
+        return when (compact(value)) {
+            "FORTWORTH" -> "Fort Worth"
+            "BELOIT" -> "BELOIT"
+            else -> value
+        }
     }
 
     private fun compact(value: String): String {

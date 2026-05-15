@@ -201,6 +201,7 @@ class OrderEnricher {
             "CHARLOTTE PRODUCTS",
             "TCD PARTS",
             "DRAKE SPECIALITIES",
+            "ECOLAB INC",
             "EISCO SCI",
             "MIROIL USA, LLC",
             "NATIONAL CHEMICALS",
