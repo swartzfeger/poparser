@@ -136,6 +136,18 @@ class OrderEnricher {
         val customerId = resolvedCustomer?.id?.uppercase().orEmpty()
         val normalizedSku = sku.uppercase().trim()
 
+        /*
+         * Ecolab sends CLK-50V-100 in two different quantity styles:
+         * - CS / Box POs: keep the visible ordered quantity.
+         * - PCE / Piece POs: convert pieces into 50-count boxes/cases.
+         *
+         * ParsedPdfItem does not currently carry the PO UOM text, so this uses
+         * the known piece-style quantity pattern from Taulia/Ecolab PCE orders.
+         */
+        if (customerId == "ECOLAB INC" && normalizedSku == "CLK-50V-100" && rawQuantity >= 1000.0) {
+            return rawQuantity / 50.0
+        }
+
         if (!isUomCustomer(customerId)) {
             return rawQuantity
         }
@@ -201,7 +213,6 @@ class OrderEnricher {
             "CHARLOTTE PRODUCTS",
             "TCD PARTS",
             "DRAKE SPECIALITIES",
-            "ECOLAB INC",
             "EISCO SCI",
             "MIROIL USA, LLC",
             "NATIONAL CHEMICALS",

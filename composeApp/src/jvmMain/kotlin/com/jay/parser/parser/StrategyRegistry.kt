@@ -53,6 +53,7 @@ class StrategyRegistry(
                     PinetreeInstrumentsLayoutStrategy(),
                     PlantProductsLayoutStrategy(),
                     PrecisionEuropeLayoutStrategy(),
+                    ProlabScientificLayoutStrategy(),
                     QualityScienceLabsLayoutStrategy(),
                     SanitechLayoutStrategy(),
                     SchoolSpecialtyLayoutStrategy(),
