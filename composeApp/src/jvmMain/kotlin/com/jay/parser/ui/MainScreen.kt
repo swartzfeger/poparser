@@ -21,7 +21,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
@@ -72,14 +71,14 @@ data class UiState(
 )
 
 @Composable
-fun FrameWindowScope.MainScreen() {
+fun FrameWindowScope.MainScreen(
+    noShipVia: Boolean,
+    noShipTo: Boolean
+) {
     val queuedFiles = remember { mutableStateListOf<File>() }
     var parsedOrders by remember { mutableStateOf<List<ExportOrder>>(emptyList()) }
     var uiState by remember { mutableStateOf(UiState()) }
     var isDragOver by remember { mutableStateOf(false) }
-    var noShipVia by remember { mutableStateOf(true) }
-    var noShipTo by remember { mutableStateOf(true) }
-
     val fileParser = remember { OrderFileParser() }
     val enricher = remember { OrderEnricher() }
     val exporter = remember { SageCsvExporter() }
@@ -238,10 +237,6 @@ fun FrameWindowScope.MainScreen() {
                     FilePickerBanner(isDragOver = isDragOver)
 
                     ActionRow(
-                        noShipVia = noShipVia,
-                        onNoShipViaChange = { noShipVia = it },
-                        noShipTo = noShipTo,
-                        onNoShipToChange = { noShipTo = it },
                         onChooseFiles = {
                             val selected = pickOrderFiles()
                             addFiles(selected)
@@ -482,10 +477,6 @@ private fun FilePickerBanner(isDragOver: Boolean) {
 
 @Composable
 private fun ActionRow(
-    noShipVia: Boolean,
-    onNoShipViaChange: (Boolean) -> Unit,
-    noShipTo: Boolean,
-    onNoShipToChange: (Boolean) -> Unit,
     onChooseFiles: () -> Unit,
     onClear: () -> Unit,
     onParse: () -> Unit,
@@ -501,38 +492,6 @@ private fun ActionRow(
 
         OutlinedButton(onClick = onClear) {
             Text("Clear Queue")
-        }
-
-        Spacer(modifier = Modifier.width(8.dp))
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "No Ship Via",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Switch(
-                checked = noShipVia,
-                onCheckedChange = onNoShipViaChange
-            )
-        }
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "No Ship To",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Switch(
-                checked = noShipTo,
-                onCheckedChange = onNoShipToChange
-            )
         }
 
         Spacer(modifier = Modifier.width(8.dp))

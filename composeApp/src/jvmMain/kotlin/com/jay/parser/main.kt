@@ -1,12 +1,16 @@
 package com.jay.parser
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.getValue
@@ -23,7 +27,7 @@ import androidx.compose.ui.window.rememberWindowState
 import com.jay.parser.ui.MainScreen
 
 private const val APP_NAME = "PO Parser"
-private const val APP_VERSION = "1.2.4"
+private const val APP_VERSION = "1.2.5"
 private const val APP_VENDOR = "Jay Swartzfeger"
 private const val APP_COPYRIGHT = "© 2026 Precision Laboratories"
 
@@ -46,20 +50,37 @@ fun main() = application {
         state = windowState
     ) {
         var showAbout by remember { mutableStateOf(false) }
+        var showSettings by remember { mutableStateOf(false) }
+        var noShipVia by remember { mutableStateOf(false) }
+        var noShipTo by remember { mutableStateOf(false) }
 
         MaterialTheme {
             Surface(modifier = Modifier.fillMaxSize()) {
                 Box(modifier = Modifier.fillMaxSize()) {
-                    MainScreen()
+                    MainScreen(
+                        noShipVia = noShipVia,
+                        noShipTo = noShipTo
+                    )
 
-                    Text(
-                        text = "About…",
+                    Column(
                         modifier = Modifier
                             .align(Alignment.TopEnd)
-                            .padding(12.dp)
-                            .clickable { showAbout = true },
-                        color = MaterialTheme.colorScheme.primary
-                    )
+                            .padding(12.dp),
+                        horizontalAlignment = Alignment.End,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = "About…",
+                            modifier = Modifier.clickable { showAbout = true },
+                            color = MaterialTheme.colorScheme.primary
+                        )
+
+                        Text(
+                            text = "⚙ Settings",
+                            modifier = Modifier.clickable { showSettings = true },
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
 
                     if (showAbout) {
                         AlertDialog(
@@ -83,6 +104,60 @@ fun main() = application {
                             },
                             confirmButton = {
                                 TextButton(onClick = { showAbout = false }) {
+                                    Text("OK")
+                                }
+                            }
+                        )
+                    }
+
+                    if (showSettings) {
+                        AlertDialog(
+                            onDismissRequest = { showSettings = false },
+                            title = { Text("Settings") },
+                            text = {
+                                Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                                    Text(
+                                        text = "Export options",
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                    ) {
+                                        Switch(
+                                            checked = noShipVia,
+                                            onCheckedChange = { noShipVia = it }
+                                        )
+                                        Column {
+                                            Text("No Ship Via")
+                                            Text(
+                                                text = "Leave Ship Via blank in the CSV export.",
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                    }
+
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                    ) {
+                                        Switch(
+                                            checked = noShipTo,
+                                            onCheckedChange = { noShipTo = it }
+                                        )
+                                        Column {
+                                            Text("No Ship To")
+                                            Text(
+                                                text = "Leave Ship To name and address fields blank in the CSV export.",
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                    }
+                                }
+                            },
+                            confirmButton = {
+                                TextButton(onClick = { showSettings = false }) {
                                     Text("OK")
                                 }
                             }
