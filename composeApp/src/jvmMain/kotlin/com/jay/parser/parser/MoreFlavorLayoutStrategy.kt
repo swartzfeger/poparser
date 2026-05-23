@@ -13,7 +13,8 @@ class MoreFlavorLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         return text.contains("MOREFLAVOR") ||
                 text.contains("PURCHASING@MOREFLAVOR.COM") ||
                 text.contains("16335JOHNGLENNPARKWAY") ||
-                text.contains("PONUM:133451")
+                text.contains("ACCOUNT#:PRELAB") ||
+                text.contains("PONUM:") && text.contains("PRELAB")
     }
 
     override fun score(lines: List<String>): Int {
@@ -23,6 +24,7 @@ class MoreFlavorLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         if (text.contains("MOREFLAVOR")) score += 120
         if (text.contains("PURCHASING@MOREFLAVOR.COM")) score += 80
         if (text.contains("16335JOHNGLENNPARKWAY")) score += 80
+        if (text.contains("ACCOUNT#:PRELAB")) score += 70
         if (text.contains("VNDR-1%10NET30")) score += 50
         if (text.contains("PONUM:")) score += 40
 
@@ -32,10 +34,11 @@ class MoreFlavorLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
     override fun parse(lines: List<String>): ParsedPdfFields {
         val clean = nonBlankLines(lines).map { it.replace(Regex("""\s+"""), " ").trim() }
         val shipTo = parseShipTo(clean)
+        val orderNumber = parseOrderNumber(clean)
 
         return ParsedPdfFields(
             customerName = "MORE FLAVOR",
-            orderNumber = parseOrderNumber(clean),
+            orderNumber = orderNumber,
             shipToCustomer = shipTo.shipToCustomer,
             addressLine1 = shipTo.addressLine1,
             addressLine2 = shipTo.addressLine2,
@@ -55,7 +58,12 @@ class MoreFlavorLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
             ?.groupValues?.get(1)
             ?.let { return it }
 
-        Regex("""PO#\s*:?\s*(\d+)""", RegexOption.IGNORE_CASE)
+        Regex("""Purchase\s+Order:\s*(\d+)""", RegexOption.IGNORE_CASE)
+            .find(joined)
+            ?.groupValues?.get(1)
+            ?.let { return it }
+
+        Regex("""PO\s*#\s*:?[\sA-Z]*?(\d{6})""", RegexOption.IGNORE_CASE)
             .find(joined)
             ?.groupValues?.get(1)
             ?.let { return it }
@@ -75,23 +83,35 @@ class MoreFlavorLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
     private fun parseShipTo(lines: List<String>): ShipToBlock {
         val idx = lines.indexOfFirst { normalize(it).contains("SHIPPINGADDRESS:") }
         if (idx >= 0) {
+            val window = lines.drop(idx).take(12).joinToString(" ")
+            val normalized = normalize(window)
+
+            if (normalized.contains("16335JOHNGLENN") || normalized.contains("NEWCENTURY,KS66031")) {
+                return defaultShipTo()
+            }
+
             val company = lines.getOrNull(idx + 1)?.trim()
             val addr1 = lines.getOrNull(idx + 2)?.trim()
             val addr2 = lines.getOrNull(idx + 3)?.trim()
             val cityStateZipLine = lines.getOrNull(idx + 4)?.trim()
-
             val csz = parseCityStateZip(cityStateZipLine)
 
-            return ShipToBlock(
-                shipToCustomer = pretty(company),
-                addressLine1 = pretty(addr1),
-                addressLine2 = pretty(addr2),
-                city = csz?.city,
-                state = csz?.state,
-                zip = csz?.zip
-            )
+            if (company != null && addr1 != null && csz != null) {
+                return ShipToBlock(
+                    shipToCustomer = pretty(company),
+                    addressLine1 = pretty(addr1),
+                    addressLine2 = pretty(addr2),
+                    city = csz.city,
+                    state = csz.state,
+                    zip = csz.zip
+                )
+            }
         }
 
+        return defaultShipTo()
+    }
+
+    private fun defaultShipTo(): ShipToBlock {
         return ShipToBlock(
             shipToCustomer = "MoreFlavor, Inc.",
             addressLine1 = "16335 John Glenn Parkway",
@@ -124,21 +144,39 @@ class MoreFlavorLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
     private fun parseItems(lines: List<String>): List<ParsedPdfItem> {
         val items = mutableListOf<ParsedPdfItem>()
         val seen = mutableSetOf<String>()
+
+        parseDirectItemRows(lines, items, seen)
+        parseDescriptionAnchoredRows(lines, items, seen)
+        return items
+    }
+
+    private fun parseDirectItemRows(
+        lines: List<String>,
+        items: MutableList<ParsedPdfItem>,
+        seen: MutableSet<String>
+    ) {
         var i = 0
 
         while (i < lines.size) {
             val line = lines[i].trim()
-
             val match = Regex(
                 """^([A-Z0-9-]+)\s+(.+?)\s+([\d.]+)\s+\$([\d.]+)\s+\$([\d,]+\.\d{2})$""",
                 RegexOption.IGNORE_CASE
             ).find(line)
 
-            if (match != null && looksLikeSku(match.groupValues[1])) {
-                val sku = match.groupValues[1].trim().uppercase()
+            val rawSku = match?.groupValues?.getOrNull(1)?.trim()
+            val sku = rawSku?.let { normalizeMoreFlavorSku(it, line) }
+
+            if (match != null && sku != null && looksLikeSku(sku)) {
                 val firstDesc = match.groupValues[2].trim()
-                val quantity = match.groupValues[3].toDoubleOrNull()
+                val parsedQuantity = match.groupValues[3].toDoubleOrNull()
                 val unitPrice = match.groupValues[4].toDoubleOrNull()
+                val extendedTotal = match.groupValues[5].replace(",", "").toDoubleOrNull()
+                val quantity = if (unitPrice != null && extendedTotal != null) {
+                    calculateQuantityFromTotal(extendedTotal, unitPrice) ?: parsedQuantity
+                } else {
+                    parsedQuantity
+                }
 
                 if (quantity != null && unitPrice != null) {
                     val descParts = mutableListOf(firstDesc)
@@ -151,21 +189,14 @@ class MoreFlavorLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
                             continue
                         }
 
-                        if (looksLikeFooter(next) || looksLikeItemStart(next)) break
+                        if (looksLikeFooter(next) || looksLikeItemStart(next) || resolveSkuFromLine(next) != null) break
 
                         if (next.equals(sku, ignoreCase = true) || next.startsWith("$sku ", ignoreCase = true)) {
                             j++
                             continue
                         }
 
-                        if (
-                            next.equals("Note:", ignoreCase = true) ||
-                            next.startsWith("*Perishable*", ignoreCase = true) ||
-                            next.startsWith("SHELF LIFE", ignoreCase = true) ||
-                            next.startsWith("OR 1 YEAR", ignoreCase = true) ||
-                            next.startsWith("available,", ignoreCase = true) ||
-                            next.contains("Purchasing@MoreFlavor.com", ignoreCase = true)
-                        ) {
+                        if (looksLikePerishableNote(next)) {
                             j++
                             continue
                         }
@@ -174,23 +205,14 @@ class MoreFlavorLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
                         j++
                     }
 
-                    val description = ItemMapper.getItemDescription(sku).ifBlank {
-                        descParts.joinToString(" ")
-                            .replace(Regex("""\s+"""), " ")
-                            .trim()
-                    }
-
-                    val key = "$sku|$quantity|$unitPrice"
-                    if (seen.add(key)) {
-                        items.add(
-                            item(
-                                sku = sku,
-                                description = description,
-                                quantity = quantity,
-                                unitPrice = unitPrice
-                            )
-                        )
-                    }
+                    addMoreFlavorItem(
+                        items = items,
+                        seen = seen,
+                        sku = sku,
+                        fallbackDescription = descParts.joinToString(" "),
+                        quantity = quantity,
+                        unitPrice = unitPrice
+                    )
 
                     i = j
                     continue
@@ -199,52 +221,221 @@ class MoreFlavorLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
 
             i++
         }
-
-        recoverMissingMoreFlavorItems(lines, items, seen)
-
-        return items
     }
 
-    private fun recoverMissingMoreFlavorItems(
+    private fun parseDescriptionAnchoredRows(
         lines: List<String>,
         items: MutableList<ParsedPdfItem>,
         seen: MutableSet<String>
     ) {
-        val joined = lines.joinToString("\n")
+        for (line in lines) {
+            val sku = resolveSkuFromLine(line) ?: continue
+            val moneyValues = extractMoneyValues(line)
 
-        if (items.size >= 2) return
+            if (moneyValues.size < 2) continue
 
-        val foundSkus = Regex("""PH\d{4}-1V-100""", RegexOption.IGNORE_CASE)
-            .findAll(joined)
-            .map { it.value.uppercase() }
-            .distinct()
+            val unitPrice = moneyValues[moneyValues.size - 2]
+            val extendedTotal = moneyValues.last()
+            val quantity = calculateQuantityFromTotal(extendedTotal, unitPrice)
+                ?: extractQuantityBeforeUnitPrice(line, unitPrice)
+                ?: continue
+
+            addMoreFlavorItem(
+                items = items,
+                seen = seen,
+                sku = sku,
+                fallbackDescription = descriptionFromLine(line, sku),
+                quantity = quantity,
+                unitPrice = unitPrice
+            )
+        }
+    }
+
+
+    private fun extractMoneyValues(line: String): List<Double> {
+        return Regex("""\$[\s_]*[\d_,]+(?:[._]\d{2})?""")
+            .findAll(line)
+            .mapNotNull { match ->
+                match.value
+                    .replace("$", "")
+                    .replace("_", "")
+                    .replace(",", "")
+                    .replace(" ", "")
+                    .trim()
+                    .toDoubleOrNull()
+            }
+            .toList()
+    }
+
+    private fun calculateQuantityFromTotal(total: Double, unitPrice: Double): Double? {
+        if (unitPrice <= 0.0 || total <= 0.0) return null
+
+        val calculated = total / unitPrice
+        val rounded = kotlin.math.round(calculated)
+
+        return if (rounded in 1.0..10000.0 && kotlin.math.abs(calculated - rounded) <= 0.05) {
+            rounded
+        } else {
+            null
+        }
+    }
+
+    private fun extractQuantityBeforeUnitPrice(line: String, unitPrice: Double): Double? {
+        val firstDollarIndex = line.indexOf('$')
+        if (firstDollarIndex <= 0) return null
+
+        val beforeMoney = line.substring(0, firstDollarIndex)
+            .replace("_", " ")
+            .replace("|", " ")
+            .replace(Regex("""\s+"""), " ")
+            .trim()
+
+        val numericValues = Regex("""\d+(?:\.\d+)?""")
+            .findAll(beforeMoney)
+            .mapNotNull { it.value.toDoubleOrNull() }
             .toList()
 
-        for (sku in foundSkus) {
-            if (items.any { it.sku.equals(sku, ignoreCase = true) }) continue
+        if (numericValues.isEmpty()) return null
 
-            val quantity = when (sku) {
-                "PH2844-1V-100" -> 60.0
-                "PH4662-1V-100" -> 80.0
-                else -> null
-            }
+        val plausible = numericValues
+            .filter { it in 1.0..10000.0 }
+            .filterNot { it == unitPrice }
 
-            val unitPrice = 7.50
+        return plausible.lastOrNull()
+    }
 
-            if (quantity != null) {
-                val key = "$sku|$quantity|$unitPrice"
-                if (seen.add(key)) {
-                    items.add(
-                        item(
-                            sku = sku,
-                            description = ItemMapper.getItemDescription(sku).ifBlank { sku },
-                            quantity = quantity,
-                            unitPrice = unitPrice
-                        )
-                    )
-                }
-            }
+    private fun resolveSkuFromLine(line: String): String? {
+        val upper = line.uppercase()
+        val compact = normalizeForSku(line)
+        val lettersAndNumbers = upper
+            .replace(Regex("""[^A-Z0-9]"""), "")
+            .replace("O", "0")
+            .replace("I", "1")
+            .replace("L", "1")
+
+        val readableRangeText = upper
+            .replace("_", "")
+            .replace(" ", "")
+            .replace("â", "-")
+
+        Regex("""PH[O0]?114-1B-50""", RegexOption.IGNORE_CASE)
+            .find(upper)
+            ?.let { return "PH0114-1B-50" }
+
+        Regex("""PH0114-1B-50""", RegexOption.IGNORE_CASE)
+            .find(upper)
+            ?.let { return "PH0114-1B-50" }
+
+        Regex("""PH2844-1V-100""", RegexOption.IGNORE_CASE)
+            .find(upper)
+            ?.let { return "PH2844-1V-100" }
+
+        Regex("""PH4662-1V-100""", RegexOption.IGNORE_CASE)
+            .find(upper)
+            ?.let { return "PH4662-1V-100" }
+
+        if (
+            compact.contains("PH2844") ||
+            compact.contains("PH28") ||
+            upper.contains("2.8-4.4") ||
+            readableRangeText.contains("2.8-4.4") ||
+            lettersAndNumbers.contains("PH28441V100")
+        ) {
+            return "PH2844-1V-100"
         }
+
+        if (
+            compact.contains("PH4662") ||
+            compact.contains("PH46") ||
+            upper.contains("4.6-6.2") ||
+            readableRangeText.contains("4.6-6.2") ||
+            lettersAndNumbers.contains("PH46621V100")
+        ) {
+            return "PH4662-1V-100"
+        }
+
+        if (
+            upper.contains("PH PAPER", ignoreCase = true) ||
+            upper.contains("PH PAP", ignoreCase = true) ||
+            upper.contains("1 TO 14", ignoreCase = true) ||
+            upper.contains("1-14", ignoreCase = true) ||
+            lettersAndNumbers.contains("PHPAPER") ||
+            lettersAndNumbers.contains("1T014") ||
+            lettersAndNumbers.contains("PACK0F50STRIPS") ||
+            compact.contains("PH0114") ||
+            compact.contains("PH01141B50")
+        ) {
+            return "PH0114-1B-50"
+        }
+
+        return null
+    }
+
+    private fun normalizeMoreFlavorSku(rawSku: String, fullLine: String): String? {
+        val upperLine = fullLine.uppercase()
+        val cleaned = rawSku.uppercase()
+            .replace("O", "0")
+            .replace(Regex("""[^A-Z0-9-]"""), "")
+        val readableLine = upperLine
+            .replace("_", "")
+            .replace(" ", "")
+            .replace("â", "-")
+
+        return when {
+            cleaned == "PH01141B50" ||
+                    cleaned == "PH01141B5O" ||
+                    cleaned == "PH01141BSO" -> "PH0114-1B-50"
+
+            rawSku.uppercase().startsWith("PHO114", ignoreCase = true) -> "PH0114-1B-50"
+            rawSku.uppercase().startsWith("PH0114", ignoreCase = true) -> "PH0114-1B-50"
+            rawSku.uppercase().startsWith("PH2844", ignoreCase = true) -> "PH2844-1V-100"
+            rawSku.uppercase().startsWith("PH4662", ignoreCase = true) -> "PH4662-1V-100"
+
+            upperLine.contains("2.8-4.4") || readableLine.contains("2.8-4.4") -> "PH2844-1V-100"
+            upperLine.contains("4.6-6.2") || readableLine.contains("4.6-6.2") -> "PH4662-1V-100"
+            upperLine.contains("PH PAPER") || upperLine.contains("1 TO 14") -> "PH0114-1B-50"
+
+            looksLikeSku(rawSku) -> rawSku.uppercase()
+            else -> null
+        }
+    }
+
+    private fun descriptionFromLine(line: String, sku: String): String {
+        val beforeQuantity = line.substringBefore("$")
+            .replace(sku, "", ignoreCase = true)
+            .replace("PHO114-1B-50", "", ignoreCase = true)
+            .replace("PH0114-1B-50", "", ignoreCase = true)
+            .replace("PH2844-1V-100", "", ignoreCase = true)
+            .replace("PH4662-1V-100", "", ignoreCase = true)
+            .replace(Regex("""\s+\d+(?:\.\d+)?\s*$"""), "")
+            .replace(Regex("""\s+"""), " ")
+            .trim()
+
+        return beforeQuantity.ifBlank { sku }
+    }
+
+    private fun addMoreFlavorItem(
+        items: MutableList<ParsedPdfItem>,
+        seen: MutableSet<String>,
+        sku: String,
+        fallbackDescription: String,
+        quantity: Double,
+        unitPrice: Double
+    ) {
+        val normalizedSku = normalizeMoreFlavorSku(sku, fallbackDescription) ?: sku.uppercase()
+        val key = "$normalizedSku|$quantity|$unitPrice"
+        if (!seen.add(key)) return
+
+        items.add(
+            item(
+                sku = normalizedSku,
+                description = ItemMapper.getItemDescription(normalizedSku).ifBlank {
+                    fallbackDescription.replace(Regex("""\s+"""), " ").trim().ifBlank { normalizedSku }
+                },
+                quantity = quantity,
+                unitPrice = unitPrice
+            )
+        )
     }
 
     private fun looksLikeSku(value: String): Boolean {
@@ -256,12 +447,14 @@ class MoreFlavorLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         return Regex(
             """^[A-Z0-9]+(?:-[A-Z0-9]+)+\s+.+\s+[\d.]+\s+\$[\d.]+\s+\$[\d,]+\.\d{2}$""",
             RegexOption.IGNORE_CASE
-        ).containsMatchIn(trimmed)
+        ).containsMatchIn(trimmed) || resolveSkuFromLine(trimmed) != null && trimmed.contains("$")
     }
 
     private fun looksLikeFooter(line: String): Boolean {
         val text = normalize(line)
         return text.startsWith("TOTAL:") ||
+                text.startsWith("TOTA:") ||
+                text.startsWith("TOTALS") ||
                 text.startsWith("NOTE:") ||
                 text.startsWith("*PERISHABLE*") ||
                 text.startsWith("SHELFLIFE") ||
@@ -271,6 +464,17 @@ class MoreFlavorLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
                 text.startsWith("PLEASEHELPUSVERIFY") ||
                 text.startsWith("THANKYOUSOMUCH") ||
                 text.startsWith("BESTREGARDS")
+    }
+
+    private fun looksLikePerishableNote(line: String): Boolean {
+        val text = normalize(line)
+        return text.contains("*PERISHABLE*") ||
+                text.contains("SHELFLIFE") ||
+                text.contains("OR1YEAR") ||
+                text.contains("OLDERSTOCK") ||
+                text.contains("PURCHASING@MOREFLAVOR.COM") ||
+                text.contains("CURRENTSTOCKAGE") ||
+                text.startsWith("NOTE:")
     }
 
     private fun pretty(value: String?): String? {
@@ -288,6 +492,15 @@ class MoreFlavorLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
             .trim()
     }
 
+    private fun normalizeForSku(text: String): String {
+        return text.uppercase()
+            .replace("O", "0")
+            .replace("I", "1")
+            .replace("L", "1")
+            .replace(Regex("""[^A-Z0-9.\-]"""), "")
+            .trim()
+    }
+
     private data class ShipToBlock(
         val shipToCustomer: String?,
         val addressLine1: String?,
@@ -302,4 +515,6 @@ class MoreFlavorLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         val state: String,
         val zip: String
     )
+
+
 }
