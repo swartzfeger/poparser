@@ -60,6 +60,7 @@ class StrategyRegistry(
                     ScienceFirstLayoutStrategy(),
                     SensonicsIntlLayoutStrategy(),
                     TcdPartsLayoutStrategy(),
+                    TsaInvoiceLayoutStrategy(),
                     UnipakLayoutStrategy(),
                     UsaBlueBookLayoutStrategy(),
                     VikingPureLayoutStrategy(),

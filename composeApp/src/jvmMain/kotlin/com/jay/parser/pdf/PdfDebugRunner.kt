@@ -6,16 +6,17 @@ import java.io.File
 
 fun main() {
     val testFiles = listOf(
-        "testpdf/Precision 2026.05.28(406552).pdf"
-        //"testpdf/129799.pdf",
-        //"testpdf/130220.pdf",
-        //"testpdf/130874.pdf",
-        //"testpdf/133451.pdf",
-        //"testpdf/135014.pdf"
-        //"testpdf/VWR_PO_4518416176.PDF",
-        //"testpdf/VWR_PO_4518994980.PDF",
-        //"testpdf/VWR_PO_4519025394.PDF",
-        //"testpdf/VWR_PO_4519046791.PDF"
+        "testpdf/invoice-SO-W4999.pdf",
+        "testpdf/invoice-SO-W5002.pdf",
+        "testpdf/invoice-SO-W5003.pdf",
+        "testpdf/invoice-SO-W5004.pdf",
+        "testpdf/invoice-SO-W5005.pdf",
+        "testpdf/invoice-SO-W5006.pdf",
+        "testpdf/invoice-SO-W5007.pdf",
+        "testpdf/invoice-SO-W5008.pdf",
+        "testpdf/invoice-SO-W5009.pdf",
+        "testpdf/invoice-SO-W5010.pdf",
+        "testpdf/invoice-SO-W5011.pdf"
     )
 
     val fileParser = OrderFileParser()
