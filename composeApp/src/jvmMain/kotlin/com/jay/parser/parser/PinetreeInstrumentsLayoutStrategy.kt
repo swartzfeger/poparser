@@ -348,8 +348,12 @@ class PinetreeInstrumentsLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
                 noEach.equals("50", ignoreCase = true) -> vendorParts.add("50")
                 noEach.equals("100 Indigo", ignoreCase = true) -> vendorParts.add("100")
                 noEach.equals("100Indigo", ignoreCase = true) -> vendorParts.add("100")
+                noEach.equals("Indigo 100", ignoreCase = true) -> vendorParts.add("100")
+                noEach.equals("Indigo100", ignoreCase = true) -> vendorParts.add("100")
                 noEach.equals("50 Indigo", ignoreCase = true) -> vendorParts.add("50")
                 noEach.equals("50Indigo", ignoreCase = true) -> vendorParts.add("50")
+                noEach.equals("Indigo 50", ignoreCase = true) -> vendorParts.add("50")
+                noEach.equals("Indigo50", ignoreCase = true) -> vendorParts.add("50")
 
                 noEach.matches(Regex("""^1V-(50|100)(?:INDIGO)?$""", RegexOption.IGNORE_CASE)) -> {
                     vendorParts.add(
@@ -452,6 +456,7 @@ class PinetreeInstrumentsLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
 
         if (sku == "PIN-MNTX-") sku = "PIN-MNTX-100"
         if (sku == "PIN-QA15-") sku = "PIN-QA15-100"
+        if (sku == "QAC-400-1B-") sku = "QAC-400-1B-100"
         if (sku == "QAC-100-1V-") sku = "QAC-100-1V-100"
         if (sku == "CHL-2000-1V-") sku = "CHL-2000-1V-100"
 
@@ -468,8 +473,12 @@ class PinetreeInstrumentsLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
 
         joined = joined.replace("100 Indigo", "100", ignoreCase = true)
         joined = joined.replace("100Indigo", "100", ignoreCase = true)
+        joined = joined.replace("Indigo 100", "100", ignoreCase = true)
+        joined = joined.replace("Indigo100", "100", ignoreCase = true)
         joined = joined.replace("50 Indigo", "50", ignoreCase = true)
         joined = joined.replace("50Indigo", "50", ignoreCase = true)
+        joined = joined.replace("Indigo 50", "50", ignoreCase = true)
+        joined = joined.replace("Indigo50", "50", ignoreCase = true)
 
         joined = joined.replace(Regex("""-\s+(\d+)"""), "-$1")
         joined = joined.replace(Regex("""\s+(1V-\d+)""", RegexOption.IGNORE_CASE), "$1")
@@ -485,7 +494,8 @@ class PinetreeInstrumentsLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
 
         val patterns = listOf(
             Regex("""^Precision Laboratories\s+""", RegexOption.IGNORE_CASE),
-            Regex("""^415 Airpark Rd\.?\s+""", RegexOption.IGNORE_CASE),
+            Regex("""^415\s+S\.?\s+Airpark\s+Rd\.?\s+""", RegexOption.IGNORE_CASE),
+            Regex("""^415\s+Airpark\s+Rd\.?\s+""", RegexOption.IGNORE_CASE),
             Regex("""^Cottonwood,\s*AZ\s+86326\s+""", RegexOption.IGNORE_CASE),
             Regex("""^Fax:\s*\(928\)\s*649-2306\s*""", RegexOption.IGNORE_CASE)
         )
@@ -528,8 +538,12 @@ class PinetreeInstrumentsLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         if (s.equals("50", ignoreCase = true)) return true
         if (s.equals("100 Indigo", ignoreCase = true)) return true
         if (s.equals("100Indigo", ignoreCase = true)) return true
+        if (s.equals("Indigo 100", ignoreCase = true)) return true
+        if (s.equals("Indigo100", ignoreCase = true)) return true
         if (s.equals("50 Indigo", ignoreCase = true)) return true
         if (s.equals("50Indigo", ignoreCase = true)) return true
+        if (s.equals("Indigo 50", ignoreCase = true)) return true
+        if (s.equals("Indigo50", ignoreCase = true)) return true
         if (s.matches(Regex("""^1V-(50|100)(?:INDIGO)?$""", RegexOption.IGNORE_CASE))) return true
 
         return Regex(
