@@ -89,7 +89,7 @@ fun FrameWindowScope.MainScreen(
     // ==================== MACOS RAINBOW CURSOR HELPERS ====================
     fun setBusyCursor() {
         SwingUtilities.invokeLater {
-            println("Ã°ÂÂÂ [CURSOR] Setting busy cursor (rainbow beachball)")
+            println("[CURSOR] Setting busy cursor")
             val waitCursor = Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)
             window.cursor = waitCursor
             window.rootPane?.cursor = waitCursor
@@ -99,7 +99,7 @@ fun FrameWindowScope.MainScreen(
 
     fun resetCursor() {
         SwingUtilities.invokeLater {
-            println("Ã°ÂÂÂ [CURSOR] Resetting to default cursor")
+            println("[CURSOR] Resetting to default cursor")
             val defaultCursor = Cursor.getDefaultCursor()
             window.cursor = defaultCursor
             window.rootPane?.cursor = defaultCursor
@@ -214,6 +214,15 @@ fun FrameWindowScope.MainScreen(
 
             override fun drop(dtde: DropTargetDropEvent) {
                 try {
+                    println("========== DND DROP DEBUG ==========")
+                    dtde.currentDataFlavors.forEach {
+                        println("DND current flavor: ${it.humanPresentableName} | mime=${it.mimeType} | class=${it.representationClass}")
+                    }
+                    dtde.transferable.transferDataFlavors.forEach {
+                        println("DND transferable flavor: ${it.humanPresentableName} | mime=${it.mimeType} | class=${it.representationClass}")
+                    }
+                    println("====================================")
+
                     if (!supportsFiles(dtde.currentDataFlavors)) {
                         dtde.rejectDrop()
                         isDragOver = false
