@@ -45,12 +45,14 @@ import java.awt.Container
 import java.awt.Cursor
 import java.awt.FileDialog
 import java.awt.datatransfer.DataFlavor
+import java.awt.datatransfer.Transferable
 import java.awt.dnd.DnDConstants
 import java.awt.dnd.DropTarget
 import java.awt.dnd.DropTargetAdapter
 import java.awt.dnd.DropTargetDragEvent
 import java.awt.dnd.DropTargetDropEvent
 import java.io.File
+import java.net.URI
 import java.time.LocalDate
 import javax.swing.SwingUtilities
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -132,28 +134,78 @@ fun FrameWindowScope.MainScreen(
 
     DisposableEffect(window) {
         val listener = object : DropTargetAdapter() {
+            private val uriListFlavor: DataFlavor? = runCatching {
+                DataFlavor("text/uri-list;class=java.lang.String")
+            }.getOrNull()
+
             private fun supportsFiles(flavors: Array<DataFlavor>): Boolean {
-                return flavors.any { it == DataFlavor.javaFileListFlavor }
+                return flavors.any { flavor ->
+                    flavor == DataFlavor.javaFileListFlavor ||
+                            flavor == DataFlavor.stringFlavor ||
+                            flavor.primaryType.equals("text", ignoreCase = true) &&
+                            flavor.subType.equals("uri-list", ignoreCase = true)
+                }
+            }
+
+            private fun extractDroppedFiles(transferable: Transferable): List<File> {
+                val filesFromNativeList = runCatching {
+                    if (transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
+                        @Suppress("UNCHECKED_CAST")
+                        transferable.getTransferData(DataFlavor.javaFileListFlavor) as? List<File>
+                    } else {
+                        null
+                    }
+                }.getOrNull()
+
+                if (!filesFromNativeList.isNullOrEmpty()) {
+                    return filesFromNativeList
+                }
+
+                val uriText = runCatching {
+                    when {
+                        uriListFlavor != null && transferable.isDataFlavorSupported(uriListFlavor) ->
+                            transferable.getTransferData(uriListFlavor) as? String
+
+                        transferable.isDataFlavorSupported(DataFlavor.stringFlavor) ->
+                            transferable.getTransferData(DataFlavor.stringFlavor) as? String
+
+                        else -> null
+                    }
+                }.getOrNull()
+
+                return uriText
+                    ?.lineSequence()
+                    ?.map { it.trim() }
+                    ?.filter { it.isNotBlank() && !it.startsWith("#") }
+                    ?.mapNotNull { token ->
+                        runCatching {
+                            when {
+                                token.startsWith("file:", ignoreCase = true) -> File(URI(token))
+                                else -> File(token)
+                            }
+                        }.getOrNull()
+                    }
+                    ?.filter { it.exists() }
+                    ?.toList()
+                    ?: emptyList()
+            }
+
+            private fun acceptOrRejectDrag(dtde: DropTargetDragEvent) {
+                if (supportsFiles(dtde.currentDataFlavors)) {
+                    dtde.acceptDrag(DnDConstants.ACTION_COPY)
+                    isDragOver = true
+                } else {
+                    dtde.rejectDrag()
+                    isDragOver = false
+                }
             }
 
             override fun dragEnter(dtde: DropTargetDragEvent) {
-                if (supportsFiles(dtde.currentDataFlavors)) {
-                    dtde.acceptDrag(DnDConstants.ACTION_COPY)
-                    isDragOver = true
-                } else {
-                    dtde.rejectDrag()
-                    isDragOver = false
-                }
+                acceptOrRejectDrag(dtde)
             }
 
             override fun dragOver(dtde: DropTargetDragEvent) {
-                if (supportsFiles(dtde.currentDataFlavors)) {
-                    dtde.acceptDrag(DnDConstants.ACTION_COPY)
-                    isDragOver = true
-                } else {
-                    dtde.rejectDrag()
-                    isDragOver = false
-                }
+                acceptOrRejectDrag(dtde)
             }
 
             override fun dragExit(dte: java.awt.dnd.DropTargetEvent) {
@@ -170,10 +222,16 @@ fun FrameWindowScope.MainScreen(
 
                     dtde.acceptDrop(DnDConstants.ACTION_COPY)
 
-                    @Suppress("UNCHECKED_CAST")
-                    val droppedFiles = dtde.transferable
-                        .getTransferData(DataFlavor.javaFileListFlavor) as? List<File>
-                        ?: emptyList()
+                    val droppedFiles = extractDroppedFiles(dtde.transferable)
+
+                    if (droppedFiles.isEmpty()) {
+                        uiState = UiState(
+                            status = "Error",
+                            message = "Drop failed: Windows did not provide file paths. Use Choose Files, or drag from File Explorer instead of a browser/email/cloud preview."
+                        )
+                        dtde.dropComplete(false)
+                        return
+                    }
 
                     addFiles(droppedFiles)
                     dtde.dropComplete(true)
@@ -182,7 +240,7 @@ fun FrameWindowScope.MainScreen(
                         status = "Error",
                         message = "Drop failed: ${e.message ?: "Unknown error"}"
                     )
-                    dtde.dropComplete(false)
+                    runCatching { dtde.dropComplete(false) }
                 } finally {
                     isDragOver = false
                 }
@@ -396,10 +454,6 @@ fun FrameWindowScope.MainScreen(
         }
     }
 }
-
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
-// Everything below this line is 100% your original code (no changes)
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 
 @Composable
 private fun HeaderSection() {
