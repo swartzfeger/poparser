@@ -199,6 +199,7 @@ object QtyDiscountMapper {
         rule("BARTOVATION LLC", "QAC-1500-1V-50", "QAC1500", "DIST - 15%", breakAt(250, 0.030), breakAt(500, 0.050), breakAt(5000, 0.090)),
         rule("BARTOVATION LLC", "SPC-CHL-200-1V-100", "SPC-CHL-200-1V-100", "DIST - 15%", breakAt(250, 0.030), breakAt(500, 0.050)),
         rule("BARTOVATION LLC", "SPC-CHL-300-1V-100", "SPC-CHL-300-1V-100", "DIST - 15%", breakAt(250, 0.030), breakAt(500, 0.050)),
+        rule("BARTOVATION LLC", "SPC-CHL300-1V-100", "SPC-CHL-300-1V-100", "DIST - 15%", breakAt(250, 0.030), breakAt(500, 0.050)),
         rule("BARTOVATION LLC", "SUL-1V-50", "SUL-1V-50", "DIST - 15%", breakAt(250, 0.020)),
 
         rule("CHEM-SUPPLY", "NAT-1V-100", "NAT-1V-100", "DISTRIBUTOR", breakAt(500, 0.150)),
