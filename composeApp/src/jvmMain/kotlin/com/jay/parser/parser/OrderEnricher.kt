@@ -19,6 +19,36 @@ class OrderEnricher {
                 var sku = item.sku?.trim().orEmpty()
                 if (sku.isBlank()) return@mapNotNull null
 
+                if (
+                    resolvedCustomer?.id?.equals("BARTOVATION LLC", ignoreCase = true) == true &&
+                    sku.equals("PLBL", ignoreCase = true)
+                ) {
+                    val rawQty = item.quantity ?: 0.0
+                    val lookupSku = "LBL"
+                    val mappedDescription = ItemMapper.getItemDescription(lookupSku).ifBlank { "LABEL" }
+                    val mappedUnitPrice = ItemMapper.getItemPrice(
+                        sku = lookupSku,
+                        priceLevel = resolvedCustomer.priceLevel
+                    )
+                    val qtyDiscountResult = QtyDiscountMapper.applyQtyDiscount(
+                        customerId = resolvedCustomer.id,
+                        sku = lookupSku,
+                        quantity = rawQty,
+                        unitPrice = mappedUnitPrice,
+                        priceLevel = resolvedCustomer.priceLevel
+                    )
+
+                    return@mapNotNull ExportOrderLine(
+                        sku = "PLBL",
+                        description = mappedDescription,
+                        quantityRaw = rawQty,
+                        quantityForExport = rawQty,
+                        unitPriceReference = item.unitPrice,
+                        unitPriceResolved = qtyDiscountResult.unitPrice,
+                        glAccount = GLAccountMapper.getGLAccount(lookupSku)
+                    )
+                }
+
                 val allKnownSkus = ItemMapper.getAllSkus()
 
                 val isExactMatch = allKnownSkus.contains(sku)
