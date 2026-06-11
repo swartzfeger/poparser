@@ -88,7 +88,8 @@ class EiscoSciLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
 
         lines.firstOrNull {
             Regex("""NET\s+DUE\s+IN\s+30""", RegexOption.IGNORE_CASE).containsMatchIn(it) ||
-                    Regex("""\bNET\s*30\b""", RegexOption.IGNORE_CASE).containsMatchIn(it)
+                    Regex("""\bNET\s*30\b""", RegexOption.IGNORE_CASE).containsMatchIn(it) ||
+                    normalize(it).contains("NETDUEIN30")
         }?.let { return "Net 30" }
 
         return null
@@ -394,8 +395,10 @@ class EiscoSciLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         val leftCode = parts.getOrNull(1) ?: return null
         if (!leftCode.any { it.isLetterOrDigit() }) return null
 
-        val uomValues = setOf("EA", "CS", "PK", "BX")
-        val uomIndex = parts.indexOfFirst { it.uppercase() in uomValues }
+        val uomIndex = parts.indexOfFirst { token ->
+            val normalized = token.uppercase()
+            normalized in setOf("EA", "CS", "PK", "BX") || Regex("""^PK\d+$""").matches(normalized)
+        }
         if (uomIndex < 4 || uomIndex + 3 >= parts.size) return null
 
         val vendorCode = parts[uomIndex - 1]

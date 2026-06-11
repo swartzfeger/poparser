@@ -224,6 +224,21 @@ class OrderEnricher {
             return rawQuantity
         }
 
+        /*
+         * Eisco ERP-style POs can already send pack/case quantities for these
+         * SKUs. Do not divide them by the quantity embedded in the SKU.
+         *
+         * 150-500V-100 comes in as UOM PK500 with quantity 1.
+         * 185-12V-100 comes in as EA with quantity 10 and should remain 10.
+         */
+        if (customerId == "EISCO SCI" && normalizedSku in setOf(
+                "150-500V-100",
+                "185-12V-100"
+            )
+        ) {
+            return rawQuantity
+        }
+
         val divisor = getSkuUomDivisor(normalizedSku)
         return if (divisor != null && divisor > 0) rawQuantity / divisor else rawQuantity
     }
