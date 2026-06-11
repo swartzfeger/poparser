@@ -61,14 +61,22 @@ class UsaBlueBookLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
     private fun parseOrderNumber(lines: List<String>): String? {
         val joined = lines.joinToString(" ")
 
-        return Regex(
+        val raw = Regex(
             """\bPO\s*(\d{7,10})\b""",
             RegexOption.IGNORE_CASE
-        ).find(joined)?.groupValues?.get(1)?.trim()
+        ).find(joined)?.groupValues?.getOrNull(1)
             ?: Regex(
-                """PURCHASE\s+ORDER\s+NUMBER.*?\b(PO?\d{7,10}|\d{7,10})\b""",
+                """PURCHASE\s+ORDER\s+NUMBER.*?\b(PO\s*\d{7,10}|\d{7,10})\b""",
                 setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL)
-            ).find(joined)?.groupValues?.get(1)?.trim()
+            ).find(joined)?.groupValues?.getOrNull(1)
+
+        val cleaned = raw
+            ?.uppercase()
+            ?.replace(Regex("""\s+"""), "")
+            ?.trim()
+            ?: return null
+
+        return if (cleaned.startsWith("PO")) cleaned else "PO$cleaned"
     }
 
     private fun parseTerms(lines: List<String>): String? {
@@ -81,56 +89,56 @@ class UsaBlueBookLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
     }
 
     private fun parseShipTo(lines: List<String>): ShipToBlock {
-        var shipToCustomer: String? = null
-        var addressLine1: String? = null
-        var addressLine2: String? = null
-        var city: String? = null
-        var state: String? = null
-        var zip: String? = null
+        val joined = lines.joinToString(" ") {
+            it.replace(Regex("""\s+"""), " ").trim()
+        }
+        val compactJoined = compact(joined)
 
-        val knownAddresses = listOf(
-            Triple("800 Highland Drive, Suite 800-B", "Westampton", Regex("""(Westampton)\s*,\s*(NJ)\s+(08060(?:-\d{4})?)""", RegexOption.IGNORE_CASE)),
-            Triple("1940 W Oak Circle", "Marietta", Regex("""(Marietta)\s*,\s*(GA)\s+(30062(?:-\d{4})?)""", RegexOption.IGNORE_CASE))
+        val knownShipTos = listOf(
+            KnownShipTo(
+                addressLine1 = "800 Highland Drive, Suite 800-B",
+                addressLine2 = null,
+                city = "Westampton",
+                state = "NJ",
+                zip = "08060"
+            ),
+            KnownShipTo(
+                addressLine1 = "1940 W Oak Circle",
+                addressLine2 = null,
+                city = "Marietta",
+                state = "GA",
+                zip = "30062"
+            ),
+            KnownShipTo(
+                addressLine1 = "3781 Bur Wood Drive, Dock 5-6",
+                addressLine2 = null,
+                city = "Waukegan",
+                state = "IL",
+                zip = "60085"
+            ),
+            KnownShipTo(
+                addressLine1 = "8349 Frontage Road",
+                addressLine2 = "Suite 200",
+                city = "Olive Branch",
+                state = "MS",
+                zip = "38654"
+            )
         )
 
-        for (lineRaw in lines) {
-            val line = lineRaw.replace(Regex("""\s+"""), " ").trim()
-            val c = compact(line)
-
-            if (shipToCustomer == null && c.contains("USABLUEBOOK")) {
-                shipToCustomer = "USABlueBook"
-            }
-
-            if (addressLine1 == null) {
-                knownAddresses.firstOrNull { line.contains(it.first, ignoreCase = true) }?.let {
-                    addressLine1 = it.first
-                }
-            }
-
-            if (city == null) {
-                for ((_, knownCity, regex) in knownAddresses) {
-                    val match = regex.find(line)
-                    if (match != null) {
-                        city = knownCity
-                        state = match.groupValues[2].trim().uppercase()
-                        zip = match.groupValues[3].trim()
-                        break
-                    }
-                }
-            }
-        }
-
-        if (shipToCustomer == null) {
-            shipToCustomer = "USABlueBook"
+        val matched = knownShipTos.firstOrNull { candidate ->
+            compactJoined.contains(compact(candidate.addressLine1)) &&
+                    compactJoined.contains(compact("${candidate.city}${candidate.state}${candidate.zip}"))
+        } ?: knownShipTos.firstOrNull { candidate ->
+            compactJoined.contains(compact(candidate.addressLine1))
         }
 
         return ShipToBlock(
-            shipToCustomer = shipToCustomer,
-            addressLine1 = addressLine1,
-            addressLine2 = addressLine2,
-            city = city,
-            state = state,
-            zip = zip
+            shipToCustomer = "USABlueBook",
+            addressLine1 = matched?.addressLine1,
+            addressLine2 = matched?.addressLine2,
+            city = matched?.city,
+            state = matched?.state,
+            zip = matched?.zip
         )
     }
 
@@ -166,7 +174,7 @@ class UsaBlueBookLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
                 .orEmpty()
 
             val directMatch = Regex(
-                """^([A-Z0-9-]+)\s+(\d{5})\s+(.+?)\s+(\d+(?:,\d{3})?)\s+([A-Z]{1,4}|EA|PK)\s+\$?\s*([\d,]+\.\d{2})\s+\$?\s*([\d,]+\.\d{2})$""",
+                """^([A-Z0-9-]+)\s+(\d{5,6})\s+(.+?)\s+(\d+(?:,\d{3})?)\s+([A-Z]{1,4}|EA|PK)\s+\$?\s*([\d,]+\.\d{2})\s+\$?\s*([\d,]+\.\d{2})$""",
                 RegexOption.IGNORE_CASE
             ).find(rawLine)
 
@@ -212,7 +220,7 @@ class UsaBlueBookLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
             }
 
             val wrappedMatch = Regex(
-                """^([A-Z0-9-]+)\s+(\d{5})\s+(\d+(?:,\d{3})?)\s+([A-Z]{1,4}|EA|PK)\s+\$?\s*([\d,]+\.\d{2})\s+\$?\s*([\d,]+\.\d{2})$""",
+                """^([A-Z0-9-]+)\s+(\d{5,6})\s+(\d+(?:,\d{3})?)\s+([A-Z]{1,4}|EA|PK)\s+\$?\s*([\d,]+\.\d{2})\s+\$?\s*([\d,]+\.\d{2})$""",
                 RegexOption.IGNORE_CASE
             ).find(rawLine)
 
@@ -272,6 +280,14 @@ class UsaBlueBookLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
     private fun compact(value: String): String {
         return value.uppercase().replace(Regex("""[^A-Z0-9#]"""), "")
     }
+
+    private data class KnownShipTo(
+        val addressLine1: String,
+        val addressLine2: String?,
+        val city: String,
+        val state: String,
+        val zip: String
+    )
 
     private data class ShipToBlock(
         val shipToCustomer: String?,

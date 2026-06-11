@@ -6,12 +6,12 @@ import java.io.File
 
 fun main() {
     val testFiles = listOf(
-        "testpdf/Eisco PO-002857.pdf",
-        "testpdf/PurchaseOrder - 060426PREC.pdf"
-        //"testpdf/Bartovation PO PL06426.pdf",
-        //"testpdf/Bartovation PO PL09325.pdf",
-        //"testpdf/Bartovation PO PL022326.pdf"
-        //"testpdf/invoice-SO-W5006.pdf",
+        "testpdf/PurchaseOrder_PO5197244_20260115_080032.PDF",
+        "testpdf/PurchaseOrder_PO5215413_20260416_131624.PDF",
+        "testpdf/PurchaseOrder_PO5221670_20260518_154345.PDF",
+        "testpdf/PurchaseOrder_PO5221670_20260519_083817.PDF",
+        "testpdf/PurchaseOrder_PO5222794_20260522_131419.PDF",
+        "testpdf/PurchaseOrder_PO5225078_20260604_152204.PDF"
         //"testpdf/invoice-SO-W5007.pdf",
         //"testpdf/invoice-SO-W5008.pdf",
         //"testpdf/invoice-SO-W5009.pdf",
