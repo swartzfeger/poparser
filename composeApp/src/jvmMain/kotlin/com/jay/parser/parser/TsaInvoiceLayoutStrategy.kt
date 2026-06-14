@@ -265,10 +265,12 @@ class TsaInvoiceLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
 
     private fun extractStreetCandidatesWithRanges(line: String): List<TextMatch> {
         val normalized = normalizeHumanText(line)
-        val suffixPattern = "(?:Rd|RD|Road|Ave|Avenue|Blvd|Boulevard|Dr|Drive|Parkway|Pkwy|Way|Court|Ct)\\.?"
+        val suffixPattern =
+            """(?:Rd|Road|Ave|Avenue|Blvd|Boulevard|Dr|Drive|Parkway|Pkwy|Way|Court|Ct)\.?""" +
+                    """(?:\s+(?:N|S|E|W|North|South|East|West|NE|NW|SE|SW))?"""
         val streetStartRegex = Regex("""\b\d{1,6}\b""")
         val streetFromStartRegex = Regex(
-            """^\d{1,6}\s+(?:[A-Za-z0-9'.#-]+\s+){0,9}$suffixPattern\b""",
+            """^\d{1,6}\s+(?:[A-Za-z0-9'.#-]+\s+){1,9}$suffixPattern\b""",
             RegexOption.IGNORE_CASE
         )
 
@@ -276,6 +278,20 @@ class TsaInvoiceLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         for (numberMatch in streetStartRegex.findAll(normalized)) {
             val start = numberMatch.range.first
             val fragment = normalized.substring(start)
+
+            // Ignore floor markers such as "3rd Floor" when they appear before
+            // the actual ship-to street address on the same OCR row.
+            if (Regex("""^\d{1,2}\s*(?:st|nd|rd|th)\s+Floor\b""", RegexOption.IGNORE_CASE).containsMatchIn(fragment)) {
+                continue
+            }
+
+            // Ignore suite/unit numbers when the real street number follows later
+            // on the same OCR row, e.g. "Suite 200 17801 International Blvd. South".
+            val prefix = normalized.substring(0, start).trim()
+            if (Regex("""(?:Suite|Ste\.?)$""", RegexOption.IGNORE_CASE).containsMatchIn(prefix)) {
+                continue
+            }
+
             val streetMatch = streetFromStartRegex.find(fragment) ?: continue
             val value = normalizeHumanText(streetMatch.value)
             matches.add(TextMatch(value = value, startIndex = start, endIndex = start + streetMatch.range.last + 1))
@@ -387,12 +403,15 @@ class TsaInvoiceLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
 
     private fun normalizeHumanText(value: String): String {
         val withSpaces = value
+            .replace(Regex("""\bCTRofSVCTNNL\b""", RegexOption.IGNORE_CASE), "CTR of SVC TNNL")
+            .replace(Regex("""\bCTR\s*of\s*SVC\s*TNNL\b""", RegexOption.IGNORE_CASE), "CTR of SVC TNNL")
             .replace(Regex("""([a-z])([A-Z])"""), "$1 $2")
             .replace(Regex("""([A-Z])([A-Z][a-z])"""), "$1 $2")
             .replace(Regex("""([A-Za-z])([0-9])"""), "$1 $2")
             .replace(Regex("""([0-9])([A-Za-z])"""), "$1 $2")
             .replace(Regex("""\bTSA\s*DHS\b""", RegexOption.IGNORE_CASE), "TSA DHS")
             .replace(".", ". ")
+            .replace(Regex(""",(?=\S)"""), ", ")
             .replace(Regex("""\s+"""), " ")
             .trim()
 

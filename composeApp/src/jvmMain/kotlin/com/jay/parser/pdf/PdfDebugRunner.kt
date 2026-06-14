@@ -6,15 +6,15 @@ import java.io.File
 
 fun main() {
     val testFiles = listOf(
-        "testpdf/PurchaseOrder_PO5197244_20260115_080032.PDF",
-        "testpdf/PurchaseOrder_PO5215413_20260416_131624.PDF",
-        "testpdf/PurchaseOrder_PO5221670_20260518_154345.PDF",
-        "testpdf/PurchaseOrder_PO5221670_20260519_083817.PDF",
-        "testpdf/PurchaseOrder_PO5222794_20260522_131419.PDF",
-        "testpdf/PurchaseOrder_PO5225078_20260604_152204.PDF"
-        //"testpdf/invoice-SO-W5007.pdf",
-        //"testpdf/invoice-SO-W5008.pdf",
-        //"testpdf/invoice-SO-W5009.pdf",
+        "testpdf/4518937877.pdf",
+        "testpdf/4519046736.pdf",
+        "testpdf/4519052441.pdf",
+        "testpdf/4519245569.pdf",
+        "testpdf/VWR - UPS PO_4518928570.PDF",
+        "testpdf/VWR FEDEX - 4518937877.pdf",
+        "testpdf/VWR_PO_4518416176.PDF",
+        "testpdf/VWR_PO_4518994980.PDF",
+        "testpdf/VWR_PO_4519025394.PDF"
         //"testpdf/invoice-SO-W5010.pdf",
         //"testpdf/invoice-SO-W5011.pdf"
     )
