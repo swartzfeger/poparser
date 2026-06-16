@@ -147,19 +147,6 @@ class OrderEnricher {
             ?: parsed.shipToCustomer
             ?: return null
 
-        // TSA invoices are resolved by TsaLocationMapper first so the TSA-specific
-        // defaults there stay authoritative. CustomerMapper/customers.json can still
-        // be used as a fallback for any customer not handled by the TSA mapper.
-        TsaLocationMapper.lookupByCustomerId(lookupSource)?.let { tsa ->
-            return ResolvedCustomer(
-                id = tsa.customerId,
-                name = tsa.customerName,
-                terms = tsa.terms,
-                shipVia = tsa.shipVia,
-                priceLevel = tsa.priceLevel
-            )
-        }
-
         val match = CustomerMapper.lookupCustomer(lookupSource) ?: return null
 
         return ResolvedCustomer(
@@ -230,10 +217,17 @@ class OrderEnricher {
         }
 
         /*
-         * DFS-QAC-400B is handled at the Diversified layout level because their PO
-         * explicitly says PKG OF 12. Do not divide it back down here.
+         * Diversified exceptions:
+         * - DFS-QAC-400B is handled at the Diversified layout level because their PO
+         *   explicitly says PKG OF 12. Do not divide it back down here.
+         * - 169-144V-100 is ordered by Diversified as the sellable PKG OF 144 quantity,
+         *   not as individual vials. Keep the visible ordered quantity.
          */
-        if (customerId == "DIVERSIFIED FOODSERV" && normalizedSku == "DFS-QAC-400B") {
+        if (customerId == "DIVERSIFIED FOODSERV" && normalizedSku in setOf(
+                "DFS-QAC-400B",
+                "169-144V-100"
+            )
+        ) {
             return rawQuantity
         }
 
