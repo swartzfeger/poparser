@@ -140,7 +140,7 @@ class TsaInvoiceLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         )
 
         for ((index, line) in lines.withIndex()) {
-            val normalizedLine = normalizeHumanText(line)
+            val normalizedLine = normalizeHumanText(stripEmailPrefixBeforeAddress(line))
             val matches = pattern.findAll(normalizedLine).toList()
             if (matches.isEmpty()) continue
 
@@ -164,7 +164,7 @@ class TsaInvoiceLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         )
 
         for ((index, line) in lines.withIndex()) {
-            val normalizedLine = normalizeHumanText(line)
+            val normalizedLine = normalizeHumanText(stripEmailPrefixBeforeAddress(line))
             val first = pattern.findAll(normalizedLine).firstOrNull() ?: continue
             return ParsedCityStateZip(
                 city = normalizeHumanText(first.groupValues[1]),
@@ -234,6 +234,12 @@ class TsaInvoiceLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
             }
         }
 
+        // Then scan for standalone suite/dock/floor lines. Some TSA invoices OCR
+        // the ship-to second address line separately, e.g. "United States (US) Suite 200".
+        for (line in lines.asReversed()) {
+            cleanAddressLine2(line)?.let { cleaned -> return cleaned }
+        }
+
         // Then look immediately after the selected street address on combined rows.
         if (!addressLine1.isNullOrBlank()) {
             val compactAddress = compact(addressLine1)
@@ -247,6 +253,10 @@ class TsaInvoiceLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         }
 
         return null
+    }
+
+    private fun stripEmailPrefixBeforeAddress(line: String): String {
+        return line.replace(Regex("""^\S+@\S+\s+"""), "")
     }
 
     private fun trailingAfterLastCityStateZip(line: String): String? {
@@ -266,7 +276,7 @@ class TsaInvoiceLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
     private fun extractStreetCandidatesWithRanges(line: String): List<TextMatch> {
         val normalized = normalizeHumanText(line)
         val suffixPattern =
-            """(?:Rd|Road|Ave|Avenue|Blvd|Boulevard|Dr|Drive|Parkway|Pkwy|Way|Court|Ct)\.?""" +
+            """(?:Rd|Road|Ave|Avenue|Blvd|Boulevard|Dr|Drive|Parkway|Pkwy|Way|Court|Ct|Hwy|Highway)\.?""" +
                     """(?:\s+(?:N|S|E|W|North|South|East|West|NE|NW|SE|SW))?"""
         val streetStartRegex = Regex("""\b\d{1,6}\b""")
         val streetFromStartRegex = Regex(
@@ -304,8 +314,9 @@ class TsaInvoiceLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         if (value.isNullOrBlank()) return null
 
         var cleaned = normalizeHumanText(value)
-            .replace(Regex("""^United\s*States.*$""", RegexOption.IGNORE_CASE), "")
-            .replace(Regex("""^\(US\).*$""", RegexOption.IGNORE_CASE), "")
+            .replace(Regex("""^United\s*States\s*\(US\)\s*""", RegexOption.IGNORE_CASE), "")
+            .replace(Regex("""^United\s*States\s*""", RegexOption.IGNORE_CASE), "")
+            .replace(Regex("""^\(US\)\s*""", RegexOption.IGNORE_CASE), "")
             .replace(Regex("""^Payment\s*Method:.*$""", RegexOption.IGNORE_CASE), "")
             .replace(Regex("""^Invoice\s*Date:.*$""", RegexOption.IGNORE_CASE), "")
             .replace(Regex("""^Order\s*Date:.*$""", RegexOption.IGNORE_CASE), "")
@@ -359,16 +370,29 @@ class TsaInvoiceLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
             ?.uppercase()
             ?: "TSAPER100"
 
-        val itemLine = lines.firstOrNull {
-            compact(it).contains("LIQUIDSAMPLETESTSTRIPS") &&
-                    Regex("""\b\d+\s+\$[\d,]+\.\d{2}""").containsMatchIn(it)
+        val sameLineMatch = lines.firstNotNullOfOrNull { line ->
+            Regex(
+                """Liquid\s*Sample\s*Test\s*Strips\s+(\d+(?:\.\d+)?)\s+\$([\d,]+\.\d{2})""",
+                RegexOption.IGNORE_CASE
+            ).find(line)
         }
 
-        val match = itemLine?.let {
-            Regex("""Liquid\s*Sample\s*Test\s*Strips\s+(\d+)\s+\$([\d,]+\.\d{2})""", RegexOption.IGNORE_CASE)
-                .find(it)
+        val splitLineMatch = if (sameLineMatch == null) {
+            val itemIndex = lines.indexOfFirst { compact(it).contains("LIQUIDSAMPLETESTSTRIPS") }
+            val searchWindow = if (itemIndex >= 0) {
+                lines.drop(itemIndex + 1).takeWhile { !compact(it).startsWith("SUBTOTAL") }
+            } else {
+                lines
+            }
+
+            searchWindow.firstNotNullOfOrNull { line ->
+                Regex("""^\s*(\d+(?:\.\d+)?)\s+\$([\d,]+\.\d{2})\s*$""").find(line)
+            }
+        } else {
+            null
         }
 
+        val match = sameLineMatch ?: splitLineMatch
         val quantity = match?.groupValues?.getOrNull(1)?.toDoubleOrNull()
         val lineTotal = match?.groupValues?.getOrNull(2)?.replace(",", "")?.toDoubleOrNull()
         val unitPrice = if (quantity != null && quantity > 0.0 && lineTotal != null) {

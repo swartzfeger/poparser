@@ -381,7 +381,7 @@ const CUSTOMER_DATA: MasterCustomer[] = [
   { id: "TSA-WENDOVER", name: "TSA-WENDOVER", terms: "Prepaid", shipVia: "UPS GRNC", priceLevel: "DISTRIBUTOR" },
   { id: "TSA-WEST COLUMBIA", name: "TSA-WEST COLUMBIA", terms: "Prepaid", shipVia: "UPS GRNC", priceLevel: "DISTRIBUTOR" },
   { id: "TSA-WEST PALM BEACH", name: "TSA-WEST PALM BEACH", terms: "Prepaid", shipVia: "UPS GRNC", priceLevel: "DISTRIBUTOR" },
-  { id: "TSA-WEYERS CAVE", name: "TSA-WEYERS CAVE", terms: "Prepaid", shipVia: "UPS Ground", priceLevel: "DIST + 100%" },
+  { id: "TSA-WEYERS CAVE", name: "TSA-WEYERS CAVE", terms: "Prepaid", shipVia: "UPS GRNC", priceLevel: "DISTRIBUTOR" },
   { id: "TSA-WHITE PLAINS", name: "TSA-WHITE PLAINS", terms: "Prepaid", shipVia: "UPS GRNC", priceLevel: "DISTRIBUTOR" },
   { id: "TSA-WICHITA", name: "TSA-WICHITA", terms: "Prepaid", shipVia: "UPS GRNC", priceLevel: "DISTRIBUTOR" },
   { id: "TSA-WINDSOR LOCKS", name: "TSA-WINDSOR LOCKS", terms: "Prepaid", shipVia: "UPS GRNC", priceLevel: "DISTRIBUTOR" },
@@ -412,20 +412,36 @@ export function lookupCustomer(name: string): MasterCustomer | null {
   const normalized = name.trim().toUpperCase();
 
   // 1. Try exact match on ID
-  const matchById = CUSTOMER_DATA.find(c => c.id.toUpperCase() === normalized);
-  if (matchById) return matchById;
+  for (let i = 0; i < CUSTOMER_DATA.length; i++) {
+    const customer = CUSTOMER_DATA[i];
+    if (customer.id.toUpperCase() === normalized) {
+      return customer;
+    }
+  }
 
   // 2. Try exact match on Name
-  const matchByName = CUSTOMER_DATA.find(c => c.name.toUpperCase() === normalized);
-  if (matchByName) return matchByName;
+  for (let i = 0; i < CUSTOMER_DATA.length; i++) {
+    const customer = CUSTOMER_DATA[i];
+    if (customer.name.toUpperCase() === normalized) {
+      return customer;
+    }
+  }
 
   // 3. Robust partial match (e.g. "Eisco LLC" matches "EISCO LLC / EISCO SCIENTIFIC")
-  const partialMatch = CUSTOMER_DATA.find(c => {
-    const cid = c.id.toUpperCase();
-    const cname = c.name.toUpperCase();
-    return normalized.includes(cid) || cid.includes(normalized) || 
-           normalized.includes(cname) || cname.includes(normalized);
-  });
-  
-  return partialMatch || null;
+  for (let i = 0; i < CUSTOMER_DATA.length; i++) {
+    const customer = CUSTOMER_DATA[i];
+    const cid = customer.id.toUpperCase();
+    const cname = customer.name.toUpperCase();
+
+    if (
+        normalized.indexOf(cid) >= 0 ||
+        cid.indexOf(normalized) >= 0 ||
+        normalized.indexOf(cname) >= 0 ||
+        cname.indexOf(normalized) >= 0
+    ) {
+      return customer;
+    }
+  }
+
+  return null;
 }

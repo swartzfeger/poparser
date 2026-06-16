@@ -147,6 +147,19 @@ class OrderEnricher {
             ?: parsed.shipToCustomer
             ?: return null
 
+        // TSA invoices are resolved by TsaLocationMapper first so the TSA-specific
+        // defaults there stay authoritative. CustomerMapper/customers.json can still
+        // be used as a fallback for any customer not handled by the TSA mapper.
+        TsaLocationMapper.lookupByCustomerId(lookupSource)?.let { tsa ->
+            return ResolvedCustomer(
+                id = tsa.customerId,
+                name = tsa.customerName,
+                terms = tsa.terms,
+                shipVia = tsa.shipVia,
+                priceLevel = tsa.priceLevel
+            )
+        }
+
         val match = CustomerMapper.lookupCustomer(lookupSource) ?: return null
 
         return ResolvedCustomer(

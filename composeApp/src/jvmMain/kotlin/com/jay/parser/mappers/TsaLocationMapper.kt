@@ -208,7 +208,7 @@ object TsaLocationMapper {
         Entry("TSA-WENDOVER", "TSA-WENDOVER", "Prepaid", "UPS GRNC", "DISTRIBUTOR"),
         Entry("TSA-WEST COLUMBIA", "TSA-WEST COLUMBIA", "Prepaid", "UPS GRNC", "DISTRIBUTOR"),
         Entry("TSA-WEST PALM BEACH", "TSA-WEST PALM BEACH", "Prepaid", "UPS GRNC", "DISTRIBUTOR"),
-        Entry("TSA-WEYERS CAVE", "TSA-WEYERS CAVE", "Prepaid", "UPS Ground", "DIST + 100%"),
+        Entry("TSA-WEYERS CAVE", "TSA-WEYERS CAVE", "Prepaid", "UPS GRNC", "DISTRIBUTOR"),
         Entry("TSA-WHITE PLAINS", "TSA-WHITE PLAINS", "Prepaid", "UPS GRNC", "DISTRIBUTOR"),
         Entry("TSA-WICHITA", "TSA-WICHITA", "Prepaid", "UPS GRNC", "DISTRIBUTOR"),
         Entry("TSA-WINDSOR LOCKS", "TSA-WINDSOR LOCKS", "Prepaid", "UPS GRNC", "DISTRIBUTOR")
@@ -217,6 +217,12 @@ object TsaLocationMapper {
     @Suppress("UNUSED_PARAMETER")
     fun resolveByAccountLocation(city: String?, state: String?, zip: String?): Entry? {
         return resolveByLocation(city, zip)
+    }
+
+    fun lookupByCustomerId(customerId: String?): Entry? {
+        if (customerId.isNullOrBlank()) return null
+        val normalized = normalizeCustomerId(customerId)
+        return entries.firstOrNull { normalizeCustomerId(it.customerId) == normalized }
     }
 
     private fun resolveByLocation(city: String?, zip: String?): Entry? {
@@ -284,6 +290,15 @@ object TsaLocationMapper {
         }
 
         return aliases
+    }
+
+    private fun normalizeCustomerId(value: String?): String {
+        return value
+            ?.uppercase()
+            ?.replace(Regex("""[^A-Z0-9]+"""), " ")
+            ?.replace(Regex("""\s+"""), " ")
+            ?.trim()
+            .orEmpty()
     }
 
     private fun normalizeLocation(value: String?): String {
