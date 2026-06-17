@@ -66,6 +66,7 @@ class DiversifiedFoodserviceLayoutStrategy : BaseLayoutStrategy(), LayoutStrateg
         if (normalized.contains("PAA-50-1V-100")) score += 40
         if (normalized.contains("CHL-1000-1V-100")) score += 40
         if (normalized.contains("PH3060-1B-50")) score += 40
+        if (normalized.contains("QAC-400V")) score += 40
         if (normalized.contains("QAC-400B")) score += 40
 
         if (normalized.contains("1421362")) score += 20
@@ -461,6 +462,7 @@ class DiversifiedFoodserviceLayoutStrategy : BaseLayoutStrategy(), LayoutStrateg
             .trim()
 
         return when (sku) {
+            "QAC-400V" -> "DFS-QAC-400V"
             "QAC-400B" -> "DFS-QAC-400B"
             else -> sku
         }
@@ -600,6 +602,8 @@ class DiversifiedFoodserviceLayoutStrategy : BaseLayoutStrategy(), LayoutStrateg
         "PAA-50-1V-100",
         "CHL-1000-1V-100",
         "PH3060-1B-50",
+        "QAC-400V",
+        "DFS-QAC-400V",
         "QAC-400B",
         "DFS-QAC-400B"
     )
@@ -609,6 +613,7 @@ class DiversifiedFoodserviceLayoutStrategy : BaseLayoutStrategy(), LayoutStrateg
         "851351" to "PAA-50-1V-100",
         "1421556" to "CHL-1000-1V-100",
         "81403" to "PH3060-1B-50",
+        "1421486" to "DFS-QAC-400V",
         "1421363" to "DFS-QAC-400B"
     )
 
