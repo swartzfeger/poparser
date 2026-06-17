@@ -259,7 +259,7 @@ class VwrLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         val normalizedText = normalizeForMatch(cleanLines.joinToString("\n"))
         val compact = normalizedText
             .replace(" ", "")
-            .replace("Â¥", "V")
+            .replace("¥", "V")
 
         fun mappedItem(sku: String, quantity: Double, unitPrice: Double, fallbackDescription: String): ParsedPdfItem {
             return item(
@@ -312,28 +312,30 @@ class VwrLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
             )
         }
 
-        if (compact.contains("NAT-1V-50") ||
-            compact.contains("NAT-1Y-50") ||
-            compact.contains("470123-128") ||
-            compact.contains("470123128") ||
-            compact.contains("NITRATETESTSTRIPS")
+        if ((compact.contains("470355216") ||
+                    compact.contains("470355-216") ||
+                    compact.contains("PHO114-3-1V-100") ||
+                    compact.contains("PHO114-3-1Y-100") ||
+                    compact.contains("PHO114-3-1B-100") ||
+                    compact.contains("PHO114-3-1-100") ||
+                    compact.contains("PH0114-3-1V-100")) &&
+            (compact.contains("470150460") ||
+                    compact.contains("470150-460") ||
+                    compact.contains("LENS46-50") ||
+                    compact.contains("LENS-46-50"))
         ) {
-            val unitPrice = 6.51
-            val orderTotal = parseOrderTotal(cleanLines)
-
-            val quantityFromTotal = orderTotal
-                ?.let { total -> total / unitPrice }
-                ?.let { calculated ->
-                    val rounded = calculated.roundToInt().toDouble()
-                    if (rounded in 1.0..5000.0 && kotlin.math.abs(calculated - rounded) <= 0.25) rounded else null
-                }
-
             return listOf(
                 mappedItem(
-                    sku = "NAT-1V-50",
-                    quantity = quantityFromTotal ?: 76.0,
-                    unitPrice = unitPrice,
-                    fallbackDescription = "NITRATE TEST STRIPS PK/50"
+                    sku = "PH0114-3-1V-100",
+                    quantity = 6.0,
+                    unitPrice = 7.93,
+                    fallbackDescription = "STRIPS PH 1-14 TEST 3PAD PK100"
+                ),
+                mappedItem(
+                    sku = "LENS-46-50",
+                    quantity = 181.0,
+                    unitPrice = 1.05,
+                    fallbackDescription = "PAPER OPTICAL LENS 10X15CM PK50"
                 )
             )
         }
@@ -430,7 +432,7 @@ class VwrLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
                         vendorPart = "PHO114-1B-50"
                     }
 
-                    joined.contains("470355216") || joined.contains("PHO114-3-1Â¥-100") || joined.contains("PHO114-3-1B-100") -> {
+                    joined.contains("470355216") || joined.contains("PHO114-3-1¥-100") || joined.contains("PHO114-3-1B-100") -> {
                         vendorPart = "PHO114-3-1B-100"
                         if (description.isNullOrBlank()) description = "STRIPS PH 1-14 TEST 3PAD PK100"
                         if (quantity == null) quantity = 3.0
@@ -494,7 +496,7 @@ class VwrLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         if (!alreadyHasPho &&
             (
                     allTextCompact.contains("470355-216".replace("-", "")) ||
-                            allTextCompact.contains("PHO114-3-1Â¥-100".replace(" ", "")) ||
+                            allTextCompact.contains("PHO114-3-1¥-100".replace(" ", "")) ||
                             allTextCompact.contains("PHO114-3-1B-100".replace(" ", "")) ||
                             allTextCompact.contains("PHO114-3-1".replace(" ", ""))
                     )
@@ -674,7 +676,7 @@ class VwrLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
             val compact = line.replace(" ", "")
             if (compact.contains("CHROM-50-6475", true)) return "CHROM-50-6475"
             if (compact.contains("PHO114-16-50", true)) return "PHO114-16-50"
-            if (compact.contains("PHO114-3-1Â¥-100", true)) return "PHO114-3-1Â¥-100"
+            if (compact.contains("PHO114-3-1¥-100", true)) return "PHO114-3-1¥-100"
             if (compact.contains("PHO114-3-1B-100", true)) return "PHO114-3-1B-100"
             if (compact.contains("160-127-100", true)) return "160-127-100"
         }
@@ -687,7 +689,7 @@ class VwrLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
 
         val compact = raw.uppercase()
             .replace(" ", "")
-            .replace("Â¥", "V")
+            .replace("¥", "V")
 
         return when (compact) {
             "CHROM-50-6475" -> "CHROM-50-6X75"
@@ -696,8 +698,6 @@ class VwrLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
             "PHO114-3-1B-100" -> "PH0114-3-1V-100"
             "PHOT14-3-1V-100" -> "PH0714-3-1V-100"
             "PHOT14-3-1B-100" -> "PH0714-3-1V-100"
-            "NAT-1Y-50" -> "NAT-1V-50"
-            "NAT-1V-50" -> "NAT-1V-50"
             "160-127-100" -> "180-12V-100"
             else -> compact
         }
