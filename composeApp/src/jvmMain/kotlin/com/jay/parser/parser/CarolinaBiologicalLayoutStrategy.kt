@@ -154,7 +154,7 @@ class CarolinaBiologicalLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         }
 
     private val itemRowRegex = Regex(
-        """^(\d+)\s+(\d+)\s+(.+?)\s+(\d+(?:\.\d+)?)\s+(EA|BX|PK|GR)\s+(\d+(?:\.\d{1,4})?)\s+(\d+(?:\.\d{2})?)\s+\d{2}/\d{2}/\d{2}$""",
+        """^(\d+)\s+(\d+)\s+(.+?)\s+(\d+(?:\.\d+)?)\s+(EA|BX|PK|GR)\s+(\d+(?:\.\d{1,4})?)\s+([\d,]+(?:\.\d{2})?)\s+\d{2}/\d{2}/\d{2}$""",
         RegexOption.IGNORE_CASE
     )
 
