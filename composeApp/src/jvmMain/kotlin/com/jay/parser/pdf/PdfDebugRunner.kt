@@ -6,17 +6,17 @@ import java.io.File
 
 fun main() {
     val testFiles = listOf(
-        "testpdf/invoice-SO-W5052.pdf",
-        "testpdf/invoice-SO-W5037.pdf",
-        "testpdf/invoice-SO-W5036.pdf",
-        "testpdf/invoice-SO-W5033.pdf",
-        "testpdf/invoice-SO-W5011.pdf",
-        "testpdf/invoice-SO-W5010.pdf",
-        "testpdf/invoice-SO-W5009.pdf",
-        "testpdf/invoice-SO-W5008.pdf",
-        "testpdf/invoice-SO-W5007.pdf",
-        "testpdf/invoice-SO-W5005.pdf",
-        "testpdf/invoice-SO-W5004.pdf",
+        "testpdf/Bartovation PO PL05526.pdf",
+        "testpdf/Bartovation PO PL05726.pdf",
+        "testpdf/Bartovation PO PL06426.pdf",
+        "testpdf/Bartovation PO PL09325.pdf",
+        "testpdf/Bartovation PO PL022326.pdf",
+        "testpdf/Bartovation PO PL062326.2.pdf",
+        //"testpdf/invoice-SO-W5009.pdf",
+        //"testpdf/invoice-SO-W5008.pdf",
+        //"testpdf/invoice-SO-W5007.pdf",
+        //"testpdf/invoice-SO-W5005.pdf",
+        //"testpdf/invoice-SO-W5004.pdf",
         //"testpdf/VWR_PO_4519046791.PDF"
     )
 

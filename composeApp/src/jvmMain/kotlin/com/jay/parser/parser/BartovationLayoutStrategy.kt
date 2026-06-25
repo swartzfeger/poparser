@@ -58,7 +58,6 @@ class BartovationLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         return (direct ?: fallback)
             ?.uppercase()
             ?.replace("PLO", "PL0")
-            ?.substringBefore(".")
     }
 
     private fun parseShipToName(lines: List<String>): String? {
@@ -239,7 +238,11 @@ class BartovationLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
                             sku.contains("STRIPS")
                     )
         ) {
-            return "FC-CHLD-PH0245-1V-100"
+            return "CHLD-PH0245-1V-100"
+        }
+
+        if (sku == "FC-CHLD-PH0245-1V-100") {
+            return "CHLD-PH0245-1V-100"
         }
 
         return sku
