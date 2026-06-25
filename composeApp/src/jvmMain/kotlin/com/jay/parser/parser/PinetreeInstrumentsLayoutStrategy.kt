@@ -244,6 +244,7 @@ class PinetreeInstrumentsLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         var unitPrice = 0.0
         val vendorParts = mutableListOf<String>()
         val descriptionExtra = mutableListOf<String>()
+        var boxesPerCaseFromWrappedSku: Int? = null
 
         val patternA = Regex(
             """^([A-Z0-9]+(?:-[A-Z0-9]+)*)\s+(.+?)\s+(\d+)\s+(\d+(?:\.\d{1,2})?)\s+0\.00%\s+\d[\d,]*(?:\.\d{2})$""",
@@ -275,7 +276,20 @@ class PinetreeInstrumentsLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
             RegexOption.IGNORE_CASE
         ).find(first)
 
+        val patternG = Regex(
+            """^([A-Z0-9]+(?:-[A-Z0-9]+)*)\s+(.+?)\s+([A-Z0-9-]+)\s+(\d+)\s*[A-Z][A-Z0-9/]*\s+(\d[\d,]*(?:\.\d{1,2})?)\s+0\.00%\s+\d[\d,]*(?:\.\d{2})$""",
+            RegexOption.IGNORE_CASE
+        ).find(first)
+
         when {
+            patternG != null -> {
+                productCode = patternG.groupValues[1].trim().uppercase()
+                descriptionPortion = patternG.groupValues[2].trim()
+                vendorParts.add(patternG.groupValues[3].trim().uppercase())
+                quantity = patternG.groupValues[4].toDouble()
+                unitPrice = patternG.groupValues[5].replace(",", "").toDouble()
+            }
+
             patternF != null -> {
                 productCode = patternF.groupValues[1].trim().uppercase()
                 descriptionPortion = patternF.groupValues[2].trim()
@@ -355,6 +369,16 @@ class PinetreeInstrumentsLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
                 noEach.equals("Indigo 50", ignoreCase = true) -> vendorParts.add("50")
                 noEach.equals("Indigo50", ignoreCase = true) -> vendorParts.add("50")
 
+                noEach.equals("box/cs", ignoreCase = true) -> Unit
+
+                noEach.matches(Regex("""^\d{1,2}V-\d{2}\d+$""", RegexOption.IGNORE_CASE)) -> {
+                    val split = Regex("""^(\d{1,2}V-\d{2})(\d+)$""", RegexOption.IGNORE_CASE).find(noEach)
+                    if (split != null) {
+                        vendorParts.add(split.groupValues[1].uppercase())
+                        boxesPerCaseFromWrappedSku = split.groupValues[2].toIntOrNull()
+                    }
+                }
+
                 noEach.matches(Regex("""^1V-(50|100)(?:INDIGO)?$""", RegexOption.IGNORE_CASE)) -> {
                     vendorParts.add(
                         noEach.uppercase()
@@ -397,6 +421,15 @@ class PinetreeInstrumentsLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
 
         var sku = normalizePinetreeSku(repairedVendor)
         if (sku.isBlank()) sku = normalizePinetreeSku(productCode)
+
+        val hasCaseUom = rawLines.any {
+            Regex("""\b\d+\s*Caseof\d+\b""", RegexOption.IGNORE_CASE).containsMatchIn(it)
+        }
+
+        val boxesPerCase = boxesPerCaseFromWrappedSku
+        if (hasCaseUom && boxesPerCase != null && boxesPerCase > 1) {
+            quantity *= boxesPerCase.toDouble()
+        }
 
         val finalDescription = ItemMapper.getItemDescription(sku).ifBlank {
             normalizeHumanText(
