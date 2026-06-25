@@ -214,8 +214,21 @@ object TsaLocationMapper {
         Entry("TSA-WINDSOR LOCKS", "TSA-WINDSOR LOCKS", "Prepaid", "UPS GRNC", "DISTRIBUTOR")
     )
 
-    @Suppress("UNUSED_PARAMETER")
     fun resolveByAccountLocation(city: String?, state: String?, zip: String?): Entry? {
+        val normalizedCity = normalizeLocation(city)
+        val normalizedState = state?.uppercase()?.replace(Regex("""[^A-Z]+"""), "")?.trim().orEmpty()
+
+        // DCA is Washington, DC. Some Woo/TSA invoices show the account block as
+        // the airport code on one line and "Washington, DC" on the city line.
+        // Match that account block to the TSA-WASHINGTON DC customer before
+        // falling back to generic city matching.
+        if ((normalizedCity == "WASHINGTON" && normalizedState == "DC") ||
+            normalizedCity == "WASHINGTONDC" ||
+            normalizedCity == "DCA"
+        ) {
+            lookupByCustomerId("TSA-WASHINGTON DC")?.let { return it }
+        }
+
         return resolveByLocation(city, zip)
     }
 

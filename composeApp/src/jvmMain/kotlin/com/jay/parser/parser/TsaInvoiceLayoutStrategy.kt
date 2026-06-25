@@ -329,6 +329,7 @@ class TsaInvoiceLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
             .replace(Regex("""\bSuite\s*(\d+[A-Za-z]?)\b""", RegexOption.IGNORE_CASE), "Suite $1")
             .replace(Regex("""\bSte\.?\s*([A-Za-z0-9]+)\b""", RegexOption.IGNORE_CASE), "Ste. $1")
             .replace(Regex("""\bDock\s*(\d+[A-Za-z]?)\b""", RegexOption.IGNORE_CASE), "Dock $1")
+            .replace(Regex("""\bMail\s*Stop\s*([A-Za-z0-9]+)\b""", RegexOption.IGNORE_CASE), "MAIL STOP $1")
             .replace(Regex("""\bTSA\s*DHS\b""", RegexOption.IGNORE_CASE), "TSA DHS")
             .replace(Regex("""\s+"""), " ")
             .trim()
@@ -341,7 +342,7 @@ class TsaInvoiceLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         if (looksLikeCityStateZip(cleaned)) return null
 
         val allowed = Regex(
-            """\b(Suite|Ste\.?|Dock|Floor|Fl\.?)\b""",
+            """\b(Suite|Ste\.?|Dock|Floor|Fl\.?|Mail\s*Stop)\b""",
             RegexOption.IGNORE_CASE
         )
         if (!allowed.containsMatchIn(cleaned)) return null
@@ -427,6 +428,12 @@ class TsaInvoiceLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
 
     private fun normalizeHumanText(value: String): String {
         val withSpaces = value
+            .replace(Regex("""\bCAPTIOLHEIGHTS\b""", RegexOption.IGNORE_CASE), "Capitol Heights")
+            .replace(Regex("""\bCAPITOLHEIGHTS\b""", RegexOption.IGNORE_CASE), "Capitol Heights")
+            .replace(Regex("""\bCAPTIOL\b""", RegexOption.IGNORE_CASE), "Capitol")
+            .replace(Regex("""\bHAMPTONPARKBLVD\b""", RegexOption.IGNORE_CASE), "Hampton Park Blvd")
+            .replace(Regex("""\bMAILSTOP\b""", RegexOption.IGNORE_CASE), "Mail Stop")
+            .replace(Regex("""\bMAISTOP\b""", RegexOption.IGNORE_CASE), "Mail Stop")
             .replace(Regex("""\bCTRofSVCTNNL\b""", RegexOption.IGNORE_CASE), "CTR of SVC TNNL")
             .replace(Regex("""\bCTR\s*of\s*SVC\s*TNNL\b""", RegexOption.IGNORE_CASE), "CTR of SVC TNNL")
             .replace(Regex("""([a-z])([A-Z])"""), "$1 $2")

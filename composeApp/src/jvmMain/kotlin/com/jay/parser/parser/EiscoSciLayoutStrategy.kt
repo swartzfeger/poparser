@@ -238,7 +238,7 @@ class EiscoSciLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
                 if (erpInlineMatch != null) {
                     val leftCode = erpInlineMatch.leftCode
                     val vendorCode = normalizeSkuToken(erpInlineMatch.vendorCode)
-                    val quantity = erpInlineMatch.quantity.replace(",", "").toDoubleOrNull()
+                    val quantity = normalizeErpQuantity(vendorCode, erpInlineMatch.uom, erpInlineMatch.quantity)
                     val unitPrice = erpInlineMatch.unitPrice.replace(",", "").toDoubleOrNull()
 
                     val extraDesc = mutableListOf<String>()
@@ -348,6 +348,29 @@ class EiscoSciLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
                 i++
             }
         }
+
+
+    private fun normalizeErpQuantity(vendorCode: String, uom: String, quantity: String): Double? {
+        val parsedQuantity = quantity.replace(",", "").toDoubleOrNull() ?: return null
+        val normalizedSku = vendorCode.uppercase()
+        val normalizedUom = uom.uppercase().replace('O', '0')
+
+        /*
+         * Eisco's newer PO layout sometimes expresses case/pack items as one sellable
+         * package using UOM values like PK144 or PK500. The downstream quantity
+         * conversion already divides certain SKUs back to sellable packages, so feed
+         * the parser the equivalent each-count for those specific package rows.
+         *
+         * Example: 120-144V-100 PK144 qty 1 should export as qty 1, not 0.01.
+         * Example: 190-500V-100 PK500 qty 1 should export as qty 1, not 0.
+         */
+        if (parsedQuantity == 1.0) {
+            if (normalizedSku == "120-144V-100" && normalizedUom == "PK144") return 144.0
+            if (normalizedSku in setOf("180-500V-100", "190-500V-100") && normalizedUom == "PK500") return 500.0
+        }
+
+        return parsedQuantity
+    }
 
     private fun matchEiscoClassicItemLine(line: String): ItemLineMatch? {
         if (matchEiscoErpInlineItemLine(line) != null) return null
