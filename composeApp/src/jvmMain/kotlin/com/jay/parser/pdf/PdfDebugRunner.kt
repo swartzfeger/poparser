@@ -11,7 +11,7 @@ fun main() {
         "testpdf/Bartovation PO PL06426.pdf",
         "testpdf/Bartovation PO PL09325.pdf",
         "testpdf/Bartovation PO PL022326.pdf",
-        "testpdf/Bartovation PO PL062326.2.pdf",
+        //"testpdf/Bartovation PO PL062326.2.pdf",
         //"testpdf/invoice-SO-W5009.pdf",
         //"testpdf/invoice-SO-W5008.pdf",
         //"testpdf/invoice-SO-W5007.pdf",
