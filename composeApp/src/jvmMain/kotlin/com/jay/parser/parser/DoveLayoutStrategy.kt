@@ -204,8 +204,8 @@ class DoveLayoutStrategy : BaseLayoutStrategy() {
         val compact = window
             .uppercase()
             .replace('\uFFFE', '-')
-            .replace("–", "-")
-            .replace("—", "-")
+            .replace("â", "-")
+            .replace("â", "-")
             .replace("'", "")
             .replace(Regex("""\s+"""), " ")
 
@@ -232,6 +232,12 @@ class DoveLayoutStrategy : BaseLayoutStrategy() {
                     (compact.contains("106-QR5-") && compact.contains("500V-") && compact.contains("100")) ->
                 "106-QR5-500V-100"
 
+            compact.contains("QAC-400-1B-100") ||
+                    (compact.contains("QAC-400-1B-") && compact.contains("1B-100")) ||
+                    (compact.contains("QAC-400-") && compact.contains("1B-100")) ||
+                    (compact.contains("QAC PACKETS") && compact.contains("QAC-400-")) ->
+                "QAC-400-1B-100"
+
             else -> null
         }
     }
@@ -240,12 +246,13 @@ class DoveLayoutStrategy : BaseLayoutStrategy() {
         return raw
             .uppercase()
             .replace('\uFFFE', '-')
-            .replace("–", "-")
-            .replace("—", "-")
+            .replace("â", "-")
+            .replace("â", "-")
             .replace(Regex("""\s+"""), "")
             .replace(Regex("""-CANADA\b""", RegexOption.IGNORE_CASE), "")
             .replace(Regex("""\s*-\s*COMBO\b""", RegexOption.IGNORE_CASE), "")
             .replace(Regex("""-COMBO\b""", RegexOption.IGNORE_CASE), "")
+            .replace(Regex("""-EACH\b""", RegexOption.IGNORE_CASE), "")
             .trim()
             .removeSuffix("-")
     }
