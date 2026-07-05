@@ -52,7 +52,12 @@ import java.awt.dnd.DropTargetAdapter
 import java.awt.dnd.DropTargetDragEvent
 import java.awt.dnd.DropTargetDropEvent
 import java.io.File
+import java.io.InputStream
 import java.net.URI
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+import java.nio.charset.StandardCharsets
+import java.nio.file.Files
 import java.time.LocalDate
 import javax.swing.SwingUtilities
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -143,7 +148,119 @@ fun FrameWindowScope.MainScreen(
                     flavor == DataFlavor.javaFileListFlavor ||
                             flavor == DataFlavor.stringFlavor ||
                             flavor.primaryType.equals("text", ignoreCase = true) &&
-                            flavor.subType.equals("uri-list", ignoreCase = true)
+                            flavor.subType.equals("uri-list", ignoreCase = true) ||
+                            isOutlookFileGroupDescriptorFlavor(flavor) ||
+                            isOutlookFileContentsFlavor(flavor)
+                }
+            }
+
+            private fun isOutlookFileGroupDescriptorFlavor(flavor: DataFlavor): Boolean {
+                val name = flavor.humanPresentableName.orEmpty()
+                val mime = flavor.mimeType.orEmpty()
+                return name.contains("FileGroupDescriptor", ignoreCase = true) ||
+                        mime.contains("FileGroupDescriptor", ignoreCase = true)
+            }
+
+            private fun isOutlookFileContentsFlavor(flavor: DataFlavor): Boolean {
+                val name = flavor.humanPresentableName.orEmpty()
+                val mime = flavor.mimeType.orEmpty()
+                return name.contains("FileContents", ignoreCase = true) ||
+                        mime.contains("FileContents", ignoreCase = true)
+            }
+
+            private fun transferDataBytes(data: Any?): ByteArray? {
+                return when (data) {
+                    is ByteArray -> data
+                    is InputStream -> data.use { it.readBytes() }
+                    is ByteBuffer -> {
+                        val duplicate = data.slice()
+                        ByteArray(duplicate.remaining()).also { duplicate.get(it) }
+                    }
+                    else -> null
+                }
+            }
+
+            private fun sanitizeDroppedFilename(name: String): String {
+                val cleaned = name
+                    .substringAfterLast('\\')
+                    .substringAfterLast('/')
+                    .replace(Regex("""[<>:"/\\|?*\u0000-\u001F]"""), "_")
+                    .trim()
+
+                return cleaned.ifBlank { "outlook-dropped-file.pdf" }
+            }
+
+            private fun parseFileGroupDescriptorNames(data: ByteArray, unicode: Boolean): List<String> {
+                if (data.size < 4) return emptyList()
+
+                val count = runCatching {
+                    ByteBuffer.wrap(data, 0, 4).order(ByteOrder.LITTLE_ENDIAN).int
+                }.getOrDefault(0)
+
+                if (count <= 0 || count > 100) return emptyList()
+
+                val descriptorSize = if (unicode) 592 else 332
+                val nameOffset = 72
+                val unicodeNameBytes = 520
+                val ansiNameBytes = 260
+
+                return (0 until count).mapNotNull { index ->
+                    val descriptorOffset = 4 + index * descriptorSize
+                    if (descriptorOffset + nameOffset >= data.size) return@mapNotNull null
+
+                    val rawName = if (unicode) {
+                        val start = descriptorOffset + nameOffset
+                        val maxEnd = minOf(start + unicodeNameBytes, data.size)
+                        var end = start
+                        while (end + 1 < maxEnd) {
+                            if (data[end] == 0.toByte() && data[end + 1] == 0.toByte()) break
+                            end += 2
+                        }
+                        if (end <= start) "" else String(data, start, end - start, StandardCharsets.UTF_16LE)
+                    } else {
+                        val start = descriptorOffset + nameOffset
+                        val maxEnd = minOf(start + ansiNameBytes, data.size)
+                        var end = start
+                        while (end < maxEnd && data[end] != 0.toByte()) end++
+                        if (end <= start) "" else String(data, start, end - start, StandardCharsets.ISO_8859_1)
+                    }
+
+                    sanitizeDroppedFilename(rawName)
+                }.filter { it.isNotBlank() }
+            }
+
+            private fun extractOutlookVirtualFiles(transferable: Transferable): List<File> {
+                val flavors = transferable.transferDataFlavors.toList()
+
+                val descriptorFlavor = flavors.firstOrNull { isOutlookFileGroupDescriptorFlavor(it) }
+                    ?: return emptyList()
+
+                val descriptorBytes = runCatching {
+                    transferDataBytes(transferable.getTransferData(descriptorFlavor))
+                }.getOrNull() ?: return emptyList()
+
+                val unicode = descriptorFlavor.humanPresentableName.contains("W", ignoreCase = true) ||
+                        descriptorFlavor.mimeType.contains("FileGroupDescriptorW", ignoreCase = true)
+
+                val fileNames = parseFileGroupDescriptorNames(descriptorBytes, unicode)
+                if (fileNames.isEmpty()) return emptyList()
+
+                val contentFlavors = flavors.filter { isOutlookFileContentsFlavor(it) }
+                if (contentFlavors.isEmpty()) return emptyList()
+
+                return fileNames.mapIndexedNotNull { index, originalName ->
+                    val contentFlavor = contentFlavors.getOrNull(index) ?: contentFlavors.firstOrNull()
+                    if (contentFlavor == null) return@mapIndexedNotNull null
+
+                    val content = runCatching {
+                        transferDataBytes(transferable.getTransferData(contentFlavor))
+                    }.getOrNull() ?: return@mapIndexedNotNull null
+
+                    val safeName = sanitizeDroppedFilename(originalName)
+                    val tempFile = Files.createTempFile("po-parser-outlook-drop-", "-$safeName").toFile()
+                    tempFile.writeBytes(content)
+                    tempFile.deleteOnExit()
+                    tempFile
                 }
             }
 
@@ -173,7 +290,7 @@ fun FrameWindowScope.MainScreen(
                     }
                 }.getOrNull()
 
-                return uriText
+                val filesFromUriText = uriText
                     ?.lineSequence()
                     ?.map { it.trim() }
                     ?.filter { it.isNotBlank() && !it.startsWith("#") }
@@ -187,7 +304,13 @@ fun FrameWindowScope.MainScreen(
                     }
                     ?.filter { it.exists() }
                     ?.toList()
-                    ?: emptyList()
+                    .orEmpty()
+
+                if (filesFromUriText.isNotEmpty()) {
+                    return filesFromUriText
+                }
+
+                return extractOutlookVirtualFiles(transferable)
             }
 
             private fun acceptOrRejectDrag(dtde: DropTargetDragEvent) {
@@ -235,8 +358,8 @@ fun FrameWindowScope.MainScreen(
 
                     if (droppedFiles.isEmpty()) {
                         uiState = UiState(
-                            status = "Error",
-                            message = "Drop failed: Windows did not provide file paths. Use Choose Files, or drag from File Explorer instead of a browser/email/cloud preview."
+                            status = "Unsupported Drop Source",
+                            message = "Outlook did not provide the attachment as a readable file. Please use Choose Files, or save the PDF first and drag it from File Explorer."
                         )
                         dtde.dropComplete(false)
                         return
