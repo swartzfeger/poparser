@@ -6,11 +6,11 @@ import java.io.File
 
 fun main() {
     val testFiles = listOf(
-        "testpdf/PO_3_from_Sensonics_Inc._23624.pdf",
-        "testpdf/PO_11_from_Sensonics_Inc._1584.pdf",
-        "testpdf/PO_21_from_Sensonics_Inc._27512.pdf",
-        "testpdf/PO_973_from_Sensonics_Inc._15492.pdf",
-        "testpdf/SENSONICS - PO_943_from_Sensonics_Inc._19768.pdf",
+        "testpdf/Precision 2026.07.06(406576)Virox.pdf",
+        //"testpdf/PO_11_from_Sensonics_Inc._1584.pdf",
+        //"testpdf/PO_21_from_Sensonics_Inc._27512.pdf",
+        //"testpdf/PO_973_from_Sensonics_Inc._15492.pdf",
+        //"testpdf/SENSONICS - PO_943_from_Sensonics_Inc._19768.pdf",
         //"testpdf/Dove POD-0087 - PrecLab.pdf",
         //"testpdf/DovePurchaseOrder-EACH PO-00848-D PrecisionLaboratoriesInc.pdf",
         //"testpdf/DovePurchaseOrder-EACH PO-00849-D PrecisionLaboratoriesInc.pdf"
