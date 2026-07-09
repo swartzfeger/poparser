@@ -1,26 +1,15 @@
 package com.jay.parser.mappers
 
+import com.jay.parser.masterdata.MasterDataStore
 import com.jay.parser.models.MasterCustomer
-import kotlinx.serialization.json.Json
 
 object CustomerMapper {
-
-    private val json = Json {
-        ignoreUnknownKeys = true
-    }
-
-    private val customerData: List<MasterCustomer> by lazy {
-        val stream = object {}.javaClass.getResourceAsStream("/data/customers.json")
-            ?: error("Could not find /data/customers.json")
-
-        val text = stream.bufferedReader().use { it.readText() }
-        json.decodeFromString<List<MasterCustomer>>(text)
-    }
 
     fun lookupCustomer(name: String?): MasterCustomer? {
         if (name.isNullOrBlank()) return null
 
         val normalized = normalize(name)
+        val customerData = MasterDataStore.current().customers
 
         val matchById = customerData.find { normalize(it.id) == normalized }
         if (matchById != null) return matchById

@@ -1,5 +1,8 @@
 package com.jay.parser.mappers
 
+import com.jay.parser.masterdata.MasterDataStore
+import com.jay.parser.masterdata.MasterQtyDiscountBreak
+import com.jay.parser.masterdata.MasterQtyDiscountRule
 import kotlin.math.round
 
 object QtyDiscountMapper {
@@ -7,7 +10,7 @@ object QtyDiscountMapper {
     data class QtyDiscountResult(
         val unitPrice: Double,
         val discountPercent: Double,
-        val matchedRule: QtyDiscountRule?
+        val matchedRule: MasterQtyDiscountRule?
     )
 
     data class QtyDiscountRule(
@@ -38,6 +41,8 @@ object QtyDiscountMapper {
         val normalizedSku = normalizeSku(sku)
         val normalizedPriceLevel = normalize(priceLevel)
 
+        val rules = MasterDataStore.current().qtyDiscountRules
+
         val customerSpecificMatch = rules
             .filter { normalize(it.customerId) != ALL_CUSTOMERS }
             .filter { rule ->
@@ -67,11 +72,11 @@ object QtyDiscountMapper {
     }
 
     private data class RuleMatch(
-        val rule: QtyDiscountRule,
-        val breakPoint: QtyDiscountBreak
+        val rule: MasterQtyDiscountRule,
+        val breakPoint: MasterQtyDiscountBreak
     )
 
-    private fun List<QtyDiscountRule>.bestRuleFor(quantity: Double): RuleMatch? {
+    private fun List<MasterQtyDiscountRule>.bestRuleFor(quantity: Double): RuleMatch? {
         return this
             .mapNotNull { rule ->
                 val bestBreak = rule.breaks
@@ -86,12 +91,12 @@ object QtyDiscountMapper {
             )
     }
 
-    private fun QtyDiscountRule.matchesSku(normalizedSku: String): Boolean {
+    private fun MasterQtyDiscountRule.matchesSku(normalizedSku: String): Boolean {
         return normalizeSku(itemId) == normalizedSku ||
                 normalizeSku(qtyDiscountId) == normalizedSku
     }
 
-    private fun QtyDiscountRule.matchesPriceLevel(normalizedPriceLevel: String): Boolean {
+    private fun MasterQtyDiscountRule.matchesPriceLevel(normalizedPriceLevel: String): Boolean {
         val rulePriceLevel = normalize(priceLevel)
 
         /*
@@ -121,6 +126,23 @@ object QtyDiscountMapper {
 
     private fun breakAt(minQty: Number, discountPercent: Double): QtyDiscountBreak {
         return QtyDiscountBreak(minQty.toDouble(), discountPercent)
+    }
+
+    fun defaultRules(): List<MasterQtyDiscountRule> {
+        return rules.map { rule ->
+            MasterQtyDiscountRule(
+                customerId = rule.customerId,
+                itemId = rule.itemId,
+                qtyDiscountId = rule.qtyDiscountId,
+                priceLevel = rule.priceLevel,
+                breaks = rule.breaks.map { breakPoint ->
+                    MasterQtyDiscountBreak(
+                        minQty = breakPoint.minQty,
+                        discountPercent = breakPoint.discountPercent
+                    )
+                }
+            )
+        }
     }
 
     private fun normalize(value: String?): String {
