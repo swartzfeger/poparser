@@ -101,7 +101,19 @@ class OrderFileParser(
         }
 
         if (isFisher) {
-            val nativePrs = extractFisherPrNumbers(joinedNative + "\n" + joinedOcrCandidate)
+            val nativePrs = (joinedNative + "\n" + joinedOcrCandidate)
+                .uppercase()
+                .replace("FK", "PR")
+                .replace("FR", "PR")
+                .replace("PK", "PR")
+                .replace(Regex("""PR\s*41\s+(\d{4,5})"""), "PR41$1")
+                .let { normalized ->
+                    Regex("""\bPR\d{7,8}\b""")
+                        .findAll(normalized)
+                        .map { it.value }
+                        .distinct()
+                        .toList()
+                }
 
             /*
              * Only use positional PR recovery when the counts line up. In multi-order
@@ -125,18 +137,13 @@ class OrderFileParser(
                 parsedOrders
             }
 
-            val ordersAfterSparseOcrRecovery = recoverFisherOrderNumbersWithSparseOcr(
-                file = file,
-                parsedOrders = ordersAfterNativeRecovery
-            )
-
             val filenamePr = if (file.nameWithoutExtension.matches(Regex("""\d{6,8}"""))) {
                 "PR${file.nameWithoutExtension}"
             } else {
                 null
             }
 
-            return ordersAfterSparseOcrRecovery.mapIndexed { index, order ->
+            return ordersAfterNativeRecovery.mapIndexed { index, order ->
                 if (order.orderNumber.isNullOrBlank() && filenamePr != null && index == 0) {
                     order.copy(orderNumber = filenamePr)
                 } else {
@@ -146,66 +153,6 @@ class OrderFileParser(
         }
 
         return parsedOrders
-    }
-
-    private fun recoverFisherOrderNumbersWithSparseOcr(
-        file: File,
-        parsedOrders: List<ParsedPdfFields>
-    ): List<ParsedPdfFields> {
-        if (parsedOrders.none { it.orderNumber.isNullOrBlank() }) return parsedOrders
-
-        val sparseOcrLines = runCatching {
-            ocrPdfTextExtractor.extractLines(file, pageSegMode = 12, binarize = false)
-        }.getOrDefault(emptyList())
-
-        val sparsePrs = extractFisherPrNumbers(sparseOcrLines.joinToString("\n") { it.text })
-
-        val prs = if (sparsePrs.isNotEmpty()) {
-            sparsePrs
-        } else {
-            val pdftoppmLines = runCatching {
-                ocrPdfTextExtractor.extractLinesWithPdftoppm(file, pageSegMode = 12)
-            }.getOrDefault(emptyList())
-
-            extractFisherPrNumbers(pdftoppmLines.joinToString("\n") { it.text })
-        }
-
-        if (prs.isEmpty()) return parsedOrders
-
-        return when {
-            parsedOrders.size == 1 && parsedOrders.first().orderNumber.isNullOrBlank() ->
-                listOf(parsedOrders.first().copy(orderNumber = prs.first()))
-
-            parsedOrders.count { it.orderNumber.isNullOrBlank() } == prs.size &&
-                    parsedOrders.size == prs.size ->
-                parsedOrders.mapIndexed { index, order ->
-                    if (order.orderNumber.isNullOrBlank()) {
-                        order.copy(orderNumber = prs[index])
-                    } else {
-                        order
-                    }
-                }
-
-            else -> parsedOrders
-        }
-    }
-
-    internal fun extractFisherPrNumbers(text: String): List<String> {
-        return text
-            .uppercase()
-            .replace("FK", "PR")
-            .replace("FR", "PR")
-            .replace("PK", "PR")
-            .replace("P R", "PR")
-            .replace(Regex("""PR\s*41\s+(\d{4,5})"""), "PR41$1")
-            .replace(Regex("""PR\s+(\d{7,8})"""), "PR$1")
-            .let { normalized ->
-                Regex("""\bPR\d{7,8}\b""")
-                    .findAll(normalized)
-                    .map { it.value }
-                    .distinct()
-                    .toList()
-            }
     }
 
     private fun looksLikeCorruptedTextLayer(lines: List<PdfLine>): Boolean {
