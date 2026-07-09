@@ -14,13 +14,19 @@ class FisherScientificCoLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
             .replace("|", " ")
             .uppercase()
 
-        return text.contains("FISHER") &&
-                (
-                        text.contains("PRECISION") ||
-                                text.contains("PRECISTON") ||
-                                text.contains("PREC ISITON") ||
-                                text.contains("LABORATORIES")
-                        )
+        val hasPrecisionVendor =
+            text.contains("PRECISION") ||
+                    text.contains("PRECISTON") ||
+                    text.contains("PREC ISITON") ||
+                    text.contains("LABORATORIES")
+
+        val hasFisherOrderTable =
+            text.contains("FISHER") &&
+                    text.contains("SUPPLIER") &&
+                    text.contains("CATALOG") &&
+                    text.contains("TOTAL")
+
+        return text.contains("FISHER") && (hasPrecisionVendor || hasFisherOrderTable)
     }
 
     override fun score(lines: List<String>): Int {
@@ -36,7 +42,11 @@ class FisherScientificCoLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         ) score += 80
         if (text.contains("ORDER NOTES AND INSTRUCTIONS")) score += 60
         if (text.contains("CATALOG")) score += 40
-        if (text.contains("FISHER PO LINE") || text.contains("PISHER FPO LINE")) score += 60
+        if (
+            text.contains("FISHER PO LINE") ||
+            text.contains("FISHER FO LINE") ||
+            text.contains("PISHER FPO LINE")
+        ) score += 60
 
         return score
     }
@@ -334,7 +344,7 @@ class FisherScientificCoLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
             val precisionSku = normalizedParts.firstOrNull { looksLikePrecisionSku(it) } ?: continue
 
             val moneyValues = extractMoneyValues(correctedLine)
-            val unitPrice = extractUnitPrice(correctedLine, moneyValues) ?: continue
+            val unitPrice = extractUnitPrice(moneyValues) ?: continue
 
             val quantity = parseFisherQuantity(
                 line = correctedLine,
@@ -383,6 +393,7 @@ class FisherScientificCoLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
             .replace("—", "-")
             .replace("–", "-")
             .replace("~", "-")
+            .replace("�", "-")
             .replace("“", "")
             .replace("”", "")
             .replace("¥", "V")
@@ -390,6 +401,7 @@ class FisherScientificCoLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
             .replace("]", " | ")
             .replace("[", " | ")
             .replace("WHIT", "UNIT")
+            .replace("PEI", "PE")
             .replace("FE ", "PE ")
             .replace(" I ", " | ")
             .replace(Regex("""\s+"""), " ")
@@ -415,6 +427,7 @@ class FisherScientificCoLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
             .replace("—", "-")
             .replace("–", "-")
             .replace("~", "-")
+            .replace("�", "-")
             .replace("“", "")
             .replace("”", "")
             .replace("¥", "V")
@@ -437,6 +450,7 @@ class FisherScientificCoLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
             "175-247-100ERDR" -> "175-24V-100"
             "175-247-100-ERDR" -> "175-24V-100"
             "175-249-100" -> "175-24V-100"
+            "175-24V-1L00-EKDE" -> "175-24V-100"
             "175-249-LO0ERDE" -> "175-24V-100"
             "175-249-L00ERDE" -> "175-24V-100"
             "175-249-LOOERDE" -> "175-24V-100"
@@ -454,6 +468,7 @@ class FisherScientificCoLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
             "PHOO15-1B-50" -> "PH0015-1B-50"
             "PH001S-1B-50" -> "PH0015-1B-50"
             "PHOOIS-1B-50" -> "PH0015-1B-50"
+            "PHOOIS-1B-S5O" -> "PH0015-1B-50"
 
             "PHOO25-1B-5O" -> "PH0025-1B-50"
             "PHOO25-1B-50" -> "PH0025-1B-50"
@@ -492,6 +507,7 @@ class FisherScientificCoLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
     ): Double? {
         val normalizedLine = line
             .uppercase()
+            .replace("PEI", "PE")
             .replace("FE", "PE")
             .replace("WHIT", "UNIT")
             .replace(Regex("""\s+"""), " ")
@@ -576,7 +592,7 @@ class FisherScientificCoLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
             .toList()
     }
 
-    private fun extractUnitPrice(line: String, moneyValues: List<Double>): Double? {
+    private fun extractUnitPrice(moneyValues: List<Double>): Double? {
         if (moneyValues.isEmpty()) return null
 
         /*
