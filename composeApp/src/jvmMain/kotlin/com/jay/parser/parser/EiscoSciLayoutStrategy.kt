@@ -41,12 +41,12 @@ class EiscoSciLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         val textLines = nonBlankLines(lines)
         val shipTo = findShipTo(textLines)
 
-        val rawCustomerName = shipTo.shipToCustomer ?: findCustomerName(textLines)
+        val rawCustomerName = findCustomerName(textLines) ?: "EISCO SCI"
 
         return ParsedPdfFields(
-            customerName = rawCustomerName?.let(::normalizeCustomerName),
+            customerName = normalizeCustomerName(rawCustomerName),
             orderNumber = findOrderNumber(textLines),
-            shipToCustomer = shipTo.shipToCustomer?.let(::normalizeCustomerName),
+            shipToCustomer = shipTo.shipToCustomer?.let(::normalizeShipToCustomerName),
             addressLine1 = shipTo.addressLine1,
             addressLine2 = shipTo.addressLine2,
             city = shipTo.city,
@@ -61,7 +61,7 @@ class EiscoSciLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         return lines.firstOrNull {
             val n = normalize(it)
             n == "EISCOLLC" || n == "EISCO" || n == "EISCOLLCLLC"
-        }?.let { "EISCO LLC" }
+        }?.let { "EISCO SCI" }
     }
 
     private fun findOrderNumber(lines: List<String>): String? {
@@ -141,7 +141,7 @@ class EiscoSciLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
 
         val shipToCustomer = shipToMarkerLine?.let {
             extractAfter(it, "ship-to address") ?: extractAfter(it, "ship-toaddress")
-        }?.let(::normalizeCustomerName) ?: "EISCO LLC"
+        }?.let(::normalizeShipToCustomerName) ?: "EISCO LLC"
 
         val addressLine1 = if (markerIdx >= 0 && markerIdx + 1 < lines.size) {
             val nextLine = lines[markerIdx + 1]
@@ -567,6 +567,22 @@ class EiscoSciLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
     }
 
     private fun normalizeCustomerName(value: String): String {
+        val compact = value
+            .replace(Regex("""\s+"""), " ")
+            .trim()
+
+        return when {
+            compact.equals("EISCO SCI", ignoreCase = true) -> "EISCO SCI"
+            compact.equals("EISCOLLC", ignoreCase = true) -> "EISCO SCI"
+            compact.equals("EISCOLLCLLC", ignoreCase = true) -> "EISCO SCI"
+            compact.equals("EISCO", ignoreCase = true) -> "EISCO SCI"
+            compact.equals("EISCO LLC", ignoreCase = true) -> "EISCO LLC"
+            compact.equals("Eisco LLC", ignoreCase = true) -> "EISCO LLC"
+            else -> compact.uppercase()
+        }
+    }
+
+    private fun normalizeShipToCustomerName(value: String): String {
         val compact = value
             .replace(Regex("""\s+"""), " ")
             .trim()

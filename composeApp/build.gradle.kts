@@ -75,7 +75,7 @@ compose.desktop {
                 TargetFormat.Exe
             )
 
-            appResourcesRootDir.set(project.layout.projectDirectory.dir("composeApp/resources"))
+            appResourcesRootDir.set(project.layout.projectDirectory.dir("resources"))
 
             windows {
                 menu = true

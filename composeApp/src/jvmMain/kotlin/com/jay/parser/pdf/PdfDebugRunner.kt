@@ -6,7 +6,7 @@ import java.io.File
 
 fun main() {
     val testFiles = listOf(
-        "testpdf/Precision 2026.07.06(406576)Virox.pdf",
+        "../testpdf/FAX_20260303_1772496110_257.pdf",
         //"testpdf/PO_11_from_Sensonics_Inc._1584.pdf",
         //"testpdf/PO_21_from_Sensonics_Inc._27512.pdf",
         //"testpdf/PO_973_from_Sensonics_Inc._15492.pdf",
