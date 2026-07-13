@@ -22,7 +22,8 @@ class MasterListImporterTest {
         assertEquals("TEST STRIPS", bundle.itemCatalog.descriptions["ABC-1V-50"])
         assertEquals("4020", bundle.glAccounts["ABC-1V-50"])
         assertEquals(12.345, bundle.itemCatalog.prices["ABC-1V-50"]?.get("DISTRIBUTOR"))
-        assertEquals(18.518, bundle.itemCatalog.prices["ABC-1V-50"]?.get("DIST + 50%"))
+        assertEquals(18.519, bundle.itemCatalog.prices["ABC-1V-50"]?.get("DIST + 50%"))
+        assertEquals(12.3, bundle.itemCatalog.prices["ABC-1V-50"]?.get("DIST + 100%"))
 
         assertEquals(1, bundle.qtyDiscountRules.size)
         val discount = bundle.qtyDiscountRules.first()
@@ -33,6 +34,20 @@ class MasterListImporterTest {
         assertEquals(listOf(50.0, 100.0), discount.breaks.map { it.minQty })
         assertEquals(listOf(0.03, 0.05), discount.breaks.map { it.discountPercent })
         assertTrue(parsed.warnings.isEmpty())
+    }
+
+    @Test
+    fun importedItemCatalogJsonFormatsPricesWithThreeDecimalPlaces() {
+        val file = createWorkbook()
+        val catalog = MasterListImporter().parse(file).bundle.itemCatalog
+        val method = MasterDataStore::class.java.getDeclaredMethod("encodeItemCatalog", catalog::class.java)
+        method.isAccessible = true
+
+        val json = method.invoke(MasterDataStore, catalog) as String
+
+        assertTrue(json.contains("\"DISTRIBUTOR\": 12.345"))
+        assertTrue(json.contains("\"DIST + 50%\": 18.519"))
+        assertTrue(json.contains("\"DIST + 100%\": 12.300"))
     }
 
     private fun createWorkbook(): File {
@@ -65,7 +80,8 @@ class MasterListImporterTest {
                     createCell(3).setCellValue("Sales Acct")
                     createCell(4).setCellValue("DISTRIBUTOR   ")
                     createCell(5).setCellValue("DIST + 50%    ")
-                    createCell(6).setCellValue("Qty Discount ID")
+                    createCell(6).setCellValue("DIST + 100%   ")
+                    createCell(7).setCellValue("Qty Discount ID")
                 }
                 createRow(1).apply {
                     createCell(0).setCellValue("ABC-1V-50")
@@ -73,8 +89,9 @@ class MasterListImporterTest {
                     createCell(2).setCellValue("Substock item")
                     createCell(3).setCellValue("4020")
                     createCell(4).setCellValue(12.345)
-                    createCell(5).setCellValue(18.518)
-                    createCell(6).setCellValue("ABC")
+                    createCell(5).setCellValue(18.5185)
+                    createCell(6).setCellValue(12.3)
+                    createCell(7).setCellValue("ABC")
                 }
             }
 

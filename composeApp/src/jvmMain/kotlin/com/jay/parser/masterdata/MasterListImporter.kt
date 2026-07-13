@@ -10,6 +10,8 @@ import org.apache.poi.ss.usermodel.Sheet
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import java.io.File
 import java.io.FileInputStream
+import java.math.BigDecimal
+import java.math.RoundingMode
 
 class MasterListImporter {
 
@@ -134,7 +136,7 @@ class MasterListImporter {
             for ((priceLevel, columnIndex) in priceColumns) {
                 val price = row.numericAt(columnIndex)
                 if (price != null) {
-                    rowPrices[priceLevel] = price
+                    rowPrices[priceLevel] = price.roundPrice()
                 }
             }
 
@@ -297,6 +299,12 @@ class MasterListImporter {
             CellType.FORMULA -> runCatching { numericCellValue }.getOrNull()
             else -> null
         }
+    }
+
+    private fun Double.roundPrice(): Double {
+        return BigDecimal.valueOf(this)
+            .setScale(3, RoundingMode.HALF_UP)
+            .toDouble()
     }
 
     private fun String.normalizedText(): String {

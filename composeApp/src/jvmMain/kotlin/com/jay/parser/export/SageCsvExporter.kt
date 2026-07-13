@@ -86,7 +86,7 @@ class SageCsvExporter {
                     line.sku,
                     line.description,
                     formatQuantity(line.quantityForExport),
-                    formatMoney(unitPrice),
+                    formatUnitPrice(unitPrice),
                     formatMoney(amount),
                     "1135",
                     line.glAccount,
@@ -117,6 +117,12 @@ class SageCsvExporter {
     private fun formatMoney(value: Double): String {
         return BigDecimal.valueOf(value)
             .setScale(2, RoundingMode.HALF_UP)
+            .toPlainString()
+    }
+
+    private fun formatUnitPrice(value: Double): String {
+        return BigDecimal.valueOf(value)
+            .setScale(3, RoundingMode.HALF_UP)
             .toPlainString()
     }
 

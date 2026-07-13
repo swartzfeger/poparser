@@ -1,9 +1,12 @@
 package com.jay.parser.masterdata
 
 import com.jay.parser.mappers.QtyDiscountMapper
+import com.jay.parser.models.ItemCatalog
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.File
+import java.math.BigDecimal
+import java.math.RoundingMode
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.time.Instant
@@ -108,11 +111,48 @@ object MasterDataStore {
     }
 
     private fun writeBundle(bundle: MasterDataBundle, metadata: MasterDataMetadata) {
-        writeTextAtomically(dataDir.resolve(ITEMS_FILE), json.encodeToString(bundle.itemCatalog))
+        writeTextAtomically(dataDir.resolve(ITEMS_FILE), encodeItemCatalog(bundle.itemCatalog))
         writeTextAtomically(dataDir.resolve(CUSTOMERS_FILE), json.encodeToString(bundle.customers))
         writeTextAtomically(dataDir.resolve(GL_ACCOUNTS_FILE), json.encodeToString(bundle.glAccounts))
         writeTextAtomically(dataDir.resolve(QTY_DISCOUNTS_FILE), json.encodeToString(bundle.qtyDiscountRules))
         writeTextAtomically(dataDir.resolve(METADATA_FILE), json.encodeToString(metadata))
+    }
+
+    private fun encodeItemCatalog(catalog: ItemCatalog): String {
+        return buildString {
+            append("{\n")
+            append("  \"prices\": {\n")
+            catalog.prices.entries.forEachIndexed { skuIndex, (sku, priceLevels) ->
+                append("    ${quoteJson(sku)}: {\n")
+                priceLevels.entries.forEachIndexed { levelIndex, (priceLevel, price) ->
+                    append("      ${quoteJson(priceLevel)}: ${formatPrice(price)}")
+                    if (levelIndex < priceLevels.size - 1) append(",")
+                    append("\n")
+                }
+                append("    }")
+                if (skuIndex < catalog.prices.size - 1) append(",")
+                append("\n")
+            }
+            append("  },\n")
+            append("  \"descriptions\": {\n")
+            catalog.descriptions.entries.forEachIndexed { descriptionIndex, (sku, description) ->
+                append("    ${quoteJson(sku)}: ${quoteJson(description)}")
+                if (descriptionIndex < catalog.descriptions.size - 1) append(",")
+                append("\n")
+            }
+            append("  }\n")
+            append("}\n")
+        }
+    }
+
+    private fun quoteJson(value: String): String {
+        return json.encodeToString(value)
+    }
+
+    private fun formatPrice(value: Double): String {
+        return BigDecimal.valueOf(value)
+            .setScale(3, RoundingMode.HALF_UP)
+            .toPlainString()
     }
 
     private fun writeTextAtomically(file: File, text: String) {
