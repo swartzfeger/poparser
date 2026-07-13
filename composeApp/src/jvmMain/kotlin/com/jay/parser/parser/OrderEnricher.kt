@@ -19,42 +19,14 @@ class OrderEnricher {
                 var sku = item.sku?.trim().orEmpty()
                 if (sku.isBlank()) return@mapNotNull null
 
-                if (
-                    resolvedCustomer?.id?.equals("BARTOVATION LLC", ignoreCase = true) == true &&
-                    sku.equals("PLBL", ignoreCase = true)
-                ) {
-                    val rawQty = item.quantity ?: 0.0
-                    val lookupSku = "LBL"
-                    val mappedDescription = ItemMapper.getItemDescription(lookupSku).ifBlank { "LABEL" }
-                    val mappedUnitPrice = ItemMapper.getItemPrice(
-                        sku = lookupSku,
-                        priceLevel = resolvedCustomer.priceLevel
-                    )
-                    val qtyDiscountResult = QtyDiscountMapper.applyQtyDiscount(
-                        customerId = resolvedCustomer.id,
-                        sku = lookupSku,
-                        quantity = rawQty,
-                        unitPrice = mappedUnitPrice,
-                        priceLevel = resolvedCustomer.priceLevel
-                    )
-
-                    return@mapNotNull ExportOrderLine(
-                        sku = "PLBL",
-                        description = mappedDescription,
-                        quantityRaw = rawQty,
-                        quantityForExport = rawQty,
-                        unitPriceReference = item.unitPrice,
-                        unitPriceResolved = qtyDiscountResult.unitPrice,
-                        glAccount = GLAccountMapper.getGLAccount(lookupSku)
-                    )
-                }
-
                 val allKnownSkus = ItemMapper.getAllSkus()
 
                 val isExactMatch = allKnownSkus.contains(sku)
                 var description = if (isExactMatch) ItemMapper.getItemDescription(sku) else ""
 
-                if (!isExactMatch) {
+                if (!isExactMatch && sku.equals("PLBL", ignoreCase = true)) {
+                    description = "PAPER LABELS"
+                } else if (!isExactMatch) {
                     val bestMatch = allKnownSkus
                         .associateWith { sku.levenshteinDistance(it) }
                         .filterValues { distance -> distance <= 2 }
@@ -91,10 +63,20 @@ class OrderEnricher {
                     resolvedCustomer = resolvedCustomer
                 )
 
-                val mappedUnitPrice = ItemMapper.getItemPrice(
+                val masterUnitPrice = ItemMapper.getItemPrice(
                     sku = sku,
                     priceLevel = resolvedCustomer?.priceLevel.orEmpty()
                 )
+
+                val mappedUnitPrice = if (
+                    masterUnitPrice == 0.0 &&
+                    sku.equals("PLBL", ignoreCase = true) &&
+                    item.unitPrice != null
+                ) {
+                    item.unitPrice
+                } else {
+                    masterUnitPrice
+                }
 
                 val uomAdjustedUnitPrice = getUomAdjustedUnitPrice(
                     sku = sku,
@@ -112,7 +94,15 @@ class OrderEnricher {
 
                 val resolvedUnitPrice = qtyDiscountResult.unitPrice
 
-                val glAccount = GLAccountMapper.getGLAccount(sku)
+                val mappedGlAccount = GLAccountMapper.getGLAccount(sku)
+                val glAccount = if (
+                    mappedGlAccount.isBlank() &&
+                    sku.equals("PLBL", ignoreCase = true)
+                ) {
+                    "4210"
+                } else {
+                    mappedGlAccount
+                }
 
                 ExportOrderLine(
                     sku = sku,

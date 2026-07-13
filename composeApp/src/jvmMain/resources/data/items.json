@@ -2130,6 +2130,18 @@
       "DIST - 10%": 0.5,
       "DIST - 15%": 0.5
     },
+    "PLBL": {
+      "DISTRIBUTOR": 0.15,
+      "DIST + 100%": 0.15,
+      "DIST + 75%": 0.15,
+      "DIST + 50%": 0.15,
+      "DIST + 25%": 0.15,
+      "DIST + 10%": 0.15,
+      "DIST - 5%": 0.15,
+      "DIST - 10%": 0.15,
+      "DIST - 15%": 0.15,
+      "P. EUROPE": 0.15
+    },
     "LENS-2330-100": {
       "DIST - 5%": 3.75
     },
@@ -3854,6 +3866,7 @@
     "LAM-4250-200": "4250-BJ LAMOTTE CHLORINE TEST PAPERS, 1 VIAL, 200 STRIPS/VIAL",
     "LAM-8052-100": "(80010-52)  100 MICROSLIDES, (TSA/RB) SIDE 1 AGAR: TRYPTIC SOY, SIDE 2 AGAR: ROSE BENGAL",
     "LBL": "LABEL",
+    "PLBL": "PAPER LABELS",
     "LENS": "LENS BOOKS",
     "LENS-2330-100": "LENS PAPER, 23 CM X 30.5 CM, 100 SHEETS/ENVELOPE",
     "LENS-29-1000": "LENS BOOKS, 2.875\" X 9\" SHEETS, 1000 SHEETS/PK",

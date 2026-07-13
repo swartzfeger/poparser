@@ -152,10 +152,13 @@ class AutoChlorSystemTnLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
                     }
                 }
 
-                val productLine = parseProductLine(line) ?: return@forEachIndexed
+                val productLine = parseProductLine(line)
+                    ?: parseMalformedProductLine(textLines, index)
+                    ?: return@forEachIndexed
 
                 val vendorSku = findVendorSku(textLines, index + 1)
                     ?: productLine.inlineSku
+                    ?: productLine.sku
                     ?: return@forEachIndexed
 
                 val sku = normalizeAutoChlorSku(vendorSku) ?: return@forEachIndexed
@@ -290,6 +293,57 @@ class AutoChlorSystemTnLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
             description = match.groupValues[1].trim(),
             quantity = parseNumber(match.groupValues[2]),
             unitPrice = parseNumber(match.groupValues[3])
+        )
+    }
+
+    private fun parseMalformedProductLine(
+        textLines: List<String>,
+        index: Int
+    ): ParsedProductLine? {
+        val line = textLines.getOrNull(index)
+            ?.replace(Regex("""\s+"""), " ")
+            ?.trim()
+            ?: return null
+
+        if (!Regex("""^R\d+\b""", RegexOption.IGNORE_CASE).containsMatchIn(line)) {
+            return null
+        }
+
+        val vendorSku = findVendorSku(textLines, index + 1) ?: return null
+        val releaseQuantity = findReleaseQuantity(textLines, index + 1) ?: return null
+        if (releaseQuantity <= 0.0) return null
+
+        val moneyValues = Regex("""[\d,]+\.\d+""")
+            .findAll(line)
+            .mapNotNull { parseNumber(it.value) }
+            .toList()
+
+        val extendedTotal = moneyValues.lastOrNull() ?: return null
+        if (extendedTotal <= 0.0) return null
+
+        val visibleUnitPrice = moneyValues
+            .dropLast(1)
+            .lastOrNull()
+            ?.takeIf { it > 0.0 }
+
+        val calculatedUnitPrice = extendedTotal / releaseQuantity
+        val unitPrice = visibleUnitPrice
+            ?.takeIf { kotlin.math.abs(it - calculatedUnitPrice) <= 0.05 }
+            ?: calculatedUnitPrice
+
+        val description = line
+            .replaceFirst(Regex("""^R\d+\s*""", RegexOption.IGNORE_CASE), "")
+            .replace(Regex("""[\d,]+\.\d+\s+[\d,]+\.\d+\s*$"""), "")
+            .replace(Regex("""\s+"""), " ")
+            .trim()
+            .ifBlank { vendorSku }
+
+        return ParsedProductLine(
+            inlineSku = vendorSku,
+            sku = null,
+            description = description,
+            quantity = releaseQuantity,
+            unitPrice = unitPrice
         )
     }
 
