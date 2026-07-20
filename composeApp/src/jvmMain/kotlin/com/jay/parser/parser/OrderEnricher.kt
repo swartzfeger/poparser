@@ -302,6 +302,7 @@ class OrderEnricher {
             "TCD PARTS",
             "DRAKE SPECIALITIES",
             "EISCO SCI",
+            "SCHOOL SPECIALTY",
             "MIROIL USA, LLC",
             "NATIONAL CHEMICALS",
             "DOVE MATERIAL",

@@ -3,7 +3,8 @@ package com.jay.parser.mappers
 import com.jay.parser.masterdata.MasterDataStore
 import com.jay.parser.masterdata.MasterQtyDiscountBreak
 import com.jay.parser.masterdata.MasterQtyDiscountRule
-import kotlin.math.round
+import java.math.BigDecimal
+import java.math.RoundingMode
 
 object QtyDiscountMapper {
 
@@ -44,7 +45,7 @@ object QtyDiscountMapper {
         val rules = MasterDataStore.current().qtyDiscountRules
 
         val customerSpecificMatch = rules
-            .filter { normalize(it.customerId) != ALL_CUSTOMERS }
+            .filterNot { isAllCustomers(it.customerId) }
             .filter { rule ->
                 normalize(rule.customerId) == normalizedCustomerId &&
                         rule.matchesSku(normalizedSku) &&
@@ -53,7 +54,7 @@ object QtyDiscountMapper {
             .bestRuleFor(quantity)
 
         val globalMatch = rules
-            .filter { normalize(it.customerId) == ALL_CUSTOMERS }
+            .filter { isAllCustomers(it.customerId) }
             .filter { rule ->
                 rule.matchesSku(normalizedSku) &&
                         rule.matchesPriceLevel(normalizedPriceLevel)
@@ -62,7 +63,7 @@ object QtyDiscountMapper {
 
         val match = customerSpecificMatch ?: globalMatch ?: return QtyDiscountResult(unitPrice, 0.0, null)
 
-        val discountedPrice = roundMoney(unitPrice * (1.0 - match.breakPoint.discountPercent))
+        val discountedPrice = roundPrice(unitPrice * (1.0 - match.breakPoint.discountPercent))
 
         return QtyDiscountResult(
             unitPrice = discountedPrice,
@@ -162,11 +163,17 @@ object QtyDiscountMapper {
             .orEmpty()
     }
 
-    private fun roundMoney(value: Double): Double {
-        return round(value * 100.0) / 100.0
+    internal fun isAllCustomers(customerId: String?): Boolean {
+        return normalize(customerId) in ALL_CUSTOMER_IDS
     }
 
-    private const val ALL_CUSTOMERS = "ALL CUSTOMERS"
+    private fun roundPrice(value: Double): Double {
+        return BigDecimal.valueOf(value)
+            .setScale(3, RoundingMode.HALF_UP)
+            .toDouble()
+    }
+
+    private val ALL_CUSTOMER_IDS = setOf("ALL CUSTOMER", "ALL CUSTOMERS")
 
     private val rules = listOf(
         rule("ALL CUSTOMERS", "PH0015-1B-50", "PH", "", breakAt(50, 0.030), breakAt(100, 0.050), breakAt(500, 0.100)),
