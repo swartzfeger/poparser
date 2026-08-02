@@ -2,6 +2,7 @@ package com.jay.parser.export
 
 import com.jay.parser.models.ExportOrder
 import com.jay.parser.models.ExportOrderLine
+import com.jay.parser.models.PackagingSummary
 import com.jay.parser.models.ResolvedCustomer
 import java.time.LocalDate
 import kotlin.test.Test
@@ -40,8 +41,18 @@ class SageCsvExporterTest {
                             quantityForExport = 1.0,
                             unitPriceReference = 464.188,
                             unitPriceResolved = 464.188,
-                            glAccount = "4020"
+                            glAccount = "4020",
+                            itemDimensions = "10 x 10 x 2.75",
+                            itemUnitVolumeCubicInches = 275.0,
+                            itemUnitWeightPounds = 2.5
                         )
+                    ),
+                    packaging = PackagingSummary(
+                        orderPackedVolumeCubicInches = 305.556,
+                        orderWeightPounds = 2.5,
+                        totalBoxes = 1,
+                        boxPlan = "1x Box 12 (12 x 9 x 4)",
+                        status = "Complete"
                     )
                 )
             ),
@@ -50,5 +61,7 @@ class SageCsvExporterTest {
 
         assertTrue(csv.contains("\"-464.188\""))
         assertTrue(csv.contains("\"-464.19\""))
+        assertTrue(csv.contains("\"Item Unit Volume (cu in)\""))
+        assertTrue(csv.contains("\"275\",\"2.5\",\"305.556\",\"2.5\",\"1\",\"1x Box 12 (12 x 9 x 4)\",\"Complete\""))
     }
 }

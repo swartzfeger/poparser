@@ -15,7 +15,19 @@ data class ExportOrderLine(
     val quantityForExport: Double,
     val unitPriceReference: Double?,
     val unitPriceResolved: Double,
-    val glAccount: String
+    val glAccount: String,
+    val itemDimensions: String? = null,
+    val itemUnitVolumeCubicInches: Double? = null,
+    val itemUnitWeightPounds: Double? = null
+)
+
+data class PackagingSummary(
+    val orderPackedVolumeCubicInches: Double? = null,
+    val orderWeightPounds: Double? = null,
+    val totalBoxes: Int? = null,
+    val boxPlan: String = "",
+    val status: String = "Not calculated",
+    val warnings: List<String> = emptyList()
 )
 
 data class ExportOrder(
@@ -31,5 +43,6 @@ data class ExportOrder(
     val zip: String?,
     val termsRaw: String?,
     val termsResolved: String?,
-    val lines: List<ExportOrderLine>
+    val lines: List<ExportOrderLine>,
+    val packaging: PackagingSummary = PackagingSummary()
 )

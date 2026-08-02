@@ -32,7 +32,14 @@ class SageCsvExporter {
         "SO/Proposal Distribution",
         "Tax Type",
         "Ship Via",
-        "Displayed Terms"
+        "Displayed Terms",
+        "Item Unit Volume (cu in)",
+        "Item Unit Weight (lb)",
+        "Order Packed Volume (cu in)",
+        "Order Weight (lb)",
+        "Total Boxes",
+        "Box Plan",
+        "Packaging Status"
     )
 
     fun export(
@@ -94,7 +101,14 @@ class SageCsvExporter {
                     (index + 1).toString(),
                     "1",
                     if (noShipVia) "" else order.customer?.shipVia.orEmpty(),
-                    order.termsResolved.orEmpty()
+                    order.termsResolved.orEmpty(),
+                    formatMeasurement(line.itemUnitVolumeCubicInches),
+                    formatMeasurement(line.itemUnitWeightPounds),
+                    formatMeasurement(order.packaging.orderPackedVolumeCubicInches),
+                    formatMeasurement(order.packaging.orderWeightPounds),
+                    order.packaging.totalBoxes?.toString().orEmpty(),
+                    order.packaging.boxPlan,
+                    order.packaging.status
                 )
             }
         }
@@ -123,6 +137,14 @@ class SageCsvExporter {
     private fun formatUnitPrice(value: Double): String {
         return BigDecimal.valueOf(value)
             .setScale(3, RoundingMode.HALF_UP)
+            .toPlainString()
+    }
+
+    private fun formatMeasurement(value: Double?): String {
+        if (value == null) return ""
+        return BigDecimal.valueOf(value)
+            .setScale(3, RoundingMode.HALF_UP)
+            .stripTrailingZeros()
             .toPlainString()
     }
 

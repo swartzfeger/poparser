@@ -26,13 +26,15 @@ import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import com.jay.parser.masterdata.MasterDataImportResult
 import com.jay.parser.masterdata.MasterDataStore
+import com.jay.parser.packaging.PackagingDataImportResult
+import com.jay.parser.packaging.PackagingDataStore
 import com.jay.parser.ui.MainScreen
 import java.awt.FileDialog
 import java.io.File
 import javax.swing.SwingUtilities
 
 private const val APP_NAME = "PO Parser"
-private const val APP_VERSION = "1.5.2"
+private const val APP_VERSION = "1.6.0"
 private const val APP_VENDOR = "Jay Swartzfeger"
 private const val APP_COPYRIGHT = "© 2026 Precision Laboratories"
 
@@ -57,11 +59,15 @@ fun main() = application {
         var showAbout by remember { mutableStateOf(false) }
         var showSettings by remember { mutableStateOf(false) }
         var showMasterList by remember { mutableStateOf(false) }
+        var showPackagingData by remember { mutableStateOf(false) }
         var noShipVia by remember { mutableStateOf(false) }
         var noShipTo by remember { mutableStateOf(false) }
         var masterListMessage by remember { mutableStateOf("") }
         var masterListImportResult by remember { mutableStateOf<MasterDataImportResult?>(null) }
         var masterListIsImporting by remember { mutableStateOf(false) }
+        var packagingDataMessage by remember { mutableStateOf("") }
+        var packagingDataImportResult by remember { mutableStateOf<PackagingDataImportResult?>(null) }
+        var packagingDataIsImporting by remember { mutableStateOf(false) }
 
         MaterialTheme {
             Surface(modifier = Modifier.fillMaxSize()) {
@@ -90,15 +96,27 @@ fun main() = application {
                             color = MaterialTheme.colorScheme.primary
                         )
 
-                        Text(
-                            text = "⬆ Update Master List",
-                            modifier = Modifier.clickable {
-                                masterListMessage = ""
-                                masterListImportResult = null
-                                showMasterList = true
-                            },
-                            color = MaterialTheme.colorScheme.primary
-                        )
+                        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                            Text(
+                                text = "⬆ Update Packaging Data",
+                                modifier = Modifier.clickable {
+                                    packagingDataMessage = ""
+                                    packagingDataImportResult = null
+                                    showPackagingData = true
+                                },
+                                color = MaterialTheme.colorScheme.primary
+                            )
+
+                            Text(
+                                text = "⬆ Update Master List",
+                                modifier = Modifier.clickable {
+                                    masterListMessage = ""
+                                    masterListImportResult = null
+                                    showMasterList = true
+                                },
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
                     }
 
                     if (showAbout) {
@@ -307,6 +325,138 @@ fun main() = application {
                             }
                         )
                     }
+
+                    if (showPackagingData) {
+                        val metadata = PackagingDataStore.metadata()
+                        val bundledProducts = PackagingDataStore.current()
+
+                        AlertDialog(
+                            onDismissRequest = {
+                                if (!packagingDataIsImporting) showPackagingData = false
+                            },
+                            title = { Text("Update Packaging Data") },
+                            text = {
+                                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                    Text(
+                                        text = if (metadata == null) {
+                                            "Using bundled packaging data."
+                                        } else {
+                                            "Using imported packaging data from ${metadata.sourceFilename}."
+                                        },
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+
+                                    Text(
+                                        text = if (metadata == null) {
+                                            buildString {
+                                                append("Products: ${bundledProducts.size}\n")
+                                                append("With dimensions: ${bundledProducts.values.count { it.hasDimensions }}\n")
+                                                append("With weight: ${bundledProducts.values.count { it.weightPounds != null }}\n")
+                                                append("Complete records: ${bundledProducts.values.count { it.hasDimensions && it.weightPounds != null }}")
+                                            }
+                                        } else {
+                                            buildString {
+                                                append("Imported: ${metadata.importedAt}\n")
+                                                append("Products: ${metadata.productCount}\n")
+                                                append("With dimensions: ${metadata.dimensionedProductCount}\n")
+                                                append("With weight: ${metadata.weightedProductCount}\n")
+                                                append("Complete records: ${metadata.completeProductCount}")
+                                            }
+                                        },
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+
+                                    if (packagingDataMessage.isNotBlank()) {
+                                        Text(
+                                            text = packagingDataMessage,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+
+                                    packagingDataImportResult?.let { result ->
+                                        Text(
+                                            text = buildString {
+                                                appendLine("Imported ${result.metadata.sourceFilename}.")
+                                                appendLine("${result.metadata.productCount} products")
+                                                appendLine("${result.metadata.dimensionedProductCount} with dimensions")
+                                                appendLine("${result.metadata.weightedProductCount} with weight")
+                                                append("${result.metadata.completeProductCount} complete records")
+                                            },
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+
+                                        if (result.warnings.isNotEmpty()) {
+                                            Text(
+                                                text = "Warnings:\n" + result.warnings.take(5).joinToString("\n"),
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                    }
+
+                                    Text(
+                                        text = "Reparse queued orders after updating packaging data.\nData folder: ${PackagingDataStore.dataDirectoryPath()}",
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            },
+                            confirmButton = {
+                                TextButton(
+                                    enabled = !packagingDataIsImporting,
+                                    onClick = {
+                                        val selectedFile = pickPackagingDataFile()
+                                        if (selectedFile != null) {
+                                            packagingDataIsImporting = true
+                                            packagingDataMessage = "Importing ${selectedFile.name}..."
+                                            packagingDataImportResult = null
+
+                                            Thread {
+                                                try {
+                                                    val result = PackagingDataStore.importCsv(selectedFile)
+                                                    SwingUtilities.invokeLater {
+                                                        packagingDataImportResult = result
+                                                        packagingDataMessage = "Packaging data imported successfully."
+                                                        packagingDataIsImporting = false
+                                                    }
+                                                } catch (e: Exception) {
+                                                    SwingUtilities.invokeLater {
+                                                        packagingDataMessage = "Import failed: ${e.message ?: "Unknown error"}"
+                                                        packagingDataIsImporting = false
+                                                    }
+                                                }
+                                            }.start()
+                                        }
+                                    }
+                                ) {
+                                    Text(if (packagingDataIsImporting) "Importing..." else "Choose CSV")
+                                }
+                            },
+                            dismissButton = {
+                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    TextButton(
+                                        enabled = !packagingDataIsImporting,
+                                        onClick = {
+                                            try {
+                                                PackagingDataStore.restoreBundledDefaults()
+                                                packagingDataImportResult = null
+                                                packagingDataMessage = "Restored bundled packaging data."
+                                            } catch (e: Exception) {
+                                                packagingDataMessage = "Restore failed: ${e.message ?: "Unknown error"}"
+                                            }
+                                        }
+                                    ) {
+                                        Text("Restore Defaults")
+                                    }
+
+                                    TextButton(
+                                        enabled = !packagingDataIsImporting,
+                                        onClick = { showPackagingData = false }
+                                    ) {
+                                        Text("Close")
+                                    }
+                                }
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -321,5 +471,15 @@ private fun pickMasterListFile(): File? {
     val directory = dialog.directory ?: return null
     val file = dialog.file ?: return null
 
+    return File(directory, file)
+}
+
+private fun pickPackagingDataFile(): File? {
+    val dialog = FileDialog(null as java.awt.Frame?, "Choose Packaging Data CSV", FileDialog.LOAD)
+    dialog.file = "*.csv"
+    dialog.isVisible = true
+
+    val directory = dialog.directory ?: return null
+    val file = dialog.file ?: return null
     return File(directory, file)
 }

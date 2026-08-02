@@ -7,9 +7,12 @@ import com.jay.parser.mappers.QtyDiscountMapper
 import com.jay.parser.models.ExportOrder
 import com.jay.parser.models.ExportOrderLine
 import com.jay.parser.models.ResolvedCustomer
+import com.jay.parser.packaging.PackagingPlanner
 import com.jay.parser.pdf.ParsedPdfFields
 
 class OrderEnricher {
+
+    private val packagingPlanner = PackagingPlanner()
 
     fun enrich(sourceFilename: String, parsed: ParsedPdfFields): ExportOrder {
         val resolvedCustomer = resolveCustomer(parsed)
@@ -115,6 +118,8 @@ class OrderEnricher {
                 )
             }
 
+        val packagingResult = packagingPlanner.calculate(lines)
+
         return ExportOrder(
             sourceFilename = sourceFilename,
             customer = resolvedCustomer,
@@ -128,7 +133,8 @@ class OrderEnricher {
             zip = parsed.zip,
             termsRaw = parsed.terms,
             termsResolved = resolvedCustomer?.terms ?: parsed.terms,
-            lines = lines
+            lines = packagingResult.lines,
+            packaging = packagingResult.summary
         )
     }
 
@@ -303,6 +309,7 @@ class OrderEnricher {
             "DRAKE SPECIALITIES",
             "EISCO SCI",
             "SCHOOL SPECIALTY",
+            "INTERCON CHEMICAL CO",
             "MIROIL USA, LLC",
             "NATIONAL CHEMICALS",
             "DOVE MATERIAL",

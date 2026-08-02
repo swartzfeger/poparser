@@ -1,6 +1,6 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
-val appVersion = "1.5.2"
+val appVersion = "1.6.0"
 val appVendor = "Jay Swartzfeger"
 val appCopyright = "© 2026 Precision Laboratories"
 val appBaseName = "PO Parser"
@@ -45,6 +45,7 @@ kotlin {
             implementation("com.github.jai-imageio:jai-imageio-jpeg2000:1.4.0")
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
             implementation("org.apache.poi:poi-ooxml:5.2.5")
+            implementation("org.apache.commons:commons-csv:1.11.0")
             implementation("net.sourceforge.tess4j:tess4j:5.10.0")
             implementation("org.apache.logging.log4j:log4j-core:2.23.1")
 

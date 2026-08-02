@@ -874,6 +874,32 @@ private fun ResultOrderCard(
                 color = MaterialTheme.colorScheme.secondary
             )
 
+            Text(
+                text = "Total Boxes: ${order.packaging.totalBoxes?.toString() ?: "Review"}",
+                style = MaterialTheme.typography.bodyMedium
+            )
+
+            Text(
+                text = "Box Size: ${order.packaging.boxPlan.ifBlank { "Review required" }}",
+                style = MaterialTheme.typography.bodyMedium
+            )
+
+            Text(
+                text = "Order Volume / Weight: ${formatMeasurement(order.packaging.orderPackedVolumeCubicInches)} cu in / ${formatMeasurement(order.packaging.orderWeightPounds)} lb",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.secondary
+            )
+
+            Text(
+                text = "Packaging: ${order.packaging.status}",
+                style = MaterialTheme.typography.bodySmall,
+                color = if (order.packaging.status == "Complete") {
+                    MaterialTheme.colorScheme.secondary
+                } else {
+                    MaterialTheme.colorScheme.primary
+                }
+            )
+
             OutlinedButton(onClick = onCopy) {
                 Text("Copy Parsed Order")
             }
@@ -957,6 +983,11 @@ private fun buildOrderDebugText(order: ExportOrder): String {
         appendLine("Zip: ${order.zip.orEmpty()}")
         appendLine("Terms: ${order.termsResolved.orEmpty()}")
         appendLine("Lines: ${order.lines.size}")
+        appendLine("Total Boxes: ${order.packaging.totalBoxes?.toString() ?: "Review"}")
+        appendLine("Box Plan: ${order.packaging.boxPlan.ifBlank { "Review required" }}")
+        appendLine("Order Packed Volume: ${order.packaging.orderPackedVolumeCubicInches}")
+        appendLine("Order Weight: ${order.packaging.orderWeightPounds}")
+        appendLine("Packaging Status: ${order.packaging.status}")
         appendLine()
 
         order.lines.forEachIndexed { index, line ->
@@ -968,7 +999,14 @@ private fun buildOrderDebugText(order: ExportOrder): String {
             appendLine("  unitPriceRef      = ${line.unitPriceReference}")
             appendLine("  unitPriceResolved = ${line.unitPriceResolved}")
             appendLine("  glAccount         = ${line.glAccount}")
+            appendLine("  itemDimensions    = ${line.itemDimensions}")
+            appendLine("  itemUnitVolume    = ${line.itemUnitVolumeCubicInches}")
+            appendLine("  itemUnitWeight    = ${line.itemUnitWeightPounds}")
             appendLine()
         }
     }
 }
+
+private fun formatMeasurement(value: Double?): String = value
+    ?.let { java.math.BigDecimal.valueOf(it).stripTrailingZeros().toPlainString() }
+    ?: "Unknown"
