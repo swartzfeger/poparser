@@ -1,0 +1,1262 @@
+{
+  "106-12V-100": {
+    "lengthInches": 3.25,
+    "widthInches": 2.375,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "106-144V-100": {
+    "lengthInches": 10,
+    "widthInches": 10,
+    "heightInches": 2.75,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "106-25V-100": {
+    "lengthInches": 5,
+    "widthInches": 3.5,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "106-500V-100": {
+    "lengthInches": 21,
+    "widthInches": 14.75,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "106-QR10-12V-100": {
+    "lengthInches": 3.25,
+    "widthInches": 2.375,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "106-QR10-144V-100": {
+    "lengthInches": 10,
+    "widthInches": 10,
+    "heightInches": 2.75,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "106-QR10-25V-100": {
+    "lengthInches": 5,
+    "widthInches": 3.5,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "106-QR10-500V-100": {
+    "lengthInches": 21,
+    "widthInches": 14.75,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "106-QR5-12V-100": {
+    "lengthInches": 3.25,
+    "widthInches": 2.375,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "106-QR5-144V-100": {
+    "lengthInches": 10,
+    "widthInches": 10,
+    "heightInches": 2.75,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "106-QR5-25V-100": {
+    "lengthInches": 5,
+    "widthInches": 3.5,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "106-QR5-500V-100": {
+    "lengthInches": 21,
+    "widthInches": 14.75,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "110-12V-100": {
+    "lengthInches": 3.25,
+    "widthInches": 2.375,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "110-144V-100": {
+    "lengthInches": 10,
+    "widthInches": 10,
+    "heightInches": 2.75,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "110-25V-100": {
+    "lengthInches": 5,
+    "widthInches": 3.5,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "110-500V-100": {
+    "lengthInches": 21,
+    "widthInches": 14.75,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "115-12V-100": {
+    "lengthInches": 3.25,
+    "widthInches": 2.375,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "115-25V-100": {
+    "lengthInches": 5,
+    "widthInches": 3.5,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "120-12V-100": {
+    "lengthInches": 3.25,
+    "widthInches": 2.375,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "120-144V-100": {
+    "lengthInches": 10,
+    "widthInches": 10,
+    "heightInches": 2.75,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "120-25V-100": {
+    "lengthInches": 5,
+    "widthInches": 3.5,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "125-12V-100": {
+    "lengthInches": 3.25,
+    "widthInches": 2.375,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "125-144V-100": {
+    "lengthInches": 10,
+    "widthInches": 10,
+    "heightInches": 2.75,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "135-12V-100": {
+    "lengthInches": 3.25,
+    "widthInches": 2.375,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "135-144V-100": {
+    "lengthInches": 10,
+    "widthInches": 10,
+    "heightInches": 2.75,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "135-25V-100": {
+    "lengthInches": 5,
+    "widthInches": 3.5,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "135-500V-100": {
+    "lengthInches": 21,
+    "widthInches": 14.75,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "145-12V-100": {
+    "lengthInches": 3.25,
+    "widthInches": 2.375,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "145-144V-100": {
+    "lengthInches": 10,
+    "widthInches": 10,
+    "heightInches": 2.75,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "145-25V-100": {
+    "lengthInches": 5,
+    "widthInches": 3.5,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "145-500V-100": {
+    "lengthInches": 21,
+    "widthInches": 14.75,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "150-12V-100": {
+    "lengthInches": 3.25,
+    "widthInches": 2.375,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "150-144V-100": {
+    "lengthInches": 10,
+    "widthInches": 10,
+    "heightInches": 2.75,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "150-500V-100": {
+    "lengthInches": 21,
+    "widthInches": 14.75,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "158-12V-100": {
+    "lengthInches": 3.25,
+    "widthInches": 2.375,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "158-144V-100": {
+    "lengthInches": 10,
+    "widthInches": 10,
+    "heightInches": 2.75,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "158-500V-100": {
+    "lengthInches": 21,
+    "widthInches": 14.75,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "160-12V-100": {
+    "lengthInches": 3.25,
+    "widthInches": 2.375,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "160-144V-100": {
+    "lengthInches": 10,
+    "widthInches": 10,
+    "heightInches": 2.75,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "160-25V-100": {
+    "lengthInches": 5,
+    "widthInches": 3.5,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "160-500V-100": {
+    "lengthInches": 21,
+    "widthInches": 14.75,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "165-12V-100": {
+    "lengthInches": 3.25,
+    "widthInches": 2.375,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "165-144V-100": {
+    "lengthInches": 10,
+    "widthInches": 10,
+    "heightInches": 2.75,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "165-500V-100": {
+    "lengthInches": 21,
+    "widthInches": 14.75,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "166-12V-100": {
+    "lengthInches": 3.25,
+    "widthInches": 2.375,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "166-144V-100": {
+    "lengthInches": 10,
+    "widthInches": 10,
+    "heightInches": 2.75,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "166-500V-100": {
+    "lengthInches": 21,
+    "widthInches": 14.75,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "169-12V-100": {
+    "lengthInches": 3.25,
+    "widthInches": 2.375,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "169-144V-100": {
+    "lengthInches": 10,
+    "widthInches": 10,
+    "heightInches": 2.75,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "169-25V-100": {
+    "lengthInches": 5,
+    "widthInches": 3.5,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "169-500V-100": {
+    "lengthInches": 21,
+    "widthInches": 14.75,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "170-1B-40": {
+    "lengthInches": null,
+    "widthInches": 3,
+    "heightInches": 5,
+    "weightPounds": 0.01,
+    "inferredLength": false
+  },
+  "172-1B-50": {
+    "lengthInches": null,
+    "widthInches": 3,
+    "heightInches": 5,
+    "weightPounds": 0.001,
+    "inferredLength": false
+  },
+  "175-12V-100": {
+    "lengthInches": 3.25,
+    "widthInches": 2.375,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "175-144V-100": {
+    "lengthInches": 10,
+    "widthInches": 10,
+    "heightInches": 2.75,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "175-25V-100": {
+    "lengthInches": 5,
+    "widthInches": 3.5,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "175-500V-100": {
+    "lengthInches": 21,
+    "widthInches": 14.75,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "180-12V-100": {
+    "lengthInches": 3.25,
+    "widthInches": 2.375,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "180-144V-100": {
+    "lengthInches": 10,
+    "widthInches": 10,
+    "heightInches": 2.75,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "180-25V-100": {
+    "lengthInches": 5,
+    "widthInches": 3.5,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "180-500V-100": {
+    "lengthInches": 21,
+    "widthInches": 14.75,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "185-12V-100": {
+    "lengthInches": 3.25,
+    "widthInches": 2.375,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "185-144V-100": {
+    "lengthInches": 10,
+    "widthInches": 10,
+    "heightInches": 2.75,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "185-25V-100": {
+    "lengthInches": 5,
+    "widthInches": 3.5,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "185-500V-100": {
+    "lengthInches": 21,
+    "widthInches": 14.75,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "190-12V-100": {
+    "lengthInches": 3.25,
+    "widthInches": 2.375,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "190-144V-100": {
+    "lengthInches": 10,
+    "widthInches": 10,
+    "heightInches": 2.75,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "190-25V-100": {
+    "lengthInches": 5,
+    "widthInches": 3.5,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "190-500V-100": {
+    "lengthInches": 21,
+    "widthInches": 14.75,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "196-12V-100": {
+    "lengthInches": 3.25,
+    "widthInches": 2.375,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "196-144V-100": {
+    "lengthInches": 10,
+    "widthInches": 10,
+    "heightInches": 2.75,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "196-500V-100": {
+    "lengthInches": 21,
+    "widthInches": 14.75,
+    "heightInches": 3,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "210-24-8X10": {
+    "lengthInches": null,
+    "widthInches": null,
+    "heightInches": null,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "210-500-8X10": {
+    "lengthInches": null,
+    "widthInches": null,
+    "heightInches": null,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "215-24-8X10": {
+    "lengthInches": null,
+    "widthInches": null,
+    "heightInches": null,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "215-500-8X10": {
+    "lengthInches": null,
+    "widthInches": null,
+    "heightInches": null,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "220-200-2070": {
+    "lengthInches": null,
+    "widthInches": 2.125,
+    "heightInches": 4,
+    "weightPounds": 0.4,
+    "inferredLength": false
+  },
+  "235-24-8X10": {
+    "lengthInches": null,
+    "widthInches": null,
+    "heightInches": null,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "240-24-8X10": {
+    "lengthInches": null,
+    "widthInches": null,
+    "heightInches": null,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "240-500-8X10": {
+    "lengthInches": null,
+    "widthInches": null,
+    "heightInches": null,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "250-24-8X10": {
+    "lengthInches": null,
+    "widthInches": null,
+    "heightInches": null,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "250-500-8X10": {
+    "lengthInches": null,
+    "widthInches": null,
+    "heightInches": null,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "280-24-810": {
+    "lengthInches": null,
+    "widthInches": null,
+    "heightInches": null,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "280-500-810": {
+    "lengthInches": null,
+    "widthInches": null,
+    "heightInches": null,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "285-24-8X10": {
+    "lengthInches": null,
+    "widthInches": null,
+    "heightInches": null,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "285-500-8X10": {
+    "lengthInches": null,
+    "widthInches": null,
+    "heightInches": null,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "290-24-8X10": {
+    "lengthInches": null,
+    "widthInches": null,
+    "heightInches": null,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "290-500-8X10": {
+    "lengthInches": null,
+    "widthInches": null,
+    "heightInches": null,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "505-1-2020": {
+    "lengthInches": null,
+    "widthInches": null,
+    "heightInches": null,
+    "weightPounds": 0.07,
+    "inferredLength": false
+  },
+  "505-1-4040": {
+    "lengthInches": null,
+    "widthInches": 12,
+    "heightInches": 12,
+    "weightPounds": 0.4,
+    "inferredLength": false
+  },
+  "550-1-2020": {
+    "lengthInches": null,
+    "widthInches": null,
+    "heightInches": null,
+    "weightPounds": 0.07,
+    "inferredLength": false
+  },
+  "AMM-100-1V-25": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.06,
+    "inferredLength": true
+  },
+  "AMM-6-1V-25": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.06,
+    "inferredLength": true
+  },
+  "AQU-3-1B-50": {
+    "lengthInches": null,
+    "widthInches": 3,
+    "heightInches": 4,
+    "weightPounds": 0.02,
+    "inferredLength": false
+  },
+  "AQU-5-1V-50": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.08,
+    "inferredLength": true
+  },
+  "ASC-1V-50": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.07,
+    "inferredLength": true
+  },
+  "BIB-46-50": {
+    "lengthInches": 4,
+    "widthInches": 6,
+    "heightInches": null,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "CHL-05-1V-50": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.07,
+    "inferredLength": true
+  },
+  "CHL-10000-1V-100": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.09,
+    "inferredLength": true
+  },
+  "CHL-10000-1V-50": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.07,
+    "inferredLength": true
+  },
+  "CHL-1000-1V-100": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.09,
+    "inferredLength": true
+  },
+  "CHL-1000-1V-50": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.07,
+    "inferredLength": true
+  },
+  "CHL-10-1V-50": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.07,
+    "inferredLength": true
+  },
+  "CHL-2000-1V-100": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.09,
+    "inferredLength": true
+  },
+  "CHL-200-1V-100": {
+    "lengthInches": 1.375,
+    "widthInches": 1.375,
+    "heightInches": 3.25,
+    "weightPounds": 0.05,
+    "inferredLength": true
+  },
+  "CHL-300-1V-100": {
+    "lengthInches": 1.375,
+    "widthInches": 1.375,
+    "heightInches": 3.25,
+    "weightPounds": 0.05,
+    "inferredLength": true
+  },
+  "CHL-ASSURE-1V-50": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.07,
+    "inferredLength": true
+  },
+  "CHL-D10-1V-50": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.07,
+    "inferredLength": true
+  },
+  "CHL-D500-1V-50": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.07,
+    "inferredLength": true
+  },
+  "CHROM-50-6X75": {
+    "lengthInches": 6,
+    "widthInches": 0.75,
+    "heightInches": null,
+    "weightPounds": 0.03,
+    "inferredLength": false
+  },
+  "FLU-1V-50": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.07,
+    "inferredLength": true
+  },
+  "GLU-1B-100": {
+    "lengthInches": null,
+    "widthInches": 3,
+    "heightInches": 5,
+    "weightPounds": 0.04,
+    "inferredLength": false
+  },
+  "GLU-1B-25": {
+    "lengthInches": null,
+    "widthInches": 3,
+    "heightInches": 5,
+    "weightPounds": 0.01,
+    "inferredLength": false
+  },
+  "GLU-1B-50": {
+    "lengthInches": null,
+    "widthInches": 3,
+    "heightInches": 5,
+    "weightPounds": 0.02,
+    "inferredLength": false
+  },
+  "HARD-1B-50": {
+    "lengthInches": null,
+    "widthInches": 3,
+    "heightInches": 5,
+    "weightPounds": 0.02,
+    "inferredLength": false
+  },
+  "HUM-1V-50": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.07,
+    "inferredLength": true
+  },
+  "LENS-46-100": {
+    "lengthInches": 4,
+    "widthInches": 6,
+    "heightInches": null,
+    "weightPounds": 0.09,
+    "inferredLength": false
+  },
+  "LENS-46-50": {
+    "lengthInches": 4,
+    "widthInches": 6,
+    "heightInches": null,
+    "weightPounds": 0.04,
+    "inferredLength": false
+  },
+  "LIP-1B-75": {
+    "lengthInches": null,
+    "widthInches": 3,
+    "heightInches": 4,
+    "weightPounds": 0.03,
+    "inferredLength": false
+  },
+  "MOL-1V-50": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.07,
+    "inferredLength": true
+  },
+  "MUT-1V-50": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.08,
+    "inferredLength": true
+  },
+  "NAT-1V-50": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.07,
+    "inferredLength": true
+  },
+  "NIT-25-1V-50": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.07,
+    "inferredLength": true
+  },
+  "NIT-NAT-1V-50": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.07,
+    "inferredLength": true
+  },
+  "PAA-1000-1V-100": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.09,
+    "inferredLength": true
+  },
+  "PAA-1000-1V-50": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.07,
+    "inferredLength": true
+  },
+  "PAA-160-1V-100": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.09,
+    "inferredLength": true
+  },
+  "PAA-160-1V-50": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.07,
+    "inferredLength": true
+  },
+  "PAA-3000-1V-100": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.09,
+    "inferredLength": true
+  },
+  "PAA-3000-1V-50": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.07,
+    "inferredLength": true
+  },
+  "PAA-50-1V-100": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.09,
+    "inferredLength": true
+  },
+  "PAA-50-1V-50": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.07,
+    "inferredLength": true
+  },
+  "PER-10000-1V-50": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.07,
+    "inferredLength": true
+  },
+  "PER-100-1V-100": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.09,
+    "inferredLength": true
+  },
+  "PER-100-1V-50": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.07,
+    "inferredLength": true
+  },
+  "PER-10-1V-50": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.07,
+    "inferredLength": true
+  },
+  "PER-400-1V-100": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.09,
+    "inferredLength": true
+  },
+  "PER-400-1V-50": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.07,
+    "inferredLength": true
+  },
+  "PH0007-3-1B-100": {
+    "lengthInches": null,
+    "widthInches": 3,
+    "heightInches": 4,
+    "weightPounds": 0.04,
+    "inferredLength": false
+  },
+  "PH0007-3-1B-50": {
+    "lengthInches": null,
+    "widthInches": 3,
+    "heightInches": 4,
+    "weightPounds": 0.02,
+    "inferredLength": false
+  },
+  "PH0007-3-1V-100": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.09,
+    "inferredLength": true
+  },
+  "PH0015-1B-50": {
+    "lengthInches": null,
+    "widthInches": 3,
+    "heightInches": 4,
+    "weightPounds": 0.02,
+    "inferredLength": false
+  },
+  "PH0025-1B-50": {
+    "lengthInches": null,
+    "widthInches": 3,
+    "heightInches": 4,
+    "weightPounds": 0.02,
+    "inferredLength": false
+  },
+  "PH0114-1B-100": {
+    "lengthInches": null,
+    "widthInches": 3,
+    "heightInches": 4,
+    "weightPounds": 0.04,
+    "inferredLength": false
+  },
+  "PH0114-1B-50": {
+    "lengthInches": null,
+    "widthInches": 3,
+    "heightInches": 4,
+    "weightPounds": 0.02,
+    "inferredLength": false
+  },
+  "PH0114-3-1B-100": {
+    "lengthInches": null,
+    "widthInches": 3,
+    "heightInches": 4,
+    "weightPounds": 0.04,
+    "inferredLength": false
+  },
+  "PH0114-3-1B-50": {
+    "lengthInches": null,
+    "widthInches": 3,
+    "heightInches": 4,
+    "weightPounds": 0.02,
+    "inferredLength": false
+  },
+  "PH0114-3-1V-100": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.09,
+    "inferredLength": true
+  },
+  "PH0714-3-1B-100": {
+    "lengthInches": null,
+    "widthInches": 3,
+    "heightInches": 4,
+    "weightPounds": 0.04,
+    "inferredLength": false
+  },
+  "PH0714-3-1B-50": {
+    "lengthInches": null,
+    "widthInches": 3,
+    "heightInches": 4,
+    "weightPounds": 0.02,
+    "inferredLength": false
+  },
+  "PH0714-3-1V-100": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.09,
+    "inferredLength": true
+  },
+  "PH1013-1B-50": {
+    "lengthInches": null,
+    "widthInches": 3,
+    "heightInches": 4,
+    "weightPounds": 0.02,
+    "inferredLength": false
+  },
+  "PH1114-1B-50": {
+    "lengthInches": null,
+    "widthInches": 3,
+    "heightInches": 4,
+    "weightPounds": 0.02,
+    "inferredLength": false
+  },
+  "PH2090-3-1B-100": {
+    "lengthInches": null,
+    "widthInches": 3,
+    "heightInches": 4,
+    "weightPounds": null,
+    "inferredLength": false
+  },
+  "PH2090-3-1B-50": {
+    "lengthInches": null,
+    "widthInches": 3,
+    "heightInches": 4,
+    "weightPounds": 0.02,
+    "inferredLength": false
+  },
+  "PH2090-3-1V-100": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.09,
+    "inferredLength": true
+  },
+  "PH2844-1V-100": {
+    "lengthInches": 1.375,
+    "widthInches": 1.375,
+    "heightInches": 3.25,
+    "weightPounds": 0.05,
+    "inferredLength": true
+  },
+  "PH3060-1B-50": {
+    "lengthInches": null,
+    "widthInches": 3,
+    "heightInches": null,
+    "weightPounds": 0.02,
+    "inferredLength": false
+  },
+  "PH4070-1B-50": {
+    "lengthInches": null,
+    "widthInches": 3,
+    "heightInches": null,
+    "weightPounds": 0.02,
+    "inferredLength": false
+  },
+  "PH4510-3-1B-100": {
+    "lengthInches": null,
+    "widthInches": 3,
+    "heightInches": 4,
+    "weightPounds": 0.04,
+    "inferredLength": false
+  },
+  "PH4510-3-1B-50": {
+    "lengthInches": null,
+    "widthInches": 3,
+    "heightInches": 4,
+    "weightPounds": 0.02,
+    "inferredLength": false
+  },
+  "PH4510-3-1V-100": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.09,
+    "inferredLength": true
+  },
+  "PH4662-1V-100": {
+    "lengthInches": 1.375,
+    "widthInches": 1.375,
+    "heightInches": 3.25,
+    "weightPounds": 0.05,
+    "inferredLength": true
+  },
+  "PH5090-1B-50": {
+    "lengthInches": null,
+    "widthInches": 3,
+    "heightInches": 4,
+    "weightPounds": 0.02,
+    "inferredLength": false
+  },
+  "PH7010-1B-50": {
+    "lengthInches": null,
+    "widthInches": 3,
+    "heightInches": 4,
+    "weightPounds": 0.02,
+    "inferredLength": false
+  },
+  "PHO-1V-50": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.07,
+    "inferredLength": true
+  },
+  "PRO-1V-50": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.07,
+    "inferredLength": true
+  },
+  "QAC-10000-1V-50": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.07,
+    "inferredLength": true
+  },
+  "QAC-100-1V-100": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.09,
+    "inferredLength": true
+  },
+  "QAC-1500-1V-100": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.09,
+    "inferredLength": true
+  },
+  "QAC-1500-1V-50": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.07,
+    "inferredLength": true
+  },
+  "QAC-400-1B-100": {
+    "lengthInches": null,
+    "widthInches": 3,
+    "heightInches": 4,
+    "weightPounds": 0.04,
+    "inferredLength": false
+  },
+  "QAC-400-1B-50": {
+    "lengthInches": null,
+    "widthInches": 3,
+    "heightInches": 4,
+    "weightPounds": 0.02,
+    "inferredLength": false
+  },
+  "QAC-400-1V-100": {
+    "lengthInches": 1.375,
+    "widthInches": 1.375,
+    "heightInches": 3.25,
+    "weightPounds": 0.05,
+    "inferredLength": true
+  },
+  "QAC-400-1V-50": {
+    "lengthInches": 1.375,
+    "widthInches": 1.375,
+    "heightInches": 3.25,
+    "weightPounds": 0.04,
+    "inferredLength": true
+  },
+  "SAL-1V-50": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.07,
+    "inferredLength": true
+  },
+  "SPC-160-MIL": {
+    "lengthInches": null,
+    "widthInches": 3,
+    "heightInches": 5,
+    "weightPounds": 0.001,
+    "inferredLength": false
+  },
+  "SUL-1V-50": {
+    "lengthInches": 1.125,
+    "widthInches": 1.125,
+    "heightInches": 3.375,
+    "weightPounds": 0.07,
+    "inferredLength": true
+  },
+  "WDS-1B-100": {
+    "lengthInches": null,
+    "widthInches": 6,
+    "heightInches": 9,
+    "weightPounds": 0.1,
+    "inferredLength": false
+  },
+  "WDS-1B-500": {
+    "lengthInches": null,
+    "widthInches": 6,
+    "heightInches": 9,
+    "weightPounds": 0.4,
+    "inferredLength": false
+  }
+}
