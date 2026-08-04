@@ -33,13 +33,7 @@ class SageCsvExporter {
         "Tax Type",
         "Ship Via",
         "Displayed Terms",
-        "Item Unit Volume (cu in)",
-        "Item Unit Weight (lb)",
-        "Order Packed Volume (cu in)",
-        "Order Weight (lb)",
-        "Total Boxes",
-        "Box Plan",
-        "Packaging Status"
+        "Invoice Note",
     )
 
     fun export(
@@ -47,9 +41,10 @@ class SageCsvExporter {
         outputFile: File,
         orderDate: LocalDate = LocalDate.now(),
         noShipVia: Boolean = true,
-        noShipTo: Boolean = true
+        noShipTo: Boolean = true,
+        noInvoiceNote: Boolean = false
     ) {
-        val csv = buildCsv(orders, orderDate, noShipVia, noShipTo)
+        val csv = buildCsv(orders, orderDate, noShipVia, noShipTo, noInvoiceNote)
         val bytes = encodeWindows1252(csv)
         outputFile.writeBytes(bytes)
     }
@@ -58,7 +53,8 @@ class SageCsvExporter {
         orders: List<ExportOrder>,
         orderDate: LocalDate = LocalDate.now(),
         noShipVia: Boolean = true,
-        noShipTo: Boolean = true
+        noShipTo: Boolean = true,
+        noInvoiceNote: Boolean = false
     ): String {
         val rows = mutableListOf<List<String>>()
         rows += header
@@ -102,13 +98,7 @@ class SageCsvExporter {
                     "1",
                     if (noShipVia) "" else order.customer?.shipVia.orEmpty(),
                     order.termsResolved.orEmpty(),
-                    formatMeasurement(line.itemUnitVolumeCubicInches),
-                    formatMeasurement(line.itemUnitWeightPounds),
-                    formatMeasurement(order.packaging.orderPackedVolumeCubicInches),
-                    formatMeasurement(order.packaging.orderWeightPounds),
-                    order.packaging.totalBoxes?.toString().orEmpty(),
-                    order.packaging.boxPlan,
-                    order.packaging.status
+                    if (noInvoiceNote) "" else order.packaging.invoiceNote
                 )
             }
         }
@@ -137,14 +127,6 @@ class SageCsvExporter {
     private fun formatUnitPrice(value: Double): String {
         return BigDecimal.valueOf(value)
             .setScale(3, RoundingMode.HALF_UP)
-            .toPlainString()
-    }
-
-    private fun formatMeasurement(value: Double?): String {
-        if (value == null) return ""
-        return BigDecimal.valueOf(value)
-            .setScale(3, RoundingMode.HALF_UP)
-            .stripTrailingZeros()
             .toPlainString()
     }
 

@@ -34,7 +34,7 @@ import java.io.File
 import javax.swing.SwingUtilities
 
 private const val APP_NAME = "PO Parser"
-private const val APP_VERSION = "1.6.0"
+private const val APP_VERSION = "1.6.1"
 private const val APP_VENDOR = "Jay Swartzfeger"
 private const val APP_COPYRIGHT = "© 2026 Precision Laboratories"
 
@@ -62,6 +62,7 @@ fun main() = application {
         var showPackagingData by remember { mutableStateOf(false) }
         var noShipVia by remember { mutableStateOf(false) }
         var noShipTo by remember { mutableStateOf(false) }
+        var noInvoiceNote by remember { mutableStateOf(false) }
         var masterListMessage by remember { mutableStateOf("") }
         var masterListImportResult by remember { mutableStateOf<MasterDataImportResult?>(null) }
         var masterListIsImporting by remember { mutableStateOf(false) }
@@ -74,7 +75,8 @@ fun main() = application {
                 Box(modifier = Modifier.fillMaxSize()) {
                     MainScreen(
                         noShipVia = noShipVia,
-                        noShipTo = noShipTo
+                        noShipTo = noShipTo,
+                        noInvoiceNote = noInvoiceNote
                     )
 
                     Column(
@@ -187,6 +189,23 @@ fun main() = application {
                                             Text("No Ship To")
                                             Text(
                                                 text = "Leave Ship To name and address fields blank in the CSV export.",
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                    }
+
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                    ) {
+                                        Switch(
+                                            checked = noInvoiceNote,
+                                            onCheckedChange = { noInvoiceNote = it }
+                                        )
+                                        Column {
+                                            Text("No Invoice Note")
+                                            Text(
+                                                text = "Leave Invoice Note blank in the CSV export.",
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
                                         }

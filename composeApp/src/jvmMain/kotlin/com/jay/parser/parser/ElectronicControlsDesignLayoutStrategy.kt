@@ -124,53 +124,43 @@ class ElectronicControlsDesignLayoutStrategy : BaseLayoutStrategy(), LayoutStrat
         for (i in lines.indices) {
             val first = lines[i].replace(Regex("""\s+"""), " ").trim()
 
-            if (!first.matches(Regex("""^\d+\s+G\d+-\d+-\d+\s+.+$""", RegexOption.IGNORE_CASE))) {
-                continue
-            }
+            val firstMatch = ITEM_ROW_PATTERN.find(first) ?: continue
+            val rowDetails = firstMatch.groupValues[1].trim()
+            val quantity = firstMatch.groupValues[2].replace(",", "").toDoubleOrNull() ?: continue
 
-            var rawSku: String? = null
-            var quantity: Double? = null
-            val descriptionParts = mutableListOf<String>()
-
-            // Line 20:
-            // 10000 G04-3589-75 15"FLUXOMETER BLUELITMUS 280- A BOX 5 95.00 March18,2026 475.00
-            val firstMatch = Regex(
-                """^\d+\s+G\d+-\d+-\d+\s+(.+?)\s+(280-)\s+[A-Z]\s+[A-Z]{2,5}\s+(\d+(?:,\d{3})?)\s+[\d,]+\.\d{2}\s+[A-Z][a-z]+\d{1,2},\d{4}\s+[\d,]+\.\d{2}$""",
-                RegexOption.IGNORE_CASE
-            ).find(first)
-
-            if (firstMatch == null) continue
-
-            descriptionParts += firstMatch.groupValues[1].trim()
-            val skuHead = firstMatch.groupValues[2].trim()
-            quantity = firstMatch.groupValues[3].replace(",", "").toDoubleOrNull()
-
-            if (quantity == null) continue
-
-            // Line 21:
-            // NEUTRALPH 100-8513
             val second = lines.getOrNull(i + 1)
                 ?.replace(Regex("""\s+"""), " ")
                 ?.trim()
                 .orEmpty()
-
-            val secondMatch = Regex(
-                """^(.+?)\s+(100-\d+)$""",
-                RegexOption.IGNORE_CASE
-            ).find(second)
-
-            if (secondMatch != null) {
-                val desc2 = secondMatch.groupValues[1].trim()
-                if (desc2.isNotBlank()) descriptionParts += desc2
-                rawSku = skuHead + secondMatch.groupValues[2].trim()
-            }
-
-            // Line 22:
-            // PAPER
             val third = lines.getOrNull(i + 2)
                 ?.replace(Regex("""\s+"""), " ")
                 ?.trim()
                 .orEmpty()
+
+            val completeSkuMatch = COMPLETE_SKU_PATTERN.find(rowDetails)
+            val splitSkuSuffixMatch = if (completeSkuMatch == null && rowDetails.endsWith("280-")) {
+                SPLIT_SKU_SUFFIX_PATTERN.find(second)
+            } else {
+                null
+            }
+            val rawSku = completeSkuMatch?.value
+                ?: splitSkuSuffixMatch?.let { "280-${it.value}" }
+                ?: continue
+            val sku = normalizeSku(rawSku)
+
+            val descriptionParts = mutableListOf<String>()
+            rowDetails
+                .removeMatchedText(completeSkuMatch)
+                .removeSuffix("280-")
+                .trim()
+                .takeIf { it.isNotBlank() }
+                ?.let(descriptionParts::add)
+
+            second
+                .removeMatchedText(splitSkuSuffixMatch)
+                .trim()
+                .takeIf { it.isNotBlank() }
+                ?.let(descriptionParts::add)
 
             if (third.isNotBlank() &&
                 !third.startsWith("Subtotal:", ignoreCase = true) &&
@@ -179,8 +169,6 @@ class ElectronicControlsDesignLayoutStrategy : BaseLayoutStrategy(), LayoutStrat
             ) {
                 descriptionParts += third
             }
-
-            val sku = rawSku?.let { normalizeSku(it) } ?: continue
 
             val poDescription = descriptionParts.joinToString(" ")
                 .replace(Regex("""\s+"""), " ")
@@ -205,7 +193,19 @@ class ElectronicControlsDesignLayoutStrategy : BaseLayoutStrategy(), LayoutStrat
         }
     }
 
+    private fun String.removeMatchedText(match: MatchResult?): String =
+        if (match == null) this else removeRange(match.range)
+
     private fun compact(value: String): String {
         return value.uppercase().replace(Regex("""[^A-Z0-9]"""), "")
+    }
+
+    private companion object {
+        val ITEM_ROW_PATTERN = Regex(
+            """^\d+\s+G\d+-\d+-\d+\s+(.+?)\s+[A-Z]\s+[A-Z]{2,5}\s+([\d,]+(?:\.\d+)?)\s+[\d,]+\.\d{2,3}\s+[A-Z][a-z]+\s*\d{1,2},\s*\d{4}\s+[\d,]+\.\d{2}$""",
+            RegexOption.IGNORE_CASE
+        )
+        val COMPLETE_SKU_PATTERN = Regex("""\b280-\d{2,3}-\d+\b""", RegexOption.IGNORE_CASE)
+        val SPLIT_SKU_SUFFIX_PATTERN = Regex("""\b\d{2,3}-\d+\b""", RegexOption.IGNORE_CASE)
     }
 }

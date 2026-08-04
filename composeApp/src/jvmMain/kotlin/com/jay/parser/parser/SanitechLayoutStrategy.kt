@@ -81,7 +81,7 @@ class SanitechLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
 
         val window = lines
             .drop(deliveryIndex + 1)
-            .take(6)
+            .take(10)
             .map { it.replace(Regex("""\s+"""), " ").trim() }
 
         var addressLine1: String? = null
@@ -93,20 +93,8 @@ class SanitechLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
             val normalized = line.trim().trimEnd(',')
 
             if (addressLine1 == null) {
-                val street = normalized
-                    .substringBefore("UPS")
-                    .substringBefore("FEDEX")
-                    .trim()
-                    .trimEnd(',')
-
-                val looksLikeStreet =
-                    street.isNotBlank() &&
-                            street.any { it.isDigit() } &&
-                            !street.equals("USA", ignoreCase = true) &&
-                            !street.startsWith("Telephone", ignoreCase = true) &&
-                            !Regex("""^.+,\s*[A-Z]{2},\s*\d{5}$""", RegexOption.IGNORE_CASE).matches(street)
-
-                if (looksLikeStreet) {
+                val street = extractStreetAddress(normalized)
+                if (street != null) {
                     addressLine1 = street
                     continue
                 }
@@ -124,7 +112,49 @@ class SanitechLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
             }
         }
 
+        if (city == null) {
+            val stateIndex = window.indexOfFirst { STATE_ONLY_PATTERN.matches(it.trim()) }
+            if (stateIndex >= 0) {
+                state = window[stateIndex].trim().uppercase()
+                city = window
+                    .take(stateIndex)
+                    .asReversed()
+                    .map { it.trim().trimEnd(',') }
+                    .firstOrNull(::looksLikeCity)
+                zip = window
+                    .drop(stateIndex + 1)
+                    .firstNotNullOfOrNull { ZIP_ONLY_PATTERN.matchEntire(it.trim())?.value }
+            }
+        }
+
         return ShipToBlock(addressLine1, city, state, zip)
+    }
+
+    private fun extractStreetAddress(line: String): String? {
+        val withoutInstructions = line
+            .replace(DELIVERY_INSTRUCTIONS_PATTERN, "")
+            .trim()
+            .trimEnd(',')
+
+        STREET_ADDRESS_PATTERN.find(withoutInstructions)?.let { match ->
+            return match.groupValues[1].trim().trimEnd(',')
+        }
+
+        return withoutInstructions.takeIf { candidate ->
+            candidate.isNotBlank() &&
+                    candidate.any(Char::isDigit) &&
+                    !candidate.equals("USA", ignoreCase = true) &&
+                    !candidate.startsWith("Telephone", ignoreCase = true) &&
+                    !CITY_STATE_ZIP_PATTERN.matches(candidate)
+        }
+    }
+
+    private fun looksLikeCity(value: String): Boolean {
+        if (!CITY_ONLY_PATTERN.matches(value)) return false
+
+        return !value.equals("Telephone", ignoreCase = true) &&
+                !value.equals("USA", ignoreCase = true) &&
+                !value.equals("United States", ignoreCase = true)
     }
 
     private fun parseItems(lines: List<String>): List<ParsedPdfItem> {
@@ -189,4 +219,19 @@ class SanitechLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         val state: String?,
         val zip: String?
     )
+
+    private companion object {
+        val DELIVERY_INSTRUCTIONS_PATTERN = Regex("""\s+(?:UPS|FEDEX)\b.*$""", RegexOption.IGNORE_CASE)
+        val STREET_ADDRESS_PATTERN = Regex(
+            """^(\d+\s+.+?\s+(?:ST(?:REET)?|RD|ROAD|DR(?:IVE)?|AVE(?:NUE)?|BLVD|BOULEVARD|LN|LANE|CT|COURT|CIR|CIRCLE|HWY|HIGHWAY|PKWY|PARKWAY|PL|PLACE|TER|TERRACE|WAY)\b\.?)""",
+            RegexOption.IGNORE_CASE
+        )
+        val CITY_STATE_ZIP_PATTERN = Regex(
+            """^.+?,\s*[A-Z]{2},\s*\d{5}(?:-\d{4})?$""",
+            RegexOption.IGNORE_CASE
+        )
+        val STATE_ONLY_PATTERN = Regex("""^[A-Z]{2}$""", RegexOption.IGNORE_CASE)
+        val ZIP_ONLY_PATTERN = Regex("""^\d{5}(?:-\d{4})?$""")
+        val CITY_ONLY_PATTERN = Regex("""^[A-Z][A-Z .'-]*$""", RegexOption.IGNORE_CASE)
+    }
 }

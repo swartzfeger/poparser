@@ -164,8 +164,11 @@ Packaging support was introduced in version 1.6.0 and is preliminary.
 - Box IDs 1 through 15 and dimensions are defined in `ShippingBoxes.kt`.
 - Packaging calculations use `quantityForExport`, not `quantityRaw`.
 - The UI shows total boxes and box plan in the parsed-order summary.
-- The CSV adds item volume/weight, order volume/weight, total boxes, box plan,
-  and packaging status columns.
+- The CSV writes the shipping plan to `Invoice Note`; packaging measurements stay in the UI.
+- Invoice notes identify grouped box count, per-box weight (or `?`), box ID and
+  dimensions, and the one-based order line numbers contained in each box.
+- SKU segments `12V`, `24V`, `400V`, and `500V` represent indivisible packages;
+  packaging calculations round fractional resolved quantities up to a whole package.
 
 The current planner is volume-based with per-item dimensional fit checks. It is
 not a full three-dimensional spatial packing engine. The product measurement
@@ -180,10 +183,13 @@ The exporter intentionally produces:
 - quoted CSV cells
 - negative unit prices and amounts for Sage import
 - up to three decimal places for unit prices, with trailing zeroes omitted
+- an `Invoice Note` shipping summary repeated on each line of an order
 
-The **No Ship Via** and **No Ship To** settings can blank those fields during
-export. Preserve Sage column ordering unless the client explicitly approves a
-schema change.
+The **No Ship Via**, **No Ship To**, and **No Invoice Note** settings can blank
+those fields during export. The parsed-order UI retains detailed volume, weight,
+box-plan, and packaging-status information that is no longer exported as separate
+CSV columns. Preserve Sage column ordering unless the client explicitly approves
+a schema change.
 
 ## Build And Test
 

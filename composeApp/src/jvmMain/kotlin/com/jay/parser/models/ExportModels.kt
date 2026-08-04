@@ -26,6 +26,7 @@ data class PackagingSummary(
     val orderWeightPounds: Double? = null,
     val totalBoxes: Int? = null,
     val boxPlan: String = "",
+    val invoiceNote: String = "",
     val status: String = "Not calculated",
     val warnings: List<String> = emptyList()
 )
