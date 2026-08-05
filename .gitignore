@@ -15,3 +15,12 @@ build/
 testpdf/
 test-output.csv
 .kotlin/
+/composeApp/src/jvmTest/kotlin/com/jay/parser/parser/AdvanceProductsLayoutStrategyTest.kt
+/composeApp/src/jvmTest/kotlin/com/jay/parser/parser/AldonGatewayLayoutStrategyTest.kt
+/composeApp/src/jvmTest/kotlin/com/jay/parser/parser/BetaProcesosLayoutStrategyTest.kt
+/composeApp/src/jvmTest/kotlin/com/jay/parser/parser/ButlerChemicalLayoutStrategyTest.kt
+/composeApp/src/jvmTest/kotlin/com/jay/parser/parser/CmRepresentacionesLayoutStrategyTest.kt
+/composeApp/src/jvmTest/kotlin/com/jay/parser/parser/DevereLayoutStrategyTest.kt
+/composeApp/src/jvmTest/kotlin/com/jay/parser/parser/ElectronicControlsDesignLayoutStrategyTest.kt
+/composeApp/src/jvmTest/kotlin/com/jay/parser/parser/NationalChemicalsLayoutStrategyTest.kt
+/composeApp/src/jvmTest/kotlin/com/jay/parser/parser/SanitechLayoutStrategyTest.kt
