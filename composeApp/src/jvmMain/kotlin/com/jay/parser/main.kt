@@ -205,7 +205,7 @@ fun main() = application {
                                         Column {
                                             Text("No Invoice Note")
                                             Text(
-                                                text = "No Box weights and dimensions needed.F",
+                                                text = "No Box weights and dimensions needed.",
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
                                         }
