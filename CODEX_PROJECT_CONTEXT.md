@@ -119,6 +119,10 @@ Regression examples:
 - Some Diversified, Dove, and Eisco rows already express pack quantity and must
   not be divided a second time.
 - Auto-Chlor has special vial/strip quantity and price behavior.
+- Butler Chemical orders `145-500V-100` as individual vials, so its visible
+  quantity is divided by 500 into sellable packages.
+- Beta Procesos `1V` quantities already represent the ordered sellable quantity
+  and remain unchanged.
 
 When fixing UOM behavior, verify all of these independently:
 
@@ -157,6 +161,8 @@ Master overrides are under `master-data/`. Packaging overrides are under
 Packaging support was introduced in version 1.6.0 and is preliminary.
 
 - Product dimensions and weights come from `productPackaging.json`.
+- The bundled August 5, 2026 dataset contains 180 products: all 180 have weights
+  and 150 have complete dimensions.
 - The user can replace the data through **Update Packaging Data** using a CSV.
 - Missing measurements do not block order parsing; they produce a review status.
 - Box capacity reserves 10 percent for packing material (`MAX_FILL_RATIO = 0.90`).
@@ -284,10 +290,14 @@ Focused tests currently cover:
 - packaging CSV import and box planning
 - Auto-Chlor
 - Bartovation
+- Beta Procesos
+- Butler Chemical Products
+- Electronic Controls Design
 - Eisco
 - Fisher Scientific
 - Intercon Chemical
 - School Specialty
+- Sanitech
 
 When a real customer PO reveals a bug, prefer adding a small extracted-text test
 to the corresponding strategy test rather than committing confidential source

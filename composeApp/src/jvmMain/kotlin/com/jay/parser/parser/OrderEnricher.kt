@@ -313,6 +313,7 @@ class OrderEnricher {
             "MIROIL USA, LLC",
             "NATIONAL CHEMICALS",
             "DOVE MATERIAL",
+            "BUTLER CHEMICAL PROD",
             "KROWNE METAL CORPORA",
             "JAYHAWK SALES TX",
             "JAYHAWK SALES WI"

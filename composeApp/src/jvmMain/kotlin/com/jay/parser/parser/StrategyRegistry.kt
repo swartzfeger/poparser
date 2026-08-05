@@ -19,6 +19,8 @@ class StrategyRegistry(
                     AutoChlorSystemTnLayoutStrategy(),
                     BaileysTestStripsLayoutStrategy(),
                     BartovationLayoutStrategy(),
+                    BetaProcesosLayoutStrategy(),
+                    ButlerChemicalLayoutStrategy(),
                     CarolinaBiologicalLayoutStrategy(),
                     CharlotteProductsLayoutStrategy(),
                     ChemSupplyLayoutStrategy(),

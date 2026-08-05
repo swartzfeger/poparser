@@ -1,5 +1,6 @@
 package com.jay.parser.packaging
 
+import kotlinx.serialization.json.Json
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -7,6 +8,21 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class PackagingCsvImporterTest {
+
+    @Test
+    fun bundledDatabaseIncludesAugustWeightRefresh() {
+        val resourceText = checkNotNull(
+            javaClass.getResourceAsStream("/data/productPackaging.json")
+        ).bufferedReader().use { it.readText() }
+        val products = Json.decodeFromString<Map<String, ProductPackaging>>(resourceText)
+
+        assertEquals(180, products.size)
+        assertEquals(150, products.values.count { it.hasDimensions })
+        assertEquals(180, products.values.count { it.weightPounds != null })
+        assertEquals(11.1, products.getValue("145-500V-100").weightPounds)
+        assertEquals(0.09, products.getValue("CHL-2000-1V-100").weightPounds)
+        assertEquals(0.05, products.getValue("QAC-400-1V-100").weightPounds)
+    }
 
     @Test
     fun normalizesSheetSkusAndInfersVialDiameter() {
