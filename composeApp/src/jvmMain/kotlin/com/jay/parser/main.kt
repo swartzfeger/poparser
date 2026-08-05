@@ -203,9 +203,9 @@ fun main() = application {
                                             onCheckedChange = { noInvoiceNote = it }
                                         )
                                         Column {
-                                            Text("No Invoice Note")
+                                            Text("No Box Weights and Dimensions Needed")
                                             Text(
-                                                text = "No Box weights and dimensions needed.",
+                                                text = "No box weights and dimensions will be exported.",
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
                                         }
