@@ -205,7 +205,7 @@ fun main() = application {
                                         Column {
                                             Text("No Invoice Note")
                                             Text(
-                                                text = "Leave Invoice Note blank in the CSV export.",
+                                                text = "No Box weights and dimensions needed.F",
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
                                         }
