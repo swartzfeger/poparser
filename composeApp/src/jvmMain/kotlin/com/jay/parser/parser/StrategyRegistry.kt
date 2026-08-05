@@ -13,6 +13,8 @@ class StrategyRegistry(
         fun default(): StrategyRegistry {
             return StrategyRegistry(
                 listOf(
+                    AdvanceProductsLayoutStrategy(),
+                    AldonGatewayLayoutStrategy(),
                     AllPointsIlLayoutStrategy(),
                     AquaPhoenixScientificLayoutStrategy(),
                     AquaResearchLayoutStrategy(),
@@ -25,10 +27,12 @@ class StrategyRegistry(
                     CharlotteProductsLayoutStrategy(),
                     ChemSupplyLayoutStrategy(),
                     ChosunMeasurementLayoutStrategy(),
+                    CmRepresentacionesLayoutStrategy(),
                     CovenantAviationLayoutStrategy(),
                     CovidienCtLayoutStrategy(),
                     DiversifiedFoodserviceLayoutStrategy(),
                     DiverseyTurkeyLayoutStrategy(),
+                    DevereLayoutStrategy(),
                     DoveLayoutStrategy(),
                     DrakeLayoutStrategy(),
                     EcaEducationalServicesLayoutStrategy(),

@@ -12,7 +12,8 @@ class OrderFileParser(
     private val ocrPdfTextExtractor: OcrPdfTextExtractor = OcrPdfTextExtractor(),
     private val pdfFieldParser: PdfFieldParser = PdfFieldParser(),
     private val precisionEuropeExcelParser: PrecisionEuropeExcelParser = PrecisionEuropeExcelParser(),
-    private val flowChemExcelParser: FlowChemExcelParser = FlowChemExcelParser()
+    private val flowChemExcelParser: FlowChemExcelParser = FlowChemExcelParser(),
+    private val ramcoExcelParser: RamcoExcelParser = RamcoExcelParser()
 ) {
 
     fun parse(file: File): List<ParsedPdfFields> {
@@ -276,6 +277,7 @@ class OrderFileParser(
 
     private fun parseExcel(file: File): List<ParsedPdfFields> {
         val result = when {
+            ramcoExcelParser.canParse(file) -> ramcoExcelParser.parse(file)
             precisionEuropeExcelParser.canParse(file) -> precisionEuropeExcelParser.parse(file)
             flowChemExcelParser.canParse(file) -> flowChemExcelParser.parse(file)
             else -> error("Unsupported XLSX format: ${file.extension}")

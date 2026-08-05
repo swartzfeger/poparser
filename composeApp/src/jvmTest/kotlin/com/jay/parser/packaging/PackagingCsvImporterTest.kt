@@ -16,12 +16,15 @@ class PackagingCsvImporterTest {
         ).bufferedReader().use { it.readText() }
         val products = Json.decodeFromString<Map<String, ProductPackaging>>(resourceText)
 
-        assertEquals(180, products.size)
-        assertEquals(150, products.values.count { it.hasDimensions })
-        assertEquals(180, products.values.count { it.weightPounds != null })
+        assertEquals(184, products.size)
+        assertEquals(183, products.values.count { it.hasDimensions })
+        assertEquals(184, products.values.count { it.weightPounds != null })
         assertEquals(11.1, products.getValue("145-500V-100").weightPounds)
         assertEquals(0.09, products.getValue("CHL-2000-1V-100").weightPounds)
         assertEquals(0.05, products.getValue("QAC-400-1V-100").weightPounds)
+        assertEquals(0.4, products.getValue("BART-210-Q810").weightPounds)
+        assertEquals(4.0, products.getValue("QAC-400-1B-100").lengthInches)
+        assertFalse("WDS-1B-100" in products)
     }
 
     @Test

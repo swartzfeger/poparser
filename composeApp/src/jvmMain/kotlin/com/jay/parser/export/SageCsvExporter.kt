@@ -98,7 +98,7 @@ class SageCsvExporter {
                     "1",
                     if (noShipVia) "" else order.customer?.shipVia.orEmpty(),
                     order.termsResolved.orEmpty(),
-                    if (noInvoiceNote) "" else order.packaging.invoiceNote
+                    if (noInvoiceNote || index > 0) "" else order.packaging.invoiceNote
                 )
             }
         }

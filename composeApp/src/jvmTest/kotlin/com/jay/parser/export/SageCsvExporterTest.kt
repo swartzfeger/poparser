@@ -4,7 +4,10 @@ import com.jay.parser.models.ExportOrder
 import com.jay.parser.models.ExportOrderLine
 import com.jay.parser.models.PackagingSummary
 import com.jay.parser.models.ResolvedCustomer
+import org.apache.commons.csv.CSVFormat
+import java.io.StringReader
 import java.time.LocalDate
+import kotlin.test.assertEquals
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -41,6 +44,29 @@ class SageCsvExporterTest {
 
         assertTrue(csv.contains("\"Net 30\",\"\""))
         assertFalse(csv.contains("Contains Line 1"))
+    }
+
+    @Test
+    fun includesInvoiceNoteOnlyOnFirstOrderLine() {
+        val order = testOrder()
+        val secondLine = order.lines.single().copy(
+            sku = "145-12V-100",
+            description = "CHLORINE TEST PAPERS"
+        )
+        val csv = SageCsvExporter().buildCsv(
+            orders = listOf(order.copy(lines = order.lines + secondLine)),
+            orderDate = LocalDate.of(2026, 8, 5)
+        )
+        val records = CSVFormat.DEFAULT.builder()
+            .setHeader()
+            .setSkipHeaderRecord(true)
+            .build()
+            .parse(StringReader(csv))
+            .records
+
+        assertEquals(2, records.size)
+        assertEquals(order.packaging.invoiceNote, records[0].get("Invoice Note"))
+        assertEquals("", records[1].get("Invoice Note"))
     }
 
     private fun testOrder(): ExportOrder = ExportOrder(

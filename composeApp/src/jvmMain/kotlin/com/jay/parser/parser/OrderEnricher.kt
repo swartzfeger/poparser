@@ -194,6 +194,19 @@ class OrderEnricher {
             }
         }
 
+        if (customerId == "DEVERE") {
+            val vialCaseDivisor = normalizedSku
+                .split("-")
+                .firstNotNullOfOrNull { segment ->
+                    Regex("""^(\d+)V$""").matchEntire(segment)?.groupValues?.get(1)?.toIntOrNull()
+                }
+            return if (vialCaseDivisor != null && vialCaseDivisor > 0) {
+                rawQuantity / vialCaseDivisor
+            } else {
+                rawQuantity
+            }
+        }
+
         if (!isUomCustomer(customerId)) {
             return rawQuantity
         }
@@ -303,6 +316,7 @@ class OrderEnricher {
 
     private fun isUomCustomer(customerId: String): Boolean {
         val uomCustomerIds = setOf(
+            "ADVANCE PRODUCTS & S",
             "DIVERSIFIED FOODSERV",
             "CHARLOTTE PRODUCTS",
             "TCD PARTS",

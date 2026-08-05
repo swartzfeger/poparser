@@ -51,7 +51,7 @@ class NationalChemicalsLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
             state = shipTo.state,
             zip = shipTo.zip,
             terms = mappedCustomer?.terms,
-            items = parseItems(clean, mappedCustomer?.priceLevel)
+            items = parseItems(clean)
         )
     }
 
@@ -84,7 +84,7 @@ class NationalChemicalsLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
     private fun parseShipTo(lines: List<String>): ShipToBlock {
         var shipToCustomer: String? = null
         var addressLine1: String? = null
-        var addressLine2: String? = null
+        val addressLine2: String? = null
         var city: String? = null
         var state: String? = null
         var zip: String? = null
@@ -123,7 +123,7 @@ class NationalChemicalsLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
                 continue
             }
 
-            if (city == null && state == null && zip == null && c.contains("LEWISTONMN55952")) {
+            if (city == null && c.contains("LEWISTONMN55952")) {
                 city = "Lewiston"
                 state = "MN"
                 zip = if (c.contains("559522108")) "55952-2108" else "55952"
@@ -142,7 +142,7 @@ class NationalChemicalsLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
             }?.let { "135 Rice St" }
         }
 
-        if (city == null || state == null || zip == null) {
+        if (city == null) {
             val cszLine = lines.firstOrNull { compact(it).contains("LEWISTONMN55952") }
             if (cszLine != null) {
                 city = "Lewiston"
@@ -161,42 +161,39 @@ class NationalChemicalsLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         )
     }
 
-    private fun parseItems(lines: List<String>, priceLevel: String?): List<ParsedPdfItem> {
+    private fun parseItems(lines: List<String>): List<ParsedPdfItem> {
         val items = mutableListOf<ParsedPdfItem>()
         val seen = mutableSetOf<String>()
 
         for (i in lines.indices) {
             val current = lines[i].replace(Regex("""\s+"""), " ").trim()
 
-            // Example line:
-            // RM0054 IodineTestPapers0-50ppm(#500)Item#169- Each 500 2.06 1,030.00
             val mainRow = Regex(
-                """^([A-Z0-9-]+)\s+(.+?)Item#([A-Z0-9-]+)\s+[A-Za-z]+\s+(\d+(?:,\d{3})?)\s+[\d,]+\.\d{2}\s+[\d,]+\.\d{2}$""",
+                """^([A-Z0-9-]+)\s+(.+?)\s+(Case|Each)\s+([\d,]+(?:\.\d+)?)\s+([\d,]+\.\d+)\s+[\d,]+\.\d+$""",
                 RegexOption.IGNORE_CASE
             ).find(current) ?: continue
 
-            val poDescription = mainRow.groupValues[2].trim()
-            val skuHead = mainRow.groupValues[3].trim()
+            val descriptionWithSku = mainRow.groupValues[2].trim()
+            val skuHead = Regex("""Item#\s*([A-Z0-9-]+)""", RegexOption.IGNORE_CASE)
+                .find(descriptionWithSku)
+                ?.groupValues
+                ?.get(1)
+                ?: continue
             val quantity = mainRow.groupValues[4].replace(",", "").toDoubleOrNull() ?: continue
+            val unitPrice = mainRow.groupValues[5].replace(",", "").toDoubleOrNull()
 
-            val next = lines.getOrNull(i + 1)
-                ?.replace(Regex("""\s+"""), " ")
-                ?.trim()
-                .orEmpty()
+            val sku = if (skuHead.endsWith("-")) {
+                val tail = lines.getOrNull(i + 1)
+                    ?.replace(Regex("""[^A-Z0-9-]"""), "")
+                    .orEmpty()
+                if (tail.isBlank()) continue
+                normalizeSku(skuHead + tail)
+            } else {
+                normalizeSku(skuHead)
+            }
 
-            // Example wrapped tail:
-            // 500V-100
-            val skuTailMatch = Regex(
-                """^([A-Z0-9-]+)$""",
-                RegexOption.IGNORE_CASE
-            ).find(next) ?: continue
-
-            val sku = normalizeSku(skuHead + skuTailMatch.groupValues[1].trim())
-
+            val poDescription = descriptionWithSku.substringBefore("Item#", descriptionWithSku).trim()
             val finalDescription = ItemMapper.getItemDescription(sku).ifBlank { poDescription }
-
-            val mappedPrice = ItemMapper.getItemPrice(sku, priceLevel)
-            val unitPrice = if (mappedPrice == 0.0) null else mappedPrice
 
             val key = "$sku|$quantity"
             if (!seen.add(key)) continue

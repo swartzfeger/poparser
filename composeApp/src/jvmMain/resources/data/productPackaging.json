@@ -678,6 +678,41 @@
     "weightPounds": 0.15,
     "inferredLength": false
   },
+  "BART-210-Q810": {
+    "lengthInches": 10,
+    "widthInches": 8,
+    "heightInches": 0.25,
+    "weightPounds": 0.4,
+    "inferredLength": false
+  },
+  "BART-240-Q810": {
+    "lengthInches": 10,
+    "widthInches": 8,
+    "heightInches": 0.25,
+    "weightPounds": 0.4,
+    "inferredLength": false
+  },
+  "BART-250-Q810": {
+    "lengthInches": 10,
+    "widthInches": 8,
+    "heightInches": 0.25,
+    "weightPounds": 0.4,
+    "inferredLength": false
+  },
+  "BART-280-Q810": {
+    "lengthInches": 10,
+    "widthInches": 8,
+    "heightInches": 0.25,
+    "weightPounds": 0.4,
+    "inferredLength": false
+  },
+  "BART-290-Q810": {
+    "lengthInches": 10,
+    "widthInches": 8,
+    "heightInches": 0.25,
+    "weightPounds": 0.4,
+    "inferredLength": false
+  },
   "CHL-05-1V-50": {
     "lengthInches": 1.125,
     "widthInches": 1.125,
@@ -777,30 +812,30 @@
     "inferredLength": true
   },
   "GLU-1B-100": {
-    "lengthInches": null,
+    "lengthInches": 5,
     "widthInches": 3,
-    "heightInches": 5,
+    "heightInches": 0.25,
     "weightPounds": 0.04,
     "inferredLength": false
   },
   "GLU-1B-25": {
-    "lengthInches": null,
+    "lengthInches": 5,
     "widthInches": 3,
-    "heightInches": 5,
+    "heightInches": 0.25,
     "weightPounds": 0.01,
     "inferredLength": false
   },
   "GLU-1B-50": {
-    "lengthInches": null,
+    "lengthInches": 5,
     "widthInches": 3,
-    "heightInches": 5,
+    "heightInches": 0.25,
     "weightPounds": 0.02,
     "inferredLength": false
   },
   "HARD-1B-50": {
-    "lengthInches": null,
+    "lengthInches": 5,
     "widthInches": 3,
-    "heightInches": 5,
+    "heightInches": 0.25,
     "weightPounds": 0.02,
     "inferredLength": false
   },
@@ -966,16 +1001,16 @@
     "inferredLength": true
   },
   "PH0007-3-1B-100": {
-    "lengthInches": null,
+    "lengthInches": 4,
     "widthInches": 3,
-    "heightInches": 4,
+    "heightInches": 0.25,
     "weightPounds": 0.04,
     "inferredLength": false
   },
   "PH0007-3-1B-50": {
-    "lengthInches": null,
+    "lengthInches": 4,
     "widthInches": 3,
-    "heightInches": 4,
+    "heightInches": 0.25,
     "weightPounds": 0.02,
     "inferredLength": false
   },
@@ -987,44 +1022,44 @@
     "inferredLength": true
   },
   "PH0015-1B-50": {
-    "lengthInches": null,
+    "lengthInches": 4,
     "widthInches": 3,
-    "heightInches": 4,
+    "heightInches": 0.25,
     "weightPounds": 0.02,
     "inferredLength": false
   },
   "PH0025-1B-50": {
-    "lengthInches": null,
+    "lengthInches": 4,
     "widthInches": 3,
-    "heightInches": 4,
+    "heightInches": 0.25,
     "weightPounds": 0.02,
     "inferredLength": false
   },
   "PH0114-1B-100": {
-    "lengthInches": null,
+    "lengthInches": 4,
     "widthInches": 3,
-    "heightInches": 4,
+    "heightInches": 0.25,
     "weightPounds": 0.04,
     "inferredLength": false
   },
   "PH0114-1B-50": {
-    "lengthInches": null,
+    "lengthInches": 4,
     "widthInches": 3,
-    "heightInches": 4,
+    "heightInches": 0.25,
     "weightPounds": 0.02,
     "inferredLength": false
   },
   "PH0114-3-1B-100": {
-    "lengthInches": null,
+    "lengthInches": 4,
     "widthInches": 3,
-    "heightInches": 4,
+    "heightInches": 0.25,
     "weightPounds": 0.04,
     "inferredLength": false
   },
   "PH0114-3-1B-50": {
-    "lengthInches": null,
+    "lengthInches": 4,
     "widthInches": 3,
-    "heightInches": 4,
+    "heightInches": 0.25,
     "weightPounds": 0.02,
     "inferredLength": false
   },
@@ -1036,16 +1071,16 @@
     "inferredLength": true
   },
   "PH0714-3-1B-100": {
-    "lengthInches": null,
+    "lengthInches": 4,
     "widthInches": 3,
-    "heightInches": 4,
+    "heightInches": 0.25,
     "weightPounds": 0.04,
     "inferredLength": false
   },
   "PH0714-3-1B-50": {
-    "lengthInches": null,
+    "lengthInches": 4,
     "widthInches": 3,
-    "heightInches": 4,
+    "heightInches": 0.25,
     "weightPounds": 0.02,
     "inferredLength": false
   },
@@ -1057,30 +1092,30 @@
     "inferredLength": true
   },
   "PH1013-1B-50": {
-    "lengthInches": null,
+    "lengthInches": 4,
     "widthInches": 3,
-    "heightInches": 4,
+    "heightInches": 0.25,
     "weightPounds": 0.02,
     "inferredLength": false
   },
   "PH1114-1B-50": {
-    "lengthInches": null,
+    "lengthInches": 4,
     "widthInches": 3,
-    "heightInches": 4,
+    "heightInches": 0.25,
     "weightPounds": 0.02,
     "inferredLength": false
   },
   "PH2090-3-1B-100": {
-    "lengthInches": null,
+    "lengthInches": 4,
     "widthInches": 3,
-    "heightInches": 4,
+    "heightInches": 0.25,
     "weightPounds": 0.04,
     "inferredLength": false
   },
   "PH2090-3-1B-50": {
-    "lengthInches": null,
+    "lengthInches": 4,
     "widthInches": 3,
-    "heightInches": 4,
+    "heightInches": 0.25,
     "weightPounds": 0.02,
     "inferredLength": false
   },
@@ -1099,30 +1134,30 @@
     "inferredLength": true
   },
   "PH3060-1B-50": {
-    "lengthInches": null,
+    "lengthInches": 4,
     "widthInches": 3,
-    "heightInches": 4,
+    "heightInches": 0.25,
     "weightPounds": 0.02,
     "inferredLength": false
   },
   "PH4070-1B-50": {
-    "lengthInches": null,
+    "lengthInches": 4,
     "widthInches": 3,
-    "heightInches": 4,
+    "heightInches": 0.25,
     "weightPounds": 0.02,
     "inferredLength": false
   },
   "PH4510-3-1B-100": {
-    "lengthInches": null,
+    "lengthInches": 4,
     "widthInches": 3,
-    "heightInches": 4,
+    "heightInches": 0.25,
     "weightPounds": 0.04,
     "inferredLength": false
   },
   "PH4510-3-1B-50": {
-    "lengthInches": null,
+    "lengthInches": 4,
     "widthInches": 3,
-    "heightInches": 4,
+    "heightInches": 0.25,
     "weightPounds": 0.02,
     "inferredLength": false
   },
@@ -1141,16 +1176,16 @@
     "inferredLength": true
   },
   "PH5090-1B-50": {
-    "lengthInches": null,
+    "lengthInches": 4,
     "widthInches": 3,
-    "heightInches": 4,
+    "heightInches": 0.25,
     "weightPounds": 0.02,
     "inferredLength": false
   },
   "PH7010-1B-50": {
-    "lengthInches": null,
+    "lengthInches": 4,
     "widthInches": 3,
-    "heightInches": 4,
+    "heightInches": 0.25,
     "weightPounds": 0.02,
     "inferredLength": false
   },
@@ -1167,6 +1202,13 @@
     "heightInches": 3.375,
     "weightPounds": 0.07,
     "inferredLength": true
+  },
+  "QAC-400-1B-100": {
+    "lengthInches": 4,
+    "widthInches": 3,
+    "heightInches": 0.25,
+    "weightPounds": 0.04,
+    "inferredLength": false
   },
   "QAC-10000-1V-50": {
     "lengthInches": 1.125,
@@ -1196,17 +1238,10 @@
     "weightPounds": 0.07,
     "inferredLength": true
   },
-  "QAC-400-1B-100": {
-    "lengthInches": null,
-    "widthInches": 3,
-    "heightInches": 4,
-    "weightPounds": 0.04,
-    "inferredLength": false
-  },
   "QAC-400-1B-50": {
-    "lengthInches": null,
+    "lengthInches": 4,
     "widthInches": 3,
-    "heightInches": 4,
+    "heightInches": 0.25,
     "weightPounds": 0.02,
     "inferredLength": false
   },
@@ -1232,9 +1267,9 @@
     "inferredLength": true
   },
   "SPC-160-MIL": {
-    "lengthInches": null,
+    "lengthInches": 5,
     "widthInches": 3,
-    "heightInches": 5,
+    "heightInches": 0.25,
     "weightPounds": 0.001,
     "inferredLength": false
   },
@@ -1245,17 +1280,10 @@
     "weightPounds": 0.07,
     "inferredLength": true
   },
-  "WDS-1B-100": {
-    "lengthInches": null,
-    "widthInches": 6,
-    "heightInches": 9,
-    "weightPounds": 0.1,
-    "inferredLength": false
-  },
   "WDS-1B-500": {
-    "lengthInches": null,
+    "lengthInches": 9,
     "widthInches": 6,
-    "heightInches": 9,
+    "heightInches": 1.25,
     "weightPounds": 0.4,
     "inferredLength": false
   }
