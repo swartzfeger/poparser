@@ -25,14 +25,15 @@ meaningful architectural, workflow, or product changes.
 - Development machine: macOS
 - Production client: Windows only
 
-PO Parser imports customer purchase orders in PDF or XLSX format, extracts order
+PO Parser imports customer purchase orders in PDF, XLSX, or supported legacy DOC format, extracts order
 and item data, enriches it with Precision Laboratories master data, estimates
 shipping boxes, and exports a Sage-ready CSV.
 
 ## Product Workflow
 
-1. The user chooses or drags PDF/XLSX purchase orders into the application.
-2. `OrderFileParser` extracts text or invokes OCR when required.
+1. The user chooses or drags PDF/XLSX/DOC purchase orders into the application.
+2. `OrderFileParser` routes the file to native PDF extraction/OCR, an Excel parser,
+   or a supported legacy Word parser.
 3. `PdfFieldParser` chooses the best customer-specific layout strategy.
 4. The strategy returns `ParsedPdfFields` and `ParsedPdfItem` values.
 5. `OrderEnricher` resolves customer data, SKU descriptions, prices, quantity
@@ -50,8 +51,10 @@ quantity.
   `composeApp/src/jvmMain/kotlin/com/jay/parser/main.kt`
 - Main parser UI:
   `composeApp/src/jvmMain/kotlin/com/jay/parser/ui/MainScreen.kt`
-- PDF/XLSX routing and OCR selection:
+- PDF/XLSX/DOC routing and OCR selection:
   `composeApp/src/jvmMain/kotlin/com/jay/parser/pdf/OrderFileParser.kt`
+- TECHNOS legacy Word table parsing:
+  `composeApp/src/jvmMain/kotlin/com/jay/parser/parser/TechnosWordParser.kt`
 - Native PDF extraction:
   `composeApp/src/jvmMain/kotlin/com/jay/parser/pdf/PdfTextExtractor.kt`
 - OCR extraction:
@@ -78,6 +81,12 @@ quantity.
 Customer PDF formats are handled by implementations of `LayoutStrategy`. A
 strategy has matching/scoring behavior and parsing behavior. `StrategyRegistry`
 selects the highest-scoring matching strategy.
+
+Legacy Word `.doc` support currently exists for TECHNOS purchase orders through
+Apache POI HWPF (`poi-scratchpad`). `TechnosWordParser` reads table cells directly,
+so visually wrapped SKUs are reconstructed without requiring Microsoft Word or
+LibreOffice on the client machine. Other `.doc` layouts remain unsupported until
+they receive a dedicated parser.
 
 When changing a customer parser:
 
@@ -119,6 +128,8 @@ Regression examples:
 - Some Diversified, Dove, and Eisco rows already express pack quantity and must
   not be divided a second time.
 - Auto-Chlor has special vial/strip quantity and price behavior.
+- Apothecary Products orders individual vials, so visible `EA` quantities are
+  divided by the vial-pack segment in the SKU (`12V`, `144V`, and so on).
 - Butler Chemical orders `145-500V-100` as individual vials, so its visible
   quantity is divided by 500 into sellable packages.
 - Beta Procesos `1V` quantities already represent the ordered sellable quantity
@@ -289,15 +300,24 @@ Focused tests currently cover:
 - Sage CSV formatting and packaging columns
 - packaging CSV import and box planning
 - Auto-Chlor
+- Apothecary Products
 - Bartovation
 - Beta Procesos
 - Butler Chemical Products
+- Cambridge Environmental
 - Electronic Controls Design
 - Eisco
 - Fisher Scientific
+- Franz Ziel GmbH
+- Gasco Industrial
 - Intercon Chemical
+- McCoy Health Science
+- Rideau Group
 - School Specialty
 - Sanitech
+- Summit Supply
+- Technos
+- UNI-KEM.COM
 
 When a real customer PO reveals a bug, prefer adding a small extracted-text test
 to the corresponding strategy test rather than committing confidential source

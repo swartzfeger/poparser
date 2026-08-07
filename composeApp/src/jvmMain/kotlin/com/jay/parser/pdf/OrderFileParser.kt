@@ -11,6 +11,8 @@ class OrderFileParser(
     private val pdfTextExtractor: PdfTextExtractor = PdfTextExtractor(),
     private val ocrPdfTextExtractor: OcrPdfTextExtractor = OcrPdfTextExtractor(),
     private val pdfFieldParser: PdfFieldParser = PdfFieldParser(),
+    private val technosWordParser: TechnosWordParser = TechnosWordParser(),
+    private val summitSupplyExcelParser: SummitSupplyExcelParser = SummitSupplyExcelParser(),
     private val precisionEuropeExcelParser: PrecisionEuropeExcelParser = PrecisionEuropeExcelParser(),
     private val flowChemExcelParser: FlowChemExcelParser = FlowChemExcelParser(),
     private val ramcoExcelParser: RamcoExcelParser = RamcoExcelParser()
@@ -20,6 +22,7 @@ class OrderFileParser(
         return when (file.extension.lowercase()) {
             "pdf" -> parsePdf(file)
             "xlsx" -> parseExcel(file)
+            "doc" -> listOf(technosWordParser.parse(file))
             else -> error("Unsupported file type: ${file.extension}")
         }
     }
@@ -277,6 +280,7 @@ class OrderFileParser(
 
     private fun parseExcel(file: File): List<ParsedPdfFields> {
         val result = when {
+            summitSupplyExcelParser.canParse(file) -> summitSupplyExcelParser.parse(file)
             ramcoExcelParser.canParse(file) -> ramcoExcelParser.parse(file)
             precisionEuropeExcelParser.canParse(file) -> precisionEuropeExcelParser.parse(file)
             flowChemExcelParser.canParse(file) -> flowChemExcelParser.parse(file)

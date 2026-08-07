@@ -119,7 +119,8 @@ fun FrameWindowScope.MainScreen(
         val newFiles = files
             .filter {
                 it.extension.equals("pdf", ignoreCase = true) ||
-                        it.extension.equals("xlsx", ignoreCase = true)
+                        it.extension.equals("xlsx", ignoreCase = true) ||
+                        it.extension.equals("doc", ignoreCase = true)
             }
             .filterNot { it.absolutePath in existing }
 
@@ -360,7 +361,7 @@ fun FrameWindowScope.MainScreen(
                     if (droppedFiles.isEmpty()) {
                         uiState = UiState(
                             status = "Unsupported Drop Source",
-                            message = "Outlook did not provide the attachment as a readable file. Please use Choose Files, or save the PDF first and drag it from File Explorer."
+                            message = "Outlook did not provide the attachment as a readable file. Please use Choose Files, or save the attachment first and drag it from File Explorer."
                         )
                         dtde.dropComplete(false)
                         return
@@ -635,7 +636,7 @@ private fun FilePickerBanner(isDragOver: Boolean) {
                 ) {
                     Text(
                         text = if (isDragOver) {
-                            "Drop PDF or XLSX files here"
+                            "Drop PDF, XLSX, or DOC files here"
                         } else {
                             "Use Choose Files or drag files here"
                         },
@@ -653,7 +654,7 @@ private fun FilePickerBanner(isDragOver: Boolean) {
                         color = MaterialTheme.colorScheme.secondary
                     )
                     Text(
-                        text = "PDF and XLSX purchase orders supported",
+                        text = "PDF, XLSX, and legacy Word DOC purchase orders supported",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.secondary
                     )
