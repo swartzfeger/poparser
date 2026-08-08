@@ -8,6 +8,7 @@ import java.awt.image.BufferedImage
 import java.io.File
 import java.nio.file.Files
 import javax.imageio.ImageIO
+import kotlin.math.max
 
 /**
  * Extractor that handles OCR processing and image normalization.
@@ -29,23 +30,58 @@ class OcrPdfTextExtractor(
             Loader.loadPDF(file).use { document ->
                 val renderer = PDFRenderer(document)
                 for (i in 0 until document.numberOfPages) {
-                    // 1. Render at 400 DPI in GRAYSCALE (Better for binarization)
-                    val sourceImage = renderer.renderImageWithDPI(i, 400f, ImageType.GRAY)
+                    /*
+                     * Normal documents still render at 400 DPI. Phone-scanned PDFs can
+                     * declare poster-sized page dimensions, though, which would create
+                     * a 100+ megapixel bitmap and exhaust the JVM heap. Cap only those
+                     * oversized pages while retaining enough pixels for OCR.
+                     */
+                    val page = document.getPage(i)
+                    val longestPageEdge = max(page.cropBox.width, page.cropBox.height)
+                    val targetScale = TARGET_DPI / PDF_POINTS_PER_INCH
+                    val isOversizedScan = longestPageEdge > MAX_NORMAL_PAGE_EDGE_POINTS
+                    val renderScale = if (isOversizedScan) {
+                        minOf(targetScale, MAX_RENDER_EDGE_PIXELS / longestPageEdge)
+                    } else {
+                        targetScale
+                    }
+                    val sourceImage = renderer.renderImage(i, renderScale, ImageType.GRAY)
 
                     // 2. Normalize rotation
-                    var processedImage = if (sourceImage.width > sourceImage.height) {
+                    val grayscaleImage = if (sourceImage.width > sourceImage.height) {
                         rotateImageClockwise90(sourceImage)
                     } else {
                         sourceImage
                     }
+                    var processedImage = grayscaleImage
 
-                    // 3. Apply Binarization (Thresholding) to strip fax noise
-                    processedImage = binarizeImage(processedImage)
+                    // 3. Apply binarization to normal/fax PDFs. Phone scans retain
+                    // grayscale because their faint typewriter text loses detail when
+                    // thresholded after the required downscaling.
+                    if (!isOversizedScan) {
+                        processedImage = binarizeImage(processedImage)
+                    }
 
                     val tempImageFile = File(tempDir, "page_$i.png")
                     ImageIO.write(processedImage, "png", tempImageFile)
 
-                    val pageText = runTesseract(tempImageFile)
+                    var pageText = runTesseract(tempImageFile)
+
+                    /*
+                     * Jonkman's Ricoh scans contain a ruled item table. The normal
+                     * binarized PSM 3 pass reliably identifies the customer, but it
+                     * drops the Ordered, Unit, and Price columns. A grayscale PSM 6
+                     * pass preserves complete table rows. Keep this second pass
+                     * behind the exact Jonkman fingerprint so every other OCR layout
+                     * retains its existing image processing and segmentation mode.
+                     */
+                    if (looksLikeJonkman(pageText)) {
+                        val grayscaleFile = File(tempDir, "page_${i}_jonkman_gray.png")
+                        ImageIO.write(grayscaleImage, "png", grayscaleFile)
+                        val tableText = runTesseract(grayscaleFile, pageSegmentationMode = 6)
+                        if (tableText.isNotBlank()) pageText = tableText
+                        grayscaleFile.delete()
+                    }
                     pageText.lines()
                         .filter { it.isNotBlank() }
                         .forEach { allLines.add(PdfLine(tokens = emptyList(), text = it.trim())) }
@@ -74,14 +110,28 @@ class OcrPdfTextExtractor(
         return binarized
     }
 
-    private fun runTesseract(inputFile: File): String {
-        val process = ProcessBuilder(tesseractCommand, inputFile.absolutePath, "stdout", "--psm", "3", "quiet")
+    private fun runTesseract(inputFile: File, pageSegmentationMode: Int = 3): String {
+        val process = ProcessBuilder(
+            tesseractCommand,
+            inputFile.absolutePath,
+            "stdout",
+            "--psm",
+            pageSegmentationMode.toString(),
+            "quiet"
+        )
             .redirectErrorStream(true)
             .start()
 
         val output = process.inputStream.bufferedReader().use { it.readText() }
         process.waitFor()
         return output
+    }
+
+    private fun looksLikeJonkman(text: String): Boolean {
+        val compactText = text.uppercase().replace(Regex("""[^A-Z0-9]"""), "")
+        return compactText.contains("JONKMAN") &&
+                compactText.contains("EQUIPMENT") &&
+                compactText.contains("2PREC")
     }
 
     private fun rotateImageClockwise90(image: BufferedImage): BufferedImage {
@@ -105,6 +155,11 @@ class OcrPdfTextExtractor(
     }
 
     companion object {
+        private const val TARGET_DPI = 400f
+        private const val PDF_POINTS_PER_INCH = 72f
+        private const val MAX_NORMAL_PAGE_EDGE_POINTS = 1200f
+        private const val MAX_RENDER_EDGE_PIXELS = 2400f
+
         private fun defaultTesseractCommand(): String {
             val os = System.getProperty("os.name").lowercase()
             val userDir = System.getProperty("user.dir")

@@ -318,6 +318,7 @@ class OrderEnricher {
         val uomCustomerIds = setOf(
             "ADVANCE PRODUCTS & S",
             "APOTHECARY PRODUCTS",
+            "ATHEA LABORATORIES",
             "BAILEYS THERMOMETERS",
             "DIVERSIFIED FOODSERV",
             "CHARLOTTE PRODUCTS",
@@ -325,6 +326,7 @@ class OrderEnricher {
             "DRAKE SPECIALITIES",
             "EISCO SCI",
             "GASCO INDUSTRIAL",
+            "HOME BREW OHIO",
             "SCHOOL SPECIALTY",
             "INTERCON CHEMICAL CO",
             "MIROIL USA, LLC",
@@ -333,7 +335,8 @@ class OrderEnricher {
             "BUTLER CHEMICAL PROD",
             "KROWNE METAL CORPORA",
             "JAYHAWK SALES TX",
-            "JAYHAWK SALES WI"
+            "JAYHAWK SALES WI",
+            "WESTLAB"
         )
         return uomCustomerIds.contains(customerId)
     }

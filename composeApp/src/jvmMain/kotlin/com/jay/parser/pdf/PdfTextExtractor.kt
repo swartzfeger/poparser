@@ -1,6 +1,7 @@
 package com.jay.parser.pdf
 
 import org.apache.pdfbox.Loader
+import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.text.PDFTextStripper
 import org.apache.pdfbox.text.TextPosition
 import java.io.File
@@ -26,24 +27,7 @@ class PdfTextExtractor {
             // The token-grouped path is corrupting the item block for this PDF,
             // while plain PDF text contains the exact three-line item block correctly.
             if (pdfFile.name.contains("FRESENIUS MEDICAL", ignoreCase = true)) {
-                val plainStripper = PDFTextStripper().apply {
-                    sortByPosition = true
-                    startPage = 1
-                    endPage = document.pages.count
-                }
-
-                val text = plainStripper.getText(document)
-
-                return text
-                    .lines()
-                    .map { it.replace(Regex("\\s+"), " ").trim() }
-                    .filter { it.isNotBlank() }
-                    .map { line ->
-                        PdfLine(
-                            tokens = emptyList(),
-                            text = line
-                        )
-                    }
+                return extractPlainLines(document)
             }
 
             val stripper = PositionTextStripper()
@@ -53,8 +37,44 @@ class PdfTextExtractor {
 
             stripper.getText(document)
 
-            return groupIntoLines(stripper.tokens)
+            val positionedLines = groupIntoLines(stripper.tokens)
+
+            /*
+             * WESTLAB's two-page Crystal Reports PDFs reuse the same vertical
+             * coordinates on both pages. Grouping all tokens by Y interleaves the
+             * page-two instructions into page-one headers and the first item row.
+             * Plain PDFBox extraction keeps pages sequential and is limited to this
+             * exact layout fingerprint so other customer extraction is unchanged.
+             */
+            if (looksLikeWestlab(positionedLines)) {
+                return extractPlainLines(document)
+            }
+
+            return positionedLines
         }
+    }
+
+    private fun extractPlainLines(document: PDDocument): List<PdfLine> {
+        val plainStripper = PDFTextStripper().apply {
+            sortByPosition = true
+            startPage = 1
+            endPage = document.pages.count
+        }
+
+        return plainStripper.getText(document)
+            .lines()
+            .map { it.replace(Regex("\\s+"), " ").trim() }
+            .filter { it.isNotBlank() }
+            .map { line -> PdfLine(tokens = emptyList(), text = line) }
+    }
+
+    private fun looksLikeWestlab(lines: List<PdfLine>): Boolean {
+        val compactText = lines.joinToString("") { it.text }
+            .uppercase()
+            .replace(Regex("""[^A-Z0-9]"""), "")
+
+        return compactText.contains("WESTLABNORTHAMERICA") &&
+                compactText.contains("WESTLABVENDORPACKAGINGREQUIREMENTS")
     }
 
     private fun groupIntoLines(tokens: List<PdfToken>): List<PdfLine> {
