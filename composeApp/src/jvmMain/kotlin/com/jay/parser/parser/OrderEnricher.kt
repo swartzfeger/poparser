@@ -318,6 +318,7 @@ class OrderEnricher {
         val uomCustomerIds = setOf(
             "ADVANCE PRODUCTS & S",
             "APOTHECARY PRODUCTS",
+            "BAILEYS THERMOMETERS",
             "DIVERSIFIED FOODSERV",
             "CHARLOTTE PRODUCTS",
             "TCD PARTS",

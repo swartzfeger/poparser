@@ -24,3 +24,4 @@ test-output.csv
 /composeApp/src/jvmTest/kotlin/com/jay/parser/parser/ElectronicControlsDesignLayoutStrategyTest.kt
 /composeApp/src/jvmTest/kotlin/com/jay/parser/parser/NationalChemicalsLayoutStrategyTest.kt
 /composeApp/src/jvmTest/kotlin/com/jay/parser/parser/SanitechLayoutStrategyTest.kt
+/composeApp/src/jvmTest/kotlin/com/jay/parser/parser/CambridgeEnvironmentalLayoutStrategyTest.kt

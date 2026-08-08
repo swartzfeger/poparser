@@ -156,40 +156,39 @@ class BaileysTestStripsLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
 
     private fun parseItems(lines: List<String>) = buildList {
         val seen = mutableSetOf<String>()
+        val knownSkus = ItemMapper.getAllSkus()
+            .map { it.trim().uppercase() }
+            .distinct()
+            .sortedByDescending { it.length }
 
         for (i in lines.indices) {
             val line = lines[i].replace(Regex("""\s+"""), " ").trim()
 
-            val rowMatch = Regex(
-                """^[A-Z0-9]+\s+\*{3}([A-Z0-9-]+)\*{3}(.+?)\s+(\d+(?:,\d{3})*(?:\.\d+)?)\s+(\d+(?:,\d{3})*\.\d{2})\s+(\d+(?:,\d{3})*\.\d{2})$""",
-                RegexOption.IGNORE_CASE
-            ).find(line) ?: continue
-
-            val rawSku = rowMatch.groupValues[1].trim().uppercase()
-            val firstDescPart = rowMatch.groupValues[2].trim()
-            val quantity = rowMatch.groupValues[3].replace(",", "").toDoubleOrNull()
-            val unitPrice = rowMatch.groupValues[4].replace(",", "").toDoubleOrNull()
+            val rowMatch = ITEM_ROW_REGEX.matchEntire(line) ?: continue
+            val itemText = rowMatch.groupValues[1].trim()
+            val skuMatch = findSku(itemText, knownSkus) ?: continue
+            val firstDescPart = itemText
+                .substring(skuMatch.endIndex)
+                .trimStart(' ', '*', '-', '"')
+                .trim()
+            val quantity = rowMatch.groupValues[2].replace(",", "").toDoubleOrNull()
+            val unitPrice = rowMatch.groupValues[3].replace(",", "").toDoubleOrNull()
 
             if (quantity == null || unitPrice == null) continue
 
-            val nextLine = lines.getOrNull(i + 1)
-                ?.replace(Regex("""\s+"""), " ")
-                ?.trim()
-                .orEmpty()
-
             val fullDescription = buildString {
                 append(firstDescPart)
-                if (nextLine.isNotBlank()
-                    && !nextLine.startsWith("$")
-                    && !compact(nextLine).contains("TOTAL")
-                    && !looksLikeAnotherItemRow(nextLine)
-                ) {
+
+                for (j in (i + 1)..lines.lastIndex) {
+                    val nextLine = lines[j].replace(Regex("""\s+"""), " ").trim()
+                    if (isItemBoundary(nextLine)) break
+
                     append(" ")
                     append(nextLine)
                 }
             }.trim()
 
-            val sku = normalizeSku(rawSku)
+            val sku = skuMatch.sku
             val mappedDescription = ItemMapper.getItemDescription(sku).ifBlank { fullDescription }
 
             val key = "$sku|$quantity|$unitPrice"
@@ -206,12 +205,53 @@ class BaileysTestStripsLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         }
     }
 
+    private fun findSku(itemText: String, knownSkus: List<String>): LocatedSku? {
+        val normalizedText = itemText
+            .uppercase()
+            .replace("-IV-", "-1V-")
+
+        for (knownSku in knownSkus) {
+            var startIndex = normalizedText.indexOf(knownSku)
+            while (startIndex >= 0) {
+                val hasValidStartBoundary = startIndex == 0 ||
+                        !normalizedText[startIndex - 1].isLetterOrDigit()
+                if (hasValidStartBoundary) {
+                    return LocatedSku(
+                        sku = knownSku,
+                        endIndex = startIndex + knownSku.length
+                    )
+                }
+
+                startIndex = normalizedText.indexOf(knownSku, startIndex + 1)
+            }
+        }
+
+        val fallback = SKU_REGEX.find(normalizedText) ?: return null
+        return LocatedSku(
+            sku = normalizeBaileysSku(fallback.groupValues[1]),
+            endIndex = fallback.range.last + 1
+        )
+    }
+
+    private fun isItemBoundary(line: String): Boolean {
+        if (line.isBlank() || line.startsWith("$")) return true
+
+        val compactLine = compact(line)
+        return compactLine == "TOTAL" ||
+                compactLine == "PHONE" ||
+                looksLikeAnotherItemRow(line)
+    }
+
     private fun looksLikeAnotherItemRow(line: String): Boolean {
         val normalized = line.replace(Regex("""\s+"""), " ").trim()
-        return Regex(
-            """^[A-Z0-9]+\s+\*{3}[A-Z0-9-]+\*{3}.+\s+\d+(?:,\d{3})*(?:\.\d+)?\s+\d+(?:,\d{3})*\.\d{2}\s+\d+(?:,\d{3})*\.\d{2}$""",
-            RegexOption.IGNORE_CASE
-        ).matches(normalized)
+        val rowMatch = ITEM_ROW_REGEX.matchEntire(normalized) ?: return false
+        return SKU_REGEX.containsMatchIn(rowMatch.groupValues[1])
+    }
+
+    private fun normalizeBaileysSku(rawSku: String): String {
+        return normalizeSku(rawSku)
+            .replace("-IV-", "-1V-", ignoreCase = true)
+            .uppercase()
     }
 
     private fun parseCityStateZip(line: String?): CityStateZip {
@@ -255,4 +295,21 @@ class BaileysTestStripsLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         val state: String?,
         val zip: String?
     )
+
+    private data class LocatedSku(
+        val sku: String,
+        val endIndex: Int
+    )
+
+    private companion object {
+        val ITEM_ROW_REGEX = Regex(
+            """^(.+?)\s+(\d+(?:,\d{3})*(?:\.\d+)?)\s+(\d+(?:,\d{3})*(?:\.\d+)?)\s+(\d+(?:,\d{3})*\.\d{2})$""",
+            RegexOption.IGNORE_CASE
+        )
+
+        val SKU_REGEX = Regex(
+            """\*{0,3}([A-Z0-9]+(?:-[A-Z0-9]+)+-\d+)\*{0,3}""",
+            RegexOption.IGNORE_CASE
+        )
+    }
 }
