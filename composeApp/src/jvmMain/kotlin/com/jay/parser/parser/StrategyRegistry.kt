@@ -50,7 +50,7 @@ class StrategyRegistry(
                     EiscoSciLayoutStrategy(),
                     ElectronicControlsDesignLayoutStrategy(),
                     EtdDirectSupplyLayoutStrategy(),
-                    ExtractTechnologyPoLayoutStrategy(),
+                    ExtractTechnologyLayoutStrategy(),
                     FisherScientificCoLayoutStrategy(),
                     FlinnScientificLayoutStrategy(),
                     FranzZielLayoutStrategy(),
