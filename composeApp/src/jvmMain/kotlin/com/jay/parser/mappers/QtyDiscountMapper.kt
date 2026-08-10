@@ -247,6 +247,7 @@ object QtyDiscountMapper {
         rule("PHENOMUNE", "166-1B-1000", "166-1B-1000", "DIST + 100%", breakAt(100, 0.050), breakAt(300, 0.150), breakAt(500, 0.250)),
         rule("PHENOMUNE", "196-1B-1000", "196-1B-1000", "DIST + 100%", breakAt(100, 0.050), breakAt(300, 0.150), breakAt(500, 0.250)),
         rule("PHENOMUNE", "158-1B-1000", "158-1B-1000", "DIST + 100%", breakAt(100, 0.050), breakAt(300, 0.150), breakAt(500, 0.250)),
+        rule("PHENOMUNE", "BULK TASTE TESTS", "PHENOMUNE", "DIST + 100%", breakAt(100, 0.050), breakAt(300, 0.150), breakAt(500, 0.250)),
 
         rule("PINETREE INSTRUMENTS", "240-100-1622", "240-100-1622", "DIST - 10%", breakAt(5, 0.020)),
         rule("PINETREE INSTRUMENTS", "250-100-2024", "250-100-2024", "DIST - 10%", breakAt(5, 0.020)),
