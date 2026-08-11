@@ -328,6 +328,7 @@ class OrderEnricher {
             "GASCO INDUSTRIAL",
             "HOME BREW OHIO",
             "SCHOOL SPECIALTY",
+            "TAYLOR TECHNOLOGIES",
             "INTERCON CHEMICAL CO",
             "MIROIL USA, LLC",
             "NATIONAL CHEMICALS",

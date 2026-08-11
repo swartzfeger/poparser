@@ -90,6 +90,7 @@ class StrategyRegistry(
                     SensonicsIntlLayoutStrategy(),
                     SomersetEducationalLayoutStrategy(),
                     StMarksPowderLayoutStrategy(),
+                    TaylorTechnologiesLayoutStrategy(),
                     TcdPartsLayoutStrategy(),
                     TsaInvoiceLayoutStrategy(),
                     UniKemLayoutStrategy(),
