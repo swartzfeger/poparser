@@ -15,7 +15,8 @@ class OrderFileParser(
     private val summitSupplyExcelParser: SummitSupplyExcelParser = SummitSupplyExcelParser(),
     private val precisionEuropeExcelParser: PrecisionEuropeExcelParser = PrecisionEuropeExcelParser(),
     private val flowChemExcelParser: FlowChemExcelParser = FlowChemExcelParser(),
-    private val ramcoExcelParser: RamcoExcelParser = RamcoExcelParser()
+    private val ramcoExcelParser: RamcoExcelParser = RamcoExcelParser(),
+    private val rilabExcelParser: RilabExcelParser = RilabExcelParser()
 ) {
 
     fun parse(file: File): List<ParsedPdfFields> {
@@ -282,6 +283,7 @@ class OrderFileParser(
         val result = when {
             summitSupplyExcelParser.canParse(file) -> summitSupplyExcelParser.parse(file)
             ramcoExcelParser.canParse(file) -> ramcoExcelParser.parse(file)
+            rilabExcelParser.canParse(file) -> rilabExcelParser.parse(file)
             precisionEuropeExcelParser.canParse(file) -> precisionEuropeExcelParser.parse(file)
             flowChemExcelParser.canParse(file) -> flowChemExcelParser.parse(file)
             else -> error("Unsupported XLSX format: ${file.extension}")
