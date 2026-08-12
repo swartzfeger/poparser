@@ -30,6 +30,18 @@ class PdfTextExtractor {
                 return extractPlainLines(document)
             }
 
+            /*
+             * George's six-page POs repeat the same coordinates on every page.
+             * The positioned path therefore interleaves page one with five pages
+             * of terms. All order data is on page one; later pages are boilerplate.
+             */
+            if (document.pages.count > 1) {
+                val firstPageLines = extractPlainLines(document, endPage = 1)
+                if (looksLikeGeorges(firstPageLines)) {
+                    return firstPageLines
+                }
+            }
+
             val stripper = PositionTextStripper()
             stripper.sortByPosition = true
             stripper.startPage = 1
@@ -54,11 +66,14 @@ class PdfTextExtractor {
         }
     }
 
-    private fun extractPlainLines(document: PDDocument): List<PdfLine> {
+    private fun extractPlainLines(
+        document: PDDocument,
+        endPage: Int = document.pages.count
+    ): List<PdfLine> {
         val plainStripper = PDFTextStripper().apply {
             sortByPosition = true
             startPage = 1
-            endPage = document.pages.count
+            this.endPage = endPage
         }
 
         return plainStripper.getText(document)
@@ -75,6 +90,18 @@ class PdfTextExtractor {
 
         return compactText.contains("WESTLABNORTHAMERICA") &&
                 compactText.contains("WESTLABVENDORPACKAGINGREQUIREMENTS")
+    }
+
+    private fun looksLikeGeorges(lines: List<PdfLine>): Boolean {
+        val compactText = lines.joinToString("") { it.text }
+            .uppercase()
+            .replace(Regex("""[^A-Z0-9]"""), "")
+
+        return compactText.contains("REPORTLISTINGPOI9") &&
+                compactText.contains("GEORGESPROCUREMENTCO3") &&
+                compactText.contains("VENDOR33006") &&
+                compactText.contains("CASSVILLEMRO") &&
+                compactText.contains("VENDORITEMNUMBER")
     }
 
     private fun groupIntoLines(tokens: List<PdfToken>): List<PdfLine> {

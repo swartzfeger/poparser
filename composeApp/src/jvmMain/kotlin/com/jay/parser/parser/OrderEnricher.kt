@@ -294,6 +294,7 @@ class OrderEnricher {
             "INTERCON CHEMICAL CO",
             "MIROIL USA, LLC",
             "NATIONAL CHEMICALS",
+            "UNITED SCIENTIFIC",
             "DOVE MATERIAL",
             "BUTLER CHEMICAL PROD",
             "KROWNE METAL CORPORA",
