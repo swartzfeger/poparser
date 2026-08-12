@@ -174,26 +174,6 @@ class OrderEnricher {
             return rawQuantity / 50.0
         }
 
-        /*
-         * Auto-Chlor Memphis orders vial quantities as individual strips.
-         * Convert to the sellable vial quantity using the final numeric SKU
-         * segment, which represents strips per vial:
-         *
-         * 169-144V-100      -> 200 / 100 = 2
-         * 145-100V-100      -> 15000 / 100 = 150
-         * QAC-1500-1V-25    -> 3000 / 25 = 120
-         * PH0007-3-1V-25    -> 300 / 25 = 12
-         * CHL-10-1V-50      -> 100 / 50 = 2
-         */
-        if (customerId == "AUTO-CHLOR SYSTEM TN") {
-            val stripsPerVial = getAutoChlorVialDivisor(normalizedSku)
-            return if (stripsPerVial != null && stripsPerVial > 0) {
-                rawQuantity / stripsPerVial
-            } else {
-                rawQuantity
-            }
-        }
-
         if (customerId == "DEVERE") {
             val vialCaseDivisor = normalizedSku
                 .split("-")
@@ -246,7 +226,7 @@ class OrderEnricher {
          *
          * 150-500V-100 comes in as UOM PK500 with quantity 1.
          * 185-12V-100 comes in as EA with quantity 10 and should remain 10.
-         */
+        */
         if (customerId == "EISCO SCI" && normalizedSku in setOf(
                 "150-500V-100",
                 "185-12V-100"
@@ -255,6 +235,12 @@ class OrderEnricher {
             return rawQuantity
         }
 
+        /*
+         * AUTO-CHLOR quantities use the marked vial-count segment as the UOM
+         * divisor. For example, 1V means divide by 1 and 144V means divide by
+         * 144. The final numeric segment is strips per vial, not a quantity
+         * conversion factor.
+         */
         val divisor = getSkuUomDivisor(normalizedSku)
         return if (divisor != null && divisor > 0) rawQuantity / divisor else rawQuantity
     }
@@ -266,32 +252,6 @@ class OrderEnricher {
     ): Double {
         val customerId = resolvedCustomer?.id?.uppercase().orEmpty()
         val normalizedSku = sku.uppercase().trim()
-
-        /*
-         * Auto-Chlor 1V items are priced per individual vial on the PO, while
-         * Sage expects the sellable pack price. Quantity is divided by the
-         * strips-per-vial suffix, so multiply the mapped price by the same
-         * divisor to preserve the order total.
-         *
-         * Examples:
-         * CHL-10-1V-50    -> 6.53 x 50 = 326.50
-         * PH0007-3-1V-25 -> 2.45 x 25 = 61.25
-         * QAC-1500-1V-25 -> 2.10 x 25 = 52.50
-         *
-         * Multi-vial SKUs such as 145-100V-100 and 169-144V-100 already map
-         * to their correct Sage pack price and must not be multiplied again.
-         */
-        if (
-            customerId == "AUTO-CHLOR SYSTEM TN" &&
-            Regex("""(?:^|-)1V-(\d+)$""").containsMatchIn(normalizedSku)
-        ) {
-            val divisor = getAutoChlorVialDivisor(normalizedSku)
-            return if (divisor != null && divisor > 0) {
-                mappedUnitPrice * divisor
-            } else {
-                mappedUnitPrice
-            }
-        }
 
         if (!isUomCustomer(customerId)) {
             return mappedUnitPrice
@@ -319,11 +279,13 @@ class OrderEnricher {
             "ADVANCE PRODUCTS & S",
             "APOTHECARY PRODUCTS",
             "ATHEA LABORATORIES",
+            "AUTO-CHLOR SYSTEM TN",
             "BAILEYS THERMOMETERS",
             "DIVERSIFIED FOODSERV",
             "CHARLOTTE PRODUCTS",
             "TCD PARTS",
             "DRAKE SPECIALITIES",
+            "D.W. DAVIES",
             "EISCO SCI",
             "GASCO INDUSTRIAL",
             "HOME BREW OHIO",
@@ -340,14 +302,6 @@ class OrderEnricher {
             "WESTLAB"
         )
         return uomCustomerIds.contains(customerId)
-    }
-
-    private fun getAutoChlorVialDivisor(normalizedSku: String): Int? {
-        val finalSegment = normalizedSku
-            .substringAfterLast("-", missingDelimiterValue = "")
-            .toIntOrNull()
-
-        return finalSegment?.takeIf { it > 0 }
     }
 
     private fun getSkuUomDivisor(normalizedSku: String): Int? {

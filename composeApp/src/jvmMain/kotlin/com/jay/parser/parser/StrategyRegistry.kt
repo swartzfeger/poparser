@@ -43,6 +43,7 @@ class StrategyRegistry(
                     DevereLayoutStrategy(),
                     DoveLayoutStrategy(),
                     DrakeLayoutStrategy(),
+                    DwDaviesLayoutStrategy(),
                     EcaEducationalServicesLayoutStrategy(),
                     EasternCrownLayoutStrategy(),
                     EcolabLayoutStrategy(),
@@ -57,6 +58,7 @@ class StrategyRegistry(
                     FreseniusMedicalLayoutStrategy(),
                     GascoIndustrialLayoutStrategy(),
                     Hand2MindLayoutStrategy(),
+                    HawaiiChemicalLayoutStrategy(),
                     HomeBrewOhioLayoutStrategy(),
                     HomeScienceToolsLayoutStrategy(),
                     IndustriasCorySasLayoutStrategy(),
@@ -66,6 +68,7 @@ class StrategyRegistry(
                     JonkmanEquipmentLayoutStrategy(),
                     KochFoodsMorristownLayoutStrategy(),
                     KrowneLayoutStrategy(),
+                    LitRefrigerationLayoutStrategy(),
                     MattChlorLayoutStrategy(),
                     MccoyHealthScienceLayoutStrategy(),
                     MedlineLayoutStrategy(),
@@ -83,6 +86,8 @@ class StrategyRegistry(
                     ProwestSuppliesLayoutStrategy(),
                     QualityScienceLabsLayoutStrategy(),
                     RideauGroupLayoutStrategy(),
+                    RilabLayoutStrategy(),
+                    SaniTestLayoutStrategy(),
                     SanitechLayoutStrategy(),
                     SchoolSpecialtyLayoutStrategy(),
                     ScienceFirstLayoutStrategy(),
@@ -92,6 +97,9 @@ class StrategyRegistry(
                     StMarksPowderLayoutStrategy(),
                     TaylorTechnologiesLayoutStrategy(),
                     TcdPartsLayoutStrategy(),
+                    ThermalScientificLayoutStrategy(),
+                    TransatlanticTradingLayoutStrategy(),
+                    TsmSolutionsLayoutStrategy(),
                     TsaInvoiceLayoutStrategy(),
                     UniKemLayoutStrategy(),
                     UnipakLayoutStrategy(),
@@ -99,7 +107,8 @@ class StrategyRegistry(
                     VikingPureLayoutStrategy(),
                     VwrLayoutStrategy(),
                     WebbChemicalAndPaperLayoutStrategy(),
-                    WestlabLayoutStrategy()
+                    WestlabLayoutStrategy(),
+                    WilkemScientificLayoutStrategy()
 
                 )
             )
