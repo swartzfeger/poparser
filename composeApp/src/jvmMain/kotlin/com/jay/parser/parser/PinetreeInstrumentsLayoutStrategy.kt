@@ -238,106 +238,122 @@ class PinetreeInstrumentsLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
 
         val first = rawLines.first()
 
-        var productCode = ""
-        var descriptionPortion = ""
-        var quantity = 0.0
-        var unitPrice = 0.0
         val vendorParts = mutableListOf<String>()
         val descriptionExtra = mutableListOf<String>()
         var boxesPerCaseFromWrappedSku: Int? = null
 
         val patternA = Regex(
-            """^([A-Z0-9]+(?:-[A-Z0-9]+)*)\s+(.+?)\s+(\d+)\s+(\d+(?:\.\d{1,2})?)\s+0\.00%\s+\d[\d,]*(?:\.\d{2})$""",
+            """^([A-Z0-9]+(?:-[A-Z0-9]+)*)\s+(.+?)\s+(\d+)\s+(\d+(?:\.\d{1,2})?)\s+0\.00%\s+\d[\d,]*\.\d{2}$""",
             RegexOption.IGNORE_CASE
         ).find(first)
 
         val patternB = Regex(
-            """^([A-Z0-9]+(?:-[A-Z0-9]+)*)\s+(.+?)\s+([A-Z0-9-]+)\s+(\d+)\s+(\d+(?:\.\d{1,2})?)\s+0\.00%\s+\d[\d,]*(?:\.\d{2})$""",
+            """^([A-Z0-9]+(?:-[A-Z0-9]+)*)\s+(.+?)\s+([A-Z0-9-]+)\s+(\d+)\s+(\d+(?:\.\d{1,2})?)\s+0\.00%\s+\d[\d,]*\.\d{2}$""",
             RegexOption.IGNORE_CASE
         ).find(first)
 
         val patternC = Regex(
-            """^([A-Z0-9]+(?:-[A-Z0-9]+)*)\s+(.+?)\s+(\d+)\s+(\d+\.\d{1,2})\s+([A-Z0-9-]+)\s+EACH\s+(\d{1,2})\s+0\.00%\s+\d[\d,]*(?:\.\d{2})$""",
+            """^([A-Z0-9]+(?:-[A-Z0-9]+)*)\s+(.+?)\s+(\d+)\s+(\d+\.\d{1,2})\s+([A-Z0-9-]+)\s+EACH\s+(\d{1,2})\s+0\.00%\s+\d[\d,]*\.\d{2}$""",
             RegexOption.IGNORE_CASE
         ).find(first)
 
         val patternD = Regex(
-            """^([A-Z0-9]+(?:-[A-Z0-9]+)*)\s+(.+?)\s+([A-Z0-9-]+)\s+(\d+)EACH\s+(\d+(?:\.\d{1,2})?)\s+0\.00%\s+\d[\d,]*(?:\.\d{2})$""",
+            """^([A-Z0-9]+(?:-[A-Z0-9]+)*)\s+(.+?)\s+([A-Z0-9-]+)\s+(\d+)EACH\s+(\d+(?:\.\d{1,2})?)\s+0\.00%\s+\d[\d,]*\.\d{2}$""",
             RegexOption.IGNORE_CASE
         ).find(first)
 
         val patternE = Regex(
-            """^([A-Z0-9]+(?:-[A-Z0-9]+)*)\s+(.+?)\s+(\d+)EACH\s+(\d+(?:\.\d{1,2})?)\s+0\.00%\s+\d[\d,]*(?:\.\d{2})$""",
+            """^([A-Z0-9]+(?:-[A-Z0-9]+)*)\s+(.+?)\s+(\d+)EACH\s+(\d+(?:\.\d{1,2})?)\s+0\.00%\s+\d[\d,]*\.\d{2}$""",
             RegexOption.IGNORE_CASE
         ).find(first)
 
         val patternF = Regex(
-            """^([A-Z0-9]+(?:-[A-Z0-9]+)*)\s+(.+?)\s+([A-Z0-9-]+)\s+(\d+)Lotof\d+\s+(\d+(?:\.\d{1,2})?)\s+0\.00%\s+\d[\d,]*(?:\.\d{2})$""",
+            """^([A-Z0-9]+(?:-[A-Z0-9]+)*)\s+(.+?)\s+([A-Z0-9-]+)\s+(\d+)Lotof\d+\s+(\d+(?:\.\d{1,2})?)\s+0\.00%\s+\d[\d,]*\.\d{2}$""",
             RegexOption.IGNORE_CASE
         ).find(first)
 
         val patternG = Regex(
-            """^([A-Z0-9]+(?:-[A-Z0-9]+)*)\s+(.+?)\s+([A-Z0-9-]+)\s+(\d+)\s*[A-Z][A-Z0-9/]*\s+(\d[\d,]*(?:\.\d{1,2})?)\s+0\.00%\s+\d[\d,]*(?:\.\d{2})$""",
+            """^([A-Z0-9]+(?:-[A-Z0-9]+)*)\s+(.+?)\s+([A-Z0-9-]+)\s+(\d+)\s*[A-Z][A-Z0-9/]*\s+(\d[\d,]*(?:\.\d{1,2})?)\s+0\.00%\s+\d[\d,]*\.\d{2}$""",
             RegexOption.IGNORE_CASE
         ).find(first)
 
-        when {
+        val parsedRow = when {
             patternG != null -> {
-                productCode = patternG.groupValues[1].trim().uppercase()
-                descriptionPortion = patternG.groupValues[2].trim()
-                vendorParts.add(patternG.groupValues[3].trim().uppercase())
-                quantity = patternG.groupValues[4].toDouble()
-                unitPrice = patternG.groupValues[5].replace(",", "").toDouble()
+                ParsedItemRow(
+                    productCode = patternG.groupValues[1].trim().uppercase(),
+                    description = patternG.groupValues[2].trim(),
+                    vendorCode = patternG.groupValues[3].trim().uppercase(),
+                    quantity = patternG.groupValues[4].toDouble(),
+                    unitPrice = patternG.groupValues[5].replace(",", "").toDouble()
+                )
             }
 
             patternF != null -> {
-                productCode = patternF.groupValues[1].trim().uppercase()
-                descriptionPortion = patternF.groupValues[2].trim()
-                vendorParts.add(patternF.groupValues[3].trim().uppercase())
-                quantity = patternF.groupValues[4].toDouble()
-                unitPrice = patternF.groupValues[5].toDouble()
+                ParsedItemRow(
+                    patternF.groupValues[1].trim().uppercase(),
+                    patternF.groupValues[2].trim(),
+                    patternF.groupValues[4].toDouble(),
+                    patternF.groupValues[5].toDouble(),
+                    patternF.groupValues[3].trim().uppercase()
+                )
             }
 
             patternD != null -> {
-                productCode = patternD.groupValues[1].trim().uppercase()
-                descriptionPortion = patternD.groupValues[2].trim()
-                vendorParts.add(patternD.groupValues[3].trim().uppercase())
-                quantity = patternD.groupValues[4].toDouble()
-                unitPrice = patternD.groupValues[5].toDouble()
+                ParsedItemRow(
+                    patternD.groupValues[1].trim().uppercase(),
+                    patternD.groupValues[2].trim(),
+                    patternD.groupValues[4].toDouble(),
+                    patternD.groupValues[5].toDouble(),
+                    patternD.groupValues[3].trim().uppercase()
+                )
             }
 
             patternE != null -> {
-                productCode = patternE.groupValues[1].trim().uppercase()
-                descriptionPortion = patternE.groupValues[2].trim()
-                quantity = patternE.groupValues[3].toDouble()
-                unitPrice = patternE.groupValues[4].toDouble()
+                ParsedItemRow(
+                    patternE.groupValues[1].trim().uppercase(),
+                    patternE.groupValues[2].trim(),
+                    patternE.groupValues[3].toDouble(),
+                    patternE.groupValues[4].toDouble()
+                )
             }
 
             patternC != null -> {
-                productCode = patternC.groupValues[1].trim().uppercase()
-                descriptionPortion = patternC.groupValues[2].trim()
-                quantity = patternC.groupValues[3].toDouble()
-                unitPrice = "${patternC.groupValues[4]}${patternC.groupValues[6]}".toDouble()
-                vendorParts.add(patternC.groupValues[5].trim().uppercase())
+                ParsedItemRow(
+                    patternC.groupValues[1].trim().uppercase(),
+                    patternC.groupValues[2].trim(),
+                    patternC.groupValues[3].toDouble(),
+                    "${patternC.groupValues[4]}${patternC.groupValues[6]}".toDouble(),
+                    patternC.groupValues[5].trim().uppercase()
+                )
             }
 
             patternB != null -> {
-                productCode = patternB.groupValues[1].trim().uppercase()
-                descriptionPortion = patternB.groupValues[2].trim()
-                vendorParts.add(patternB.groupValues[3].trim().uppercase())
-                quantity = patternB.groupValues[4].toDouble()
-                unitPrice = patternB.groupValues[5].toDouble()
+                ParsedItemRow(
+                    patternB.groupValues[1].trim().uppercase(),
+                    patternB.groupValues[2].trim(),
+                    patternB.groupValues[4].toDouble(),
+                    patternB.groupValues[5].toDouble(),
+                    patternB.groupValues[3].trim().uppercase()
+                )
             }
 
             patternA != null -> {
-                productCode = patternA.groupValues[1].trim().uppercase()
-                descriptionPortion = patternA.groupValues[2].trim()
-                quantity = patternA.groupValues[3].toDouble()
-                unitPrice = patternA.groupValues[4].toDouble()
+                ParsedItemRow(
+                    patternA.groupValues[1].trim().uppercase(),
+                    patternA.groupValues[2].trim(),
+                    patternA.groupValues[3].toDouble(),
+                    patternA.groupValues[4].toDouble()
+                )
             }
 
             else -> return null
         }
+
+        val productCode = parsedRow.productCode
+        var descriptionPortion = parsedRow.description
+        var quantity = parsedRow.quantity
+        val unitPrice = parsedRow.unitPrice
+        parsedRow.vendorCode?.let(vendorParts::add)
 
         val trailingVendor = extractTrailingVendorFragment(descriptionPortion)
         if (trailingVendor != null) {
@@ -486,6 +502,7 @@ class PinetreeInstrumentsLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         sku = sku.replace(Regex("""CHL2000-""", RegexOption.IGNORE_CASE), "CHL-2000-")
         sku = sku.replace(Regex("""CHL300-""", RegexOption.IGNORE_CASE), "CHL-300-")
         sku = sku.replace(Regex("""^280-25-8X10$""", RegexOption.IGNORE_CASE), "280-25-810")
+        sku = sku.replace(Regex("""^280-500-8X10$""", RegexOption.IGNORE_CASE), "280-500-810")
 
         if (sku == "PIN-MNTX-") sku = "PIN-MNTX-100"
         if (sku == "PIN-QA15-") sku = "PIN-QA15-100"
@@ -551,7 +568,7 @@ class PinetreeInstrumentsLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         if (s.startsWith("PST", ignoreCase = true)) return false
 
         return Regex(
-            """^[A-Z0-9]+(?:-[A-Z0-9]+)*\s+.+0\.00%\s+\d+(?:,\d{3})*(?:\.\d{2})$""",
+            """^[A-Z0-9]+(?:-[A-Z0-9]+)*\s+.+0\.00%\s+\d+(?:,\d{3})*\.\d{2}$""",
             RegexOption.IGNORE_CASE
         ).matches(s)
     }
@@ -562,27 +579,6 @@ class PinetreeInstrumentsLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
                 line.startsWith("Printed:", ignoreCase = true) ||
                 line.startsWith("GST", ignoreCase = true) ||
                 line.startsWith("PST", ignoreCase = true)
-    }
-
-    private fun looksLikeVendorCodeLine(line: String): Boolean {
-        val s = normalizeLine(line)
-
-        if (s.equals("100", ignoreCase = true)) return true
-        if (s.equals("50", ignoreCase = true)) return true
-        if (s.equals("100 Indigo", ignoreCase = true)) return true
-        if (s.equals("100Indigo", ignoreCase = true)) return true
-        if (s.equals("Indigo 100", ignoreCase = true)) return true
-        if (s.equals("Indigo100", ignoreCase = true)) return true
-        if (s.equals("50 Indigo", ignoreCase = true)) return true
-        if (s.equals("50Indigo", ignoreCase = true)) return true
-        if (s.equals("Indigo 50", ignoreCase = true)) return true
-        if (s.equals("Indigo50", ignoreCase = true)) return true
-        if (s.matches(Regex("""^1V-(50|100)(?:INDIGO)?$""", RegexOption.IGNORE_CASE))) return true
-
-        return Regex(
-            """^(PIN-[A-Z0-9-]+|QAC-[A-Z0-9-]+|PER-[A-Z0-9-]+|CHL-?[A-Z0-9-]+|PH[A-Z0-9-]+|M-NUT-MAC|\d+-\d+-[A-Z0-9xX-]+(?:\s+Lotof\d+)?)$""",
-            RegexOption.IGNORE_CASE
-        ).matches(s)
     }
 
     private fun looksLikeStreetAddress(line: String): Boolean {
@@ -637,5 +633,13 @@ class PinetreeInstrumentsLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         val city: String?,
         val state: String?,
         val zip: String?
+    )
+
+    private data class ParsedItemRow(
+        val productCode: String,
+        val description: String,
+        val quantity: Double,
+        val unitPrice: Double,
+        val vendorCode: String? = null
     )
 }

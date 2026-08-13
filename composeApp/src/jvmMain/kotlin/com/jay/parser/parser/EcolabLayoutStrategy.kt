@@ -4,8 +4,10 @@ import com.jay.parser.mappers.CustomerMapper
 import com.jay.parser.mappers.ItemMapper
 import com.jay.parser.pdf.ParsedPdfFields
 import com.jay.parser.pdf.ParsedPdfItem
+import com.jay.parser.pdf.PdfLine
+import com.jay.parser.pdf.PdfToken
 
-class EcolabLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
+class EcolabLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy, PositionedLayoutStrategy {
 
     override val name: String = "ECOLAB"
 
@@ -61,6 +63,20 @@ class EcolabLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
             zip = shipTo.zip,
             terms = mappedCustomer?.terms ?: parseTerms(clean),
             items = parseItems(clean)
+        )
+    }
+
+    override fun parsePositioned(lines: List<PdfLine>): ParsedPdfFields {
+        val parsed = parse(lines.map { it.text })
+        val shipTo = parsePositionedShipTo(lines) ?: return parsed
+
+        return parsed.copy(
+            shipToCustomer = shipTo.shipToCustomer,
+            addressLine1 = shipTo.addressLine1,
+            addressLine2 = shipTo.addressLine2,
+            city = shipTo.city,
+            state = shipTo.state,
+            zip = shipTo.zip
         )
     }
 
@@ -145,6 +161,8 @@ class EcolabLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
     }
 
     private fun parseShipTo(lines: List<String>): ShipToBlock {
+        parseMergedShipTo(lines)?.let { return it }
+
         val fullCompact = compact(lines.joinToString(" "))
 
         if (fullCompact.contains("ECOLABGATEWAYEQUIPECCCUS82") ||
@@ -175,9 +193,37 @@ class EcolabLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
             )
         }
 
+        if (fullCompact.contains("ECOLABCOEQUIPMENTMFGBELOIT") ||
+            fullCompact.contains("5151EROCKTONROAD") ||
+            fullCompact.contains("ROSCOEIL610737649")
+        ) {
+            return ShipToBlock(
+                shipToCustomer = "Ecolab Co. Equipment Mfg-Beloit",
+                addressLine1 = "5151 E. ROCKTON ROAD",
+                addressLine2 = null,
+                city = "ROSCOE",
+                state = "IL",
+                zip = "61073-7649"
+            )
+        }
+
+        if (fullCompact.contains("DCHIGHPOINTEQP") ||
+            fullCompact.contains("1101GALLIMOREDAIRYRD#115") ||
+            fullCompact.contains("HIGHPOINTNC27265")
+        ) {
+            return ShipToBlock(
+                shipToCustomer = "DC-High Point EQP",
+                addressLine1 = "1101 Gallimore Dairy Rd #115",
+                addressLine2 = null,
+                city = "High Point",
+                state = "NC",
+                zip = "27265"
+            )
+        }
+
         var shipToCustomer: String? = null
         var addressLine1: String? = null
-        var addressLine2: String? = null
+        val addressLine2: String? = null
         var city: String? = null
         var state: String? = null
         var zip: String? = null
@@ -249,6 +295,97 @@ class EcolabLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         )
     }
 
+    private fun parsePositionedShipTo(lines: List<PdfLine>): ShipToBlock? {
+        val headerIndex = lines.indexOfFirst { compact(it.text).contains("SHIPTOADDRESS") }
+        if (headerIndex < 0) return null
+
+        val header = lines[headerIndex]
+        val shipColumnX = header.tokens
+            .filter { it.x > 360f }
+            .minOfOrNull { it.x }
+            ?: return null
+
+        val rightColumnLines = lines
+            .drop(headerIndex + 1)
+            .takeWhile { !compact(it.text).startsWith("POAMOUNT") }
+            .map { rebuildColumnText(it.tokens.filter { token -> token.x >= shipColumnX - 1f }) }
+            .filter { it.isNotBlank() }
+            .filterNot { compact(it).matches(Regex("""USUNITEDSTATES""")) }
+
+        return interpretDynamicShipTo(rightColumnLines)
+    }
+
+    private fun parseMergedShipTo(lines: List<String>): ShipToBlock? {
+        val shipIndex = lines.indexOfFirst { compact(it).contains("SHIPTOADDRESS") }
+        if (shipIndex < 0) return null
+
+        val window = lines.drop(shipIndex + 1).take(8)
+        val name = window.firstNotNullOfOrNull { line ->
+            Regex(
+                """ECOLAB\s*PRODUCTION\s*LLC\s+(.+)$""",
+                RegexOption.IGNORE_CASE
+            ).find(line)?.groupValues?.get(1)?.trim()
+        }
+        val address = window.firstNotNullOfOrNull { line ->
+            Regex(
+                """1\s*ECOLAB\s*PLACE\s+(.+)$""",
+                RegexOption.IGNORE_CASE
+            ).find(line)?.groupValues?.get(1)?.trim()
+        }
+        val cityStateZip = window.firstNotNullOfOrNull { line ->
+            Regex(
+                """ST\.?\s*PAUL,?\s*MN\s*55102-2739\s+(.+)$""",
+                RegexOption.IGNORE_CASE
+            ).find(line)?.groupValues?.get(1)?.trim()
+        }
+
+        if (name.isNullOrBlank() || address.isNullOrBlank() || cityStateZip.isNullOrBlank()) {
+            return null
+        }
+
+        return interpretDynamicShipTo(listOf(name, address, cityStateZip))
+    }
+
+    private fun interpretDynamicShipTo(lines: List<String>): ShipToBlock? {
+        if (lines.size < 3) return null
+
+        val cityIndex = lines.indexOfLast { CITY_STATE_ZIP_PATTERN.matches(it) }
+        if (cityIndex < 2) return null
+
+        val cityMatch = CITY_STATE_ZIP_PATTERN.find(lines[cityIndex]) ?: return null
+        val addressLines = lines.subList(1, cityIndex).filter { it.isNotBlank() }
+        if (addressLines.isEmpty()) return null
+
+        return ShipToBlock(
+            shipToCustomer = lines.first().trim(),
+            addressLine1 = addressLines.first(),
+            addressLine2 = addressLines.drop(1).takeIf { it.isNotEmpty() }?.joinToString(" "),
+            city = normalizeCity(cityMatch.groupValues[1].trim()),
+            state = cityMatch.groupValues[2].uppercase(),
+            zip = cityMatch.groupValues[3]
+        )
+    }
+
+    private fun rebuildColumnText(tokens: List<PdfToken>): String {
+        val sorted = tokens.sortedBy { it.x }
+        if (sorted.isEmpty()) return ""
+
+        return buildString {
+            var previous: PdfToken? = null
+            for (token in sorted) {
+                val text = token.text.trim()
+                if (text.isEmpty()) continue
+
+                val prior = previous
+                if (prior != null && token.x - (prior.x + prior.width) > 1f) {
+                    append(' ')
+                }
+                append(text)
+                previous = token
+            }
+        }.replace(Regex("""\s+"""), " ").trim()
+    }
+
     private fun parseItems(lines: List<String>): List<ParsedPdfItem> {
         val items = mutableListOf<ParsedPdfItem>()
         val seen = mutableSetOf<String>()
@@ -266,6 +403,7 @@ class EcolabLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
             var quantity: Double? = null
             var unitPrice: Double? = null
             var description: String? = null
+            var uom: String? = null
 
             for (j in (i - 1) downTo maxOf(0, i - 4)) {
                 val row = lines[j].replace(Regex("""\s+"""), " ").trim()
@@ -275,7 +413,7 @@ class EcolabLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
                 if (row.contains("Description", ignoreCase = true) && row.contains("Item", ignoreCase = true)) continue
 
                 val rowMatch = Regex(
-                    """^\d+\s+(.+?)\s+(\d{1,3}(?:,\d{3})+|\d+)\s+[A-Z][a-z]{2}\s*\d{1,2},\s+(\d{1,3}(?:,\d{3})+|\d+)\s+\$([\d,]+\.\d{2})(?:\s+(\d{1,3}(?:,\d{3})+|\d+))?.*$""",
+                    """^\d+\s+(.+?)\s+(\d{1,3}(?:,\d{3})+|\d+)\s+[A-Z][a-z]{2}\s*\d{1,2},\s+(?:\d{4}\s+)?(\d{1,3}(?:,\d{3})+|\d+)\s+\$([\d,]+\.\d{2})(?:\s+(\d{1,3}(?:,\d{3})+|\d+))?.*$""",
                     RegexOption.IGNORE_CASE
                 ).find(row)
 
@@ -293,6 +431,7 @@ class EcolabLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
                     } else {
                         price
                     }
+                    uom = extractUom(row)
                     break
                 }
 
@@ -314,6 +453,7 @@ class EcolabLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
                     } else {
                         price
                     }
+                    uom = extractUom(row)
                     break
                 }
             }
@@ -332,12 +472,61 @@ class EcolabLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
                     sku = sku,
                     description = finalDescription,
                     quantity = quantity,
-                    unitPrice = unitPrice
+                    unitPrice = unitPrice,
+                    uom = uom
+                )
+            )
+        }
+
+        for (i in lines.indices) {
+            val current = lines[i].replace(Regex("""\s+"""), " ").trim()
+            val mfrSku = Regex(
+                """MFR\s*Part\s*Number\s*-\s*([A-Z0-9-]+).*Manufacturer\s*-\s*PRECISION\s*LABORATORIES""",
+                RegexOption.IGNORE_CASE
+            ).find(current)?.groupValues?.get(1)?.uppercase() ?: continue
+
+            val rowIndex = (i - 1 downTo maxOf(0, i - 4))
+                .firstOrNull {
+                    lines[it].replace(Regex("""\s+"""), " ").trim().matches(ITEM_ROW_PATTERN)
+                }
+                ?: continue
+
+            val hasSupplierSku = ((rowIndex + 1) until i).any {
+                lines[it].contains("Supplier", ignoreCase = true)
+            }
+            if (hasSupplierSku) continue
+
+            val row = lines[rowIndex].replace(Regex("""\s+"""), " ").trim()
+
+            val rowMatch = ITEM_ROW_PATTERN.find(row) ?: continue
+            val quantity = rowMatch.groupValues[2].replace(",", "").toDoubleOrNull() ?: continue
+            val price = rowMatch.groupValues[4].replace(",", "").toDoubleOrNull() ?: continue
+            val per = rowMatch.groupValues.getOrNull(5)?.replace(",", "")?.toDoubleOrNull()
+            val unitPrice = if (per != null && per > 1.0) price / per else price
+            val sku = normalizeSku(mfrSku)
+            val key = "$sku|$quantity|$unitPrice"
+            if (!seen.add(key)) continue
+
+            items.add(
+                item(
+                    sku = sku,
+                    description = ItemMapper.getItemDescription(sku).ifBlank { rowMatch.groupValues[1].trim() },
+                    quantity = quantity,
+                    unitPrice = unitPrice,
+                    uom = extractUom(row)
                 )
             )
         }
 
         return items
+    }
+
+    private fun extractUom(row: String): String? {
+        return Regex("""\b([A-Z]{1,4})\s*\([^)]*\)\s*$""", RegexOption.IGNORE_CASE)
+            .find(row)
+            ?.groupValues
+            ?.get(1)
+            ?.uppercase()
     }
 
     private fun normalizeCity(value: String): String {
@@ -350,6 +539,18 @@ class EcolabLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
 
     private fun compact(value: String): String {
         return value.uppercase().replace(Regex("""[^A-Z0-9#]"""), "")
+    }
+
+    private companion object {
+        val CITY_STATE_ZIP_PATTERN = Regex(
+            """^(.+?),\s*([A-Z]{2})\s*(\d{5}(?:-\d{4})?)$""",
+            RegexOption.IGNORE_CASE
+        )
+
+        val ITEM_ROW_PATTERN = Regex(
+            """^\d+\s+(.+?)\s+(\d{1,3}(?:,\d{3})+|\d+)\s+[A-Z][a-z]{2}\s*\d{1,2},\s+(?:\d{4}\s+)?(\d{1,3}(?:,\d{3})+|\d+)\s+\$([\d,]+\.\d{2})(?:\s+(\d{1,3}(?:,\d{3})+|\d+))?.*$""",
+            RegexOption.IGNORE_CASE
+        )
     }
 
     private data class ShipToBlock(

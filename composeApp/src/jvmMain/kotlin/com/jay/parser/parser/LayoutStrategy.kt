@@ -1,6 +1,7 @@
 package com.jay.parser.parser
 
 import com.jay.parser.pdf.ParsedPdfFields
+import com.jay.parser.pdf.PdfLine
 
 interface LayoutStrategy {
     val name: String
@@ -19,4 +20,8 @@ interface LayoutStrategy {
      * Parse the PDF lines into structured fields.
      */
     fun parse(lines: List<String>): ParsedPdfFields
+}
+
+interface PositionedLayoutStrategy {
+    fun parsePositioned(lines: List<PdfLine>): ParsedPdfFields
 }

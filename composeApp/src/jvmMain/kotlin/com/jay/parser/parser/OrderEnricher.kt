@@ -30,11 +30,7 @@ class OrderEnricher {
                 if (!isExactMatch && sku.equals("PLBL", ignoreCase = true)) {
                     description = "PAPER LABELS"
                 } else if (!isExactMatch) {
-                    val bestMatch = allKnownSkus
-                        .associateWith { sku.levenshteinDistance(it) }
-                        .filterValues { distance -> distance <= 2 }
-                        .minByOrNull { it.value }
-                        ?.key
+                    val bestMatch = findUniqueClosestSku(sku, allKnownSkus, maxDistance = 2)
 
                     if (bestMatch != null) {
                         sku = bestMatch
@@ -45,11 +41,7 @@ class OrderEnricher {
                 }
 
                 if (description.isBlank()) {
-                    val bestMatch = allKnownSkus
-                        .associateWith { sku.levenshteinDistance(it) }
-                        .filterValues { distance -> distance <= 3 }
-                        .minByOrNull { it.value }
-                        ?.key
+                    val bestMatch = findUniqueClosestSku(sku, allKnownSkus, maxDistance = 3)
 
                     if (bestMatch != null) {
                         sku = bestMatch
@@ -63,6 +55,7 @@ class OrderEnricher {
                 val exportQty = getUomAdjustedQuantity(
                     sku = sku,
                     rawQuantity = rawQty,
+                    sourceUom = item.uom,
                     resolvedCustomer = resolvedCustomer
                 )
 
@@ -157,21 +150,27 @@ class OrderEnricher {
     private fun getUomAdjustedQuantity(
         sku: String,
         rawQuantity: Double,
+        sourceUom: String?,
         resolvedCustomer: ResolvedCustomer?
     ): Double {
         val customerId = resolvedCustomer?.id?.uppercase().orEmpty()
         val normalizedSku = sku.uppercase().trim()
 
-        /*
-         * Ecolab sends CLK-50V-100 in two different quantity styles:
-         * - CS / Box POs: keep the visible ordered quantity.
-         * - PCE / Piece POs: convert pieces into 50-count boxes/cases.
-         *
-         * ParsedPdfItem does not currently carry the PO UOM text, so this uses
-         * the known piece-style quantity pattern from Taulia/Ecolab PCE orders.
-         */
-        if (customerId == "ECOLAB INC" && normalizedSku == "CLK-50V-100" && rawQuantity >= 1000.0) {
-            return rawQuantity / 50.0
+        if (customerId == "ECOLAB INC") {
+            val normalizedUom = sourceUom?.uppercase()?.trim().orEmpty()
+            if (normalizedUom in setOf("PCE", "PIECE")) {
+                val divisor = getSkuUomDivisor(normalizedSku)
+                return if (divisor != null && divisor > 0) rawQuantity / divisor else rawQuantity
+            }
+
+            if (normalizedUom.isNotBlank()) {
+                return rawQuantity
+            }
+
+            // Preserve compatibility with older parsed records that did not retain UOM.
+            if (normalizedSku == "CLK-50V-100" && rawQuantity >= 1000.0) {
+                return rawQuantity / 50.0
+            }
         }
 
         if (customerId == "DEVERE") {
@@ -336,6 +335,21 @@ class OrderEnricher {
 
         return null
     }
+}
+
+private fun findUniqueClosestSku(
+    sku: String,
+    knownSkus: List<String>,
+    maxDistance: Int
+): String? {
+    val candidates = knownSkus
+        .map { candidate -> candidate to sku.levenshteinDistance(candidate) }
+        .filter { (_, distance) -> distance <= maxDistance }
+
+    val minimumDistance = candidates.minOfOrNull { (_, distance) -> distance } ?: return null
+    val closest = candidates.filter { (_, distance) -> distance == minimumDistance }
+
+    return closest.singleOrNull()?.first
 }
 
 /**

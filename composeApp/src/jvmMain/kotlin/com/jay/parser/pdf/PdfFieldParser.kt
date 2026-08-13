@@ -1,6 +1,7 @@
 package com.jay.parser.pdf
 
 import com.jay.parser.parser.StrategyRegistry
+import com.jay.parser.parser.PositionedLayoutStrategy
 import kotlin.math.abs
 
 class PdfFieldParser(
@@ -30,7 +31,11 @@ class PdfFieldParser(
         return if (strategy != null) {
             println("PdfFieldParser using strategy: ${strategy.name}")
 
-            val parsed = strategy.parse(textLines)
+            val parsed = if (strategy is PositionedLayoutStrategy) {
+                strategy.parsePositioned(lines)
+            } else {
+                strategy.parse(textLines)
+            }
 
             if (strategy.name == "FRESENIUS MEDICAL") {
                 parseFreseniusWithFallback(lines, parsed)
@@ -203,7 +208,7 @@ class PdfFieldParser(
     private fun findGenericOrderNumber(lines: List<String>): String? {
         val patterns = listOf(
             Regex("""(?:PO NUMBER|P\.O\. NUMBER)\s*:?\s*([A-Z0-9-]+)""", RegexOption.IGNORE_CASE),
-            Regex("""(?:PURCHASE ORDER)\s*#?\s*:?\s*([A-Z0-9-]+)""", RegexOption.IGNORE_CASE)
+            Regex("""PURCHASE ORDER\s*#?\s*:?\s*([A-Z0-9-]+)""", RegexOption.IGNORE_CASE)
         )
 
         for (line in lines) {

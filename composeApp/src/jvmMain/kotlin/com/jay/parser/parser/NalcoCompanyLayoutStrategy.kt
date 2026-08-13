@@ -133,7 +133,7 @@ class NalcoCompanyLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
                 continue
             }
 
-            if (city == null && state == null && zip == null && c.contains("CHICAGOIL60638")) {
+            if (city == null && c.contains("CHICAGOIL60638")) {
                 city = "CHICAGO"
                 state = "IL"
                 zip = "60638"
@@ -158,7 +158,7 @@ class NalcoCompanyLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
             }?.let { "Door 29" }
         }
 
-        if (city == null || state == null || zip == null) {
+        if (city == null) {
             val cszLine = lines.firstOrNull { compact(it).contains("CHICAGOIL60638") }
             if (cszLine != null) {
                 city = "CHICAGO"
@@ -187,7 +187,7 @@ class NalcoCompanyLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
             // Example:
             // 10 ECL-56958.88-PRECISIONCHLORINESTRIPS 80 Mar11, 80 $68.00 BX(Box))
             val mainRow = Regex(
-                """^\d+\s+([A-Z0-9.\-]+)-(.+?)\s+(\d+(?:,\d{3})?)\s+[A-Z][a-z]{2}\d{1,2},\s+(\d+(?:,\d{3})?)\s+\$[\d,]+\.\d{2}\s+[A-Z]{1,4}\(.+\)\)?$""",
+                """^\d+\s+([A-Z0-9.\-]+)-(.+?)\s+(\d+(?:,\d{3})?)\s+[A-Z][a-z]{2}\s*\d{1,2},\s*(?:\d{4}\s+)?(\d+(?:,\d{3})?)\s+\$[\d,]+\.\d{2}\s+[A-Z]{1,4}\s*\(.+\)\)?$""",
                 RegexOption.IGNORE_CASE
             ).find(current) ?: continue
 

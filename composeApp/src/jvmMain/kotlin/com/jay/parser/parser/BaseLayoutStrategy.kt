@@ -1,13 +1,8 @@
 package com.jay.parser.parser
 
-import com.jay.parser.pdf.ParsedPdfFields
 import com.jay.parser.pdf.ParsedPdfItem
 
 abstract class BaseLayoutStrategy : LayoutStrategy {
-
-    protected val blockExtractor = CandidateBlockExtractor()
-    protected val shipToScorer = ShipToBlockScorer()
-    protected val shipToInterpreter = ShipToInterpreter()
 
     protected fun nonBlankLines(lines: List<String>): List<String> {
         return lines.map { it.trim() }.filter { it.isNotBlank() }
@@ -23,12 +18,6 @@ abstract class BaseLayoutStrategy : LayoutStrategy {
         return null
     }
 
-    protected fun bestShipTo(lines: List<String>): InterpretedShipTo? {
-        val blocks = blockExtractor.extract(lines)
-        val scored = shipToScorer.score(blocks)
-        return scored.firstOrNull()?.let { shipToInterpreter.interpret(it.block) }
-    }
-
     protected fun normalizeSku(input: String): String {
         var sku = input.trim()
 
@@ -42,21 +31,19 @@ abstract class BaseLayoutStrategy : LayoutStrategy {
         return sku.trim()
     }
 
-    protected fun emptyResult(): ParsedPdfFields = ParsedPdfFields(
-        items = emptyList()
-    )
-
     protected fun item(
         sku: String? = null,
         description: String? = null,
         quantity: Double? = null,
-        unitPrice: Double? = null
+        unitPrice: Double? = null,
+        uom: String? = null
     ): ParsedPdfItem {
         return ParsedPdfItem(
             sku = sku,
             description = description,
             quantity = quantity,
-            unitPrice = unitPrice
+            unitPrice = unitPrice,
+            uom = uom
         )
     }
 }

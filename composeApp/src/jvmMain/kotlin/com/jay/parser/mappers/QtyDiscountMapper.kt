@@ -187,11 +187,11 @@ object QtyDiscountMapper {
         rule("ALL CUSTOMERS", "PH4070-1B-50", "PH", "", breakAt(50, 0.030), breakAt(100, 0.050), breakAt(500, 0.100)),
         rule("ALL CUSTOMERS", "PH5090-1B-50", "PH", "", breakAt(50, 0.030), breakAt(100, 0.050), breakAt(500, 0.100)),
         rule("ALL CUSTOMERS", "PH7010-1B-50", "PH", "", breakAt(50, 0.030), breakAt(100, 0.050), breakAt(500, 0.100)),
-        rule("ALL CUSTOMERS", "220-200-2070", "220-200-2070", "", breakAt(100, 0.250)),
+        rule("ALL CUSTOMERS", "220-200-2070", "220", "", breakAt(100, 0.250)),
 
         rule("AQUA RESEARCH", "AQR-CHL5-1B25", "AQR-CHL5-1B25", "DISTRIBUTOR", breakAt(2500, 0.050)),
 
-        rule("BARTOVATION LLC", "145-500V-100", "145-500V-100", "DIST - 15%", breakAt(5, 0.020), breakAt(70, 0.075)),
+        rule("BARTOVATION LLC", "145-500V-100", "145", "DIST - 15%", breakAt(5, 0.020), breakAt(70, 0.075)),
         rule("BARTOVATION LLC", "158-500V-100", "158-500V-100", "DIST - 15%", breakAt(3, 0.020), breakAt(10, 0.050)),
         rule("BARTOVATION LLC", "165-500V-100", "165-500V-100", "DIST - 15%", breakAt(3, 0.020), breakAt(10, 0.050)),
         rule("BARTOVATION LLC", "166-500V-100", "166-500V-100", "DIST - 15%", breakAt(3, 0.020), breakAt(10, 0.050)),
@@ -216,7 +216,6 @@ object QtyDiscountMapper {
         rule("BARTOVATION LLC", "PAA-500-1V-50", "PAA-500-1V-50", "DIST - 15%", breakAt(250, 0.030), breakAt(500, 0.050)),
         rule("BARTOVATION LLC", "PER-100-1V-100", "PER-100-1V-100", "DIST - 15%", breakAt(250, 0.100), breakAt(500, 0.150)),
         rule("BARTOVATION LLC", "PER-100-1V-50", "PER-100-1V-50", "DIST - 15%", breakAt(250, 0.100), breakAt(500, 0.150)),
-        rule("BARTOVATION LLC", "PAA-1000-1V-50", "PAA-1000-1V-50", "DIST - 15%", breakAt(250, 0.030), breakAt(500, 0.050)),
         rule("BARTOVATION LLC", "PER-10000-1V-50", "PER-10000-1V-50", "DIST - 15%", breakAt(250, 0.020)),
         rule("BARTOVATION LLC", "PER-400-1V-100", "PER-400-1V-100", "DIST - 15%", breakAt(250, 0.020)),
         rule("BARTOVATION LLC", "PH0114-1V-100", "PH0114-1V-100", "DIST - 15%", breakAt(250, 0.050), breakAt(500, 0.100)),
@@ -229,8 +228,6 @@ object QtyDiscountMapper {
         rule("BARTOVATION LLC", "QAC-1500-1V-50", "QAC1500", "DIST - 15%", breakAt(250, 0.030), breakAt(500, 0.050), breakAt(5000, 0.090)),
         rule("BARTOVATION LLC", "SPC-CHL-200-1V-100", "SPC-CHL-200-1V-100", "DIST - 15%", breakAt(250, 0.030), breakAt(500, 0.050)),
         rule("BARTOVATION LLC", "SPC-CHL-300-1V-100", "SPC-CHL-300-1V-100", "DIST - 15%", breakAt(250, 0.030), breakAt(500, 0.050)),
-        rule("BARTOVATION LLC", "SPC-CHL200-1V-100", "SPC-CHL200-1V-100", "DIST - 15%", breakAt(250, 0.030), breakAt(500, 0.050)),
-        rule("BARTOVATION LLC", "SPC-CHL300-1V-100", "SPC-CHL300-1V-100", "DIST - 15%", breakAt(250, 0.030), breakAt(500, 0.050)),
         rule("BARTOVATION LLC", "SUL-1V-50", "SUL-1V-50", "DIST - 15%", breakAt(250, 0.020)),
 
         rule("CHEM-SUPPLY", "NAT-1V-100", "NAT-1V-100", "DISTRIBUTOR", breakAt(500, 0.150)),
@@ -239,14 +236,10 @@ object QtyDiscountMapper {
         rule("DEARDORFF FITZ", "CHL-10000-1V-50", "CHL100001V50", "DIST + 50%", breakAt(1000, 0.150)),
         rule("DEARDORFF FITZ", "CHL-4800-1V-50", "CHL48001V50", "DIST + 50%", breakAt(1000, 0.150)),
 
-        rule("KROWNE METAL CORPORA", "145-500V-100", "145-500V-100", "DIST - 10%", breakAt(5, 0.020), breakAt(70, 0.075)),
+        rule("KROWNE METAL CORPORA", "145-500V-100", "145", "DIST - 10%", breakAt(5, 0.020), breakAt(70, 0.075)),
         rule("KROWNE METAL CORPORA", "PH3060-1V-50", "PH30601V50", "DIST - 10%", breakAt(2000, 0.040)),
         rule("KROWNE METAL CORPORA", "QAC-1500-1V-50", "QAC1500", "DIST - 10%", breakAt(250, 0.030), breakAt(500, 0.050), breakAt(5000, 0.090)),
 
-        rule("PHENOMUNE", "165-1B-1000", "165-1B-1000", "DIST + 100%", breakAt(100, 0.050), breakAt(300, 0.150), breakAt(500, 0.250)),
-        rule("PHENOMUNE", "166-1B-1000", "166-1B-1000", "DIST + 100%", breakAt(100, 0.050), breakAt(300, 0.150), breakAt(500, 0.250)),
-        rule("PHENOMUNE", "196-1B-1000", "196-1B-1000", "DIST + 100%", breakAt(100, 0.050), breakAt(300, 0.150), breakAt(500, 0.250)),
-        rule("PHENOMUNE", "158-1B-1000", "158-1B-1000", "DIST + 100%", breakAt(100, 0.050), breakAt(300, 0.150), breakAt(500, 0.250)),
         rule("PHENOMUNE", "BULK TASTE TESTS", "PHENOMUNE", "DIST + 100%", breakAt(100, 0.050), breakAt(300, 0.150), breakAt(500, 0.250)),
 
         rule("PINETREE INSTRUMENTS", "240-100-1622", "240-100-1622", "DIST - 10%", breakAt(5, 0.020)),

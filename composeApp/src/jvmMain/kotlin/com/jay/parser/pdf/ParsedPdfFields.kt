@@ -17,5 +17,6 @@ data class ParsedPdfItem(
     val sku: String? = null,
     val description: String? = null,
     val quantity: Double? = null,
-    val unitPrice: Double? = null
+    val unitPrice: Double? = null,
+    val uom: String? = null
 )

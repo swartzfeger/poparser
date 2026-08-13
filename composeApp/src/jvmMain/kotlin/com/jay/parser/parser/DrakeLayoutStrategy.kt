@@ -28,8 +28,8 @@ class DrakeLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         return score
     }
 
-    override fun parse(textLines: List<String>): ParsedPdfFields {
-        val normalized = textLines
+    override fun parse(lines: List<String>): ParsedPdfFields {
+        val normalized = lines
             .map { it.trim() }
             .filter { it.isNotBlank() }
 
