@@ -25,8 +25,16 @@ class OrderFileParser(
             "pdf" -> parsePdf(file)
             "xlsx" -> parseExcel(file)
             "doc" -> listOf(technosWordParser.parse(file))
+            "txt" -> parseText(file)
             else -> error("Unsupported file type: ${file.extension}")
         }
+    }
+
+    private fun parseText(file: File): List<ParsedPdfFields> {
+        val lines = file.readLines(Charsets.UTF_8).map { line ->
+            PdfLine(tokens = emptyList(), text = line.removePrefix("\uFEFF"))
+        }
+        return listOf(pdfFieldParser.parse(lines))
     }
 
     private fun parsePdf(file: File): List<ParsedPdfFields> {

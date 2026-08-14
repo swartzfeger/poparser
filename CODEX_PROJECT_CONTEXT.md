@@ -25,15 +25,15 @@ meaningful architectural, workflow, or product changes.
 - Development machine: macOS
 - Production client: Windows only
 
-PO Parser imports customer purchase orders in PDF, XLSX, or supported legacy DOC format, extracts order
+PO Parser imports customer purchase orders in PDF, XLSX, supported legacy DOC, or supported plain-text TXT format, extracts order
 and item data, enriches it with Precision Laboratories master data, estimates
 shipping boxes, and exports a Sage-ready CSV.
 
 ## Product Workflow
 
-1. The user chooses or drags PDF/XLSX/DOC purchase orders into the application.
+1. The user chooses or drags PDF/XLSX/DOC/TXT purchase orders into the application.
 2. `OrderFileParser` routes the file to native PDF extraction/OCR, an Excel parser,
-   or a supported legacy Word parser.
+   a supported legacy Word parser, or the shared layout registry for plain text.
 3. `PdfFieldParser` chooses the best customer-specific layout strategy.
 4. The strategy returns `ParsedPdfFields` and `ParsedPdfItem` values.
 5. `OrderEnricher` resolves customer data, SKU descriptions, prices, quantity
@@ -51,7 +51,7 @@ quantity.
   `composeApp/src/jvmMain/kotlin/com/jay/parser/main.kt`
 - Main parser UI:
   `composeApp/src/jvmMain/kotlin/com/jay/parser/ui/MainScreen.kt`
-- PDF/XLSX/DOC routing and OCR selection:
+- PDF/XLSX/DOC/TXT routing and OCR selection:
   `composeApp/src/jvmMain/kotlin/com/jay/parser/pdf/OrderFileParser.kt`
 - TECHNOS legacy Word table parsing:
   `composeApp/src/jvmMain/kotlin/com/jay/parser/parser/TechnosWordParser.kt`

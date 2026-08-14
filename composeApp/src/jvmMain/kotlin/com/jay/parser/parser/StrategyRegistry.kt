@@ -15,6 +15,7 @@ class StrategyRegistry(
                 listOf(
                     AdvanceProductsLayoutStrategy(),
                     AlaskaRestaurantLayoutStrategy(),
+                    AlphaChemicalServicesLayoutStrategy(),
                     AldonGatewayLayoutStrategy(),
                     AllPointsIlLayoutStrategy(),
                     ApothecaryProductsLayoutStrategy(),
@@ -79,6 +80,7 @@ class StrategyRegistry(
                     MattChlorLayoutStrategy(),
                     MccoyHealthScienceLayoutStrategy(),
                     MedlineLayoutStrategy(),
+                    MedivatorsLayoutStrategy(),
                     MedtronicSurgicalSolutionsLayoutStrategy(),
                     MirOilLayoutStrategy(),
                     MoreFlavorLayoutStrategy(),
@@ -98,6 +100,7 @@ class StrategyRegistry(
                     RideauGroupLayoutStrategy(),
                     RilabLayoutStrategy(),
                     SaniTestLayoutStrategy(),
+                    SaintLukesHealthLayoutStrategy(),
                     SanitechLayoutStrategy(),
                     SchoolSpecialtyLayoutStrategy(),
                     ScienceFirstLayoutStrategy(),
@@ -105,6 +108,7 @@ class StrategyRegistry(
                     SensonicsIntlLayoutStrategy(),
                     SomersetEducationalLayoutStrategy(),
                     StMarksPowderLayoutStrategy(),
+                    StatlabLayoutStrategy(),
                     TaylorTechnologiesLayoutStrategy(),
                     TcdPartsLayoutStrategy(),
                     ThermalScientificLayoutStrategy(),
@@ -119,7 +123,8 @@ class StrategyRegistry(
                     VwrLayoutStrategy(),
                     WebbChemicalAndPaperLayoutStrategy(),
                     WestlabLayoutStrategy(),
-                    WilkemScientificLayoutStrategy()
+                    WilkemScientificLayoutStrategy(),
+                    WilkensAndersonLayoutStrategy()
 
                 )
             )

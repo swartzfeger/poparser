@@ -62,6 +62,15 @@ class PdfTextExtractor {
                 return extractPlainLines(document)
             }
 
+            /*
+             * StatLab's second page reuses page-one Y coordinates for its terms.
+             * Positioned extraction interleaves the legal text into the ship-to
+             * address and item table, while plain extraction keeps pages sequential.
+             */
+            if (looksLikeStatlab(positionedLines)) {
+                return extractPlainLines(document)
+            }
+
             return positionedLines
         }
     }
@@ -90,6 +99,18 @@ class PdfTextExtractor {
 
         return compactText.contains("WESTLABNORTHAMERICA") &&
                 compactText.contains("WESTLABVENDORPACKAGINGREQUIREMENTS")
+    }
+
+    private fun looksLikeStatlab(lines: List<PdfLine>): Boolean {
+        val compactText = lines.joinToString("") { it.text }
+            .uppercase()
+            .replace(Regex("""[^A-Z0-9]"""), "")
+
+        return compactText.contains("2090COMMERCEDRIVE") &&
+                compactText.contains("MCKINNEYTX75069") &&
+                compactText.contains("QUALITYSTATLABCOM") &&
+                compactText.contains("MOZORNIOSTATLABCOM") &&
+                compactText.contains("PONUMBER")
     }
 
     private fun looksLikeGeorges(lines: List<PdfLine>): Boolean {

@@ -186,6 +186,16 @@ class OrderEnricher {
             }
         }
 
+        if (customerId == "ALPHA CHEMICAL SERVI") {
+            val normalizedUom = sourceUom?.uppercase()?.trim().orEmpty()
+            if (normalizedUom == "ITEM") {
+                val divisor = getSkuUomDivisor(normalizedSku)
+                return if (divisor != null && divisor > 0) rawQuantity / divisor else rawQuantity
+            }
+
+            return rawQuantity
+        }
+
         if (!isUomCustomer(customerId)) {
             return rawQuantity
         }
