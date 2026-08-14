@@ -280,6 +280,7 @@ class OrderEnricher {
             "ATHEA LABORATORIES",
             "AUTO-CHLOR SYSTEM TN",
             "BAILEYS THERMOMETERS",
+            "BUNZL",
             "DIVERSIFIED FOODSERV",
             "CHARLOTTE PRODUCTS",
             "TCD PARTS",

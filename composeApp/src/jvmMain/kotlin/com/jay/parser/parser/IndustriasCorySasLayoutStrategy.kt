@@ -11,9 +11,8 @@ class IndustriasCorySasLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
     override fun matches(lines: List<String>): Boolean {
         val text = normalize(lines.joinToString("\n"))
         return text.contains("INDUSTRIASCORYS.A.S") ||
-                text.contains("IVONNEESTIVARIZ") ||
-                text.contains("DELIVERYADRESSCALLE9CSUR") ||
-                text.contains("PURCHASEORDERNO.IM-")
+                (text.contains("DELIVERYADRESSCALLE9CSUR") &&
+                        text.contains("PURCHASEORDERNO.IM-"))
     }
 
     override fun score(lines: List<String>): Int {

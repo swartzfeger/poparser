@@ -82,6 +82,20 @@ class OcrPdfTextExtractor(
                         if (tableText.isNotBlank()) pageText = tableText
                         grayscaleFile.delete()
                     }
+
+                    /*
+                     * QVORTEX purchase orders are print-to-PDF images with no text
+                     * layer. The normal PSM 3 pass can omit the order number and
+                     * separate wrapped SKUs from their item rows. Grayscale PSM 6
+                     * retains the header and reconstructs the ruled item table.
+                     */
+                    if (looksLikeQvortex(pageText)) {
+                        val grayscaleFile = File(tempDir, "page_${i}_qvortex_gray.png")
+                        ImageIO.write(grayscaleImage, "png", grayscaleFile)
+                        val tableText = runTesseract(grayscaleFile, pageSegmentationMode = 6)
+                        if (tableText.isNotBlank()) pageText = tableText
+                        grayscaleFile.delete()
+                    }
                     pageText.lines()
                         .filter { it.isNotBlank() }
                         .forEach { allLines.add(PdfLine(tokens = emptyList(), text = it.trim())) }
@@ -132,6 +146,14 @@ class OcrPdfTextExtractor(
         return compactText.contains("JONKMAN") &&
                 compactText.contains("EQUIPMENT") &&
                 compactText.contains("2PREC")
+    }
+
+    private fun looksLikeQvortex(text: String): Boolean {
+        val compactText = text.uppercase().replace(Regex("""[^A-Z0-9]"""), "")
+        return compactText.contains("QVORTEX") &&
+                compactText.contains("751NW1STLN") &&
+                compactText.contains("LAMARMO64759") &&
+                compactText.contains("OFFICEQVORTEXCHEMICALSCOM")
     }
 
     private fun rotateImageClockwise90(image: BufferedImage): BufferedImage {
