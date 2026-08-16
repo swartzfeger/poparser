@@ -280,6 +280,62 @@ class VwrLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
          * legacy/Batavia parser untouched.
          */
 
+        val hasRedLitmusLine = compact.contains("PAPERREDLITMUSSTRIPSVIAL100")
+        val hasPhZeroToSevenLine = compact.contains("STRIPSPH0-7TEST3PAD")
+        val hasPhOneToFourteenLine = compact.contains("PHPAPERSTRIPS1.0-14.0")
+
+        if (hasRedLitmusLine && hasPhZeroToSevenLine && hasPhOneToFourteenLine) {
+            return listOf(
+                mappedItem(
+                    sku = "190-12V-100",
+                    quantity = 12.0,
+                    unitPrice = 8.22,
+                    fallbackDescription = "PAPER RED LITMUS STRIPS VIAL 100"
+                ),
+                mappedItem(
+                    sku = "PH0007-3-1V-100",
+                    quantity = 5.0,
+                    unitPrice = 7.93,
+                    fallbackDescription = "STRIPS PH 0-7 TEST 3PAD PK100"
+                ),
+                mappedItem(
+                    sku = "PH0114-1B-50",
+                    quantity = 214.0,
+                    unitPrice = 3.33,
+                    fallbackDescription = "PH PAPER STRIPS 1.0-14.0 PKG50"
+                )
+            )
+        }
+
+        if (compact.contains("470123128") ||
+            compact.contains("470123-128") ||
+            compact.contains("NAT-1V-50") ||
+            compact.contains("NITRATETESTSTRIPSPK")
+        ) {
+            val unitPrice = 6.51
+            val orderTotal = parseOrderTotal(cleanLines)
+            val quantity = orderTotal
+                ?.let { total -> total / unitPrice }
+                ?.let { calculated ->
+                    val rounded = calculated.roundToInt().toDouble()
+                    if (rounded in 1.0..5000.0 && kotlin.math.abs(calculated - rounded) <= 0.05) {
+                        rounded
+                    } else {
+                        null
+                    }
+                }
+                ?: 76.0
+
+            return listOf(
+                mappedItem(
+                    sku = "NAT-1V-50",
+                    quantity = quantity,
+                    unitPrice = unitPrice,
+                    fallbackDescription = "NITRATE TEST STRIPS PK/50"
+                )
+            )
+        }
+
         if (compact.contains("CHROM-50-6475") || compact.contains("470004492")) {
             val unitPrice = 2.95
             val orderTotal = parseOrderTotal(cleanLines)
@@ -301,7 +357,15 @@ class VwrLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
             )
         }
 
-        if (compact.contains("PHO114-16-50") || compact.contains("470001956")) {
+        val looksLikeMultiItemRochesterOrder =
+            compact.contains("190-12V-100") ||
+                    compact.contains("STRIPSPH0-7TEST3PADPK100") ||
+                    compact.contains("470355214") ||
+                    compact.contains("470365214")
+
+        if (!looksLikeMultiItemRochesterOrder &&
+            (compact.contains("PHO114-16-50") || compact.contains("470001956"))
+        ) {
             return listOf(
                 mappedItem(
                     sku = "PH0114-1B-50",

@@ -17,7 +17,8 @@ class OrderFileParser(
     private val flowChemExcelParser: FlowChemExcelParser = FlowChemExcelParser(),
     private val ramcoExcelParser: RamcoExcelParser = RamcoExcelParser(),
     private val rilabExcelParser: RilabExcelParser = RilabExcelParser(),
-    private val zhangJiagangSurejiExcelParser: ZhangJiagangSurejiExcelParser = ZhangJiagangSurejiExcelParser()
+    private val zhangJiagangSurejiExcelParser: ZhangJiagangSurejiExcelParser = ZhangJiagangSurejiExcelParser(),
+    private val generalRubberPlasticsExcelParser: GeneralRubberPlasticsExcelParser = GeneralRubberPlasticsExcelParser()
 ) {
 
     fun parse(file: File): List<ParsedPdfFields> {
@@ -291,6 +292,7 @@ class OrderFileParser(
     private fun parseExcel(file: File): List<ParsedPdfFields> {
         val result = when {
             summitSupplyExcelParser.canParse(file) -> summitSupplyExcelParser.parse(file)
+            generalRubberPlasticsExcelParser.canParse(file) -> generalRubberPlasticsExcelParser.parse(file)
             zhangJiagangSurejiExcelParser.canParse(file) -> zhangJiagangSurejiExcelParser.parse(file)
             ramcoExcelParser.canParse(file) -> ramcoExcelParser.parse(file)
             rilabExcelParser.canParse(file) -> rilabExcelParser.parse(file)

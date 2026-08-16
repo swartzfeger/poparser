@@ -71,6 +71,15 @@ class PdfTextExtractor {
                 return extractPlainLines(document)
             }
 
+            /*
+             * Contec's two-page production-order PDFs reuse page-one coordinates
+             * for their page-two routing instructions. Plain extraction preserves
+             * the delivery address and item table as sequential page-one lines.
+             */
+            if (looksLikeContecDistribution(positionedLines)) {
+                return extractPlainLines(document)
+            }
+
             return positionedLines
         }
     }
@@ -111,6 +120,17 @@ class PdfTextExtractor {
                 compactText.contains("QUALITYSTATLABCOM") &&
                 compactText.contains("MOZORNIOSTATLABCOM") &&
                 compactText.contains("PONUMBER")
+    }
+
+    private fun looksLikeContecDistribution(lines: List<PdfLine>): Boolean {
+        val compactText = lines.joinToString("") { it.text }
+            .uppercase()
+            .replace(Regex("""[^A-Z0-9]"""), "")
+
+        return compactText.contains("CONTECLOGISTICSAT18664364804") &&
+                compactText.contains("LUNDERWOODCONTECINCCOM") &&
+                compactText.contains("CONTECRECEIVINGAT18646998303") &&
+                compactText.contains("LINEYOURPARTNOYOURDESCRIPTIONDOCKQTYDUE")
     }
 
     private fun looksLikeGeorges(lines: List<PdfLine>): Boolean {

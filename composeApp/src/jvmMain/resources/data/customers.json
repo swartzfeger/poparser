@@ -462,6 +462,13 @@
         "priceLevel": "DIST + 50%"
     },
     {
+        "id": "DSA DETECTION",
+        "name": "DSA DETECTION",
+        "terms": "Prepaid",
+        "shipVia": "FEDC",
+        "priceLevel": "DISTRIBUTOR"
+    },
+    {
         "id": "EASTERN CROWN",
         "name": "EASTERN CROWN",
         "terms": "Prepaid",

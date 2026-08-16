@@ -196,6 +196,25 @@ class OrderEnricher {
             return rawQuantity
         }
 
+        /*
+         * US Foods' Institutional Wholesale POs show individual-vial counts and
+         * per-vial reference prices even though the UOM prints as CS. Sage orders
+         * the sellable pack represented by the SKU's marked vial-count segment.
+         */
+        if (customerId == "US FOODS") {
+            val divisor = getSkuUomDivisor(normalizedSku)
+            return if (divisor != null && divisor > 0) rawQuantity / divisor else rawQuantity
+        }
+
+        /*
+         * Explosia orders 220-200-2070 as 200 individual pieces, while Sage sells
+         * the /200 bottle represented by the SKU's second numeric segment.
+         */
+        if (customerId == "EXPLOSIA AS") {
+            val divisor = getSkuUomDivisor(normalizedSku)
+            return if (divisor != null && divisor > 0) rawQuantity / divisor else rawQuantity
+        }
+
         if (!isUomCustomer(customerId)) {
             return rawQuantity
         }
@@ -290,6 +309,7 @@ class OrderEnricher {
             "ATHEA LABORATORIES",
             "AUTO-CHLOR SYSTEM TN",
             "BAILEYS THERMOMETERS",
+            "BLUE DRAGON DEFENSE",
             "BUNZL",
             "DIVERSIFIED FOODSERV",
             "CHARLOTTE PRODUCTS",
