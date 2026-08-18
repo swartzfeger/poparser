@@ -52,7 +52,11 @@ class AutoChlorSystemTnLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
     private fun findCustomerName(textLines: List<String>): String? {
         val compactText = compact(textLines.joinToString(" "))
 
-        return if (compactText.contains("AUTOCHLORSYSTEMMEMPHISPLANT200")) {
+        return if (
+            compactText.contains("AUTOCHLORSYSTEMMEMPHISPLANT200") ||
+            compactText.contains("AUTOCHLORSYSTEMMEMPHISPLANT") ||
+            compactText.contains("AUTOCHLORSYSTEMTN")
+        ) {
             "AUTO-CHLOR SYSTEM MEMPHIS PLANT (200)"
         } else {
             textLines.firstOrNull {
@@ -63,6 +67,9 @@ class AutoChlorSystemTnLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
 
     private fun findOrderNumber(textLines: List<String>): String? {
         return findFirstMatch(
+            textLines,
+            Regex("""AUTO-CHLOR\s+SYSTEM\s*TN\s+(\d{4,})""", RegexOption.IGNORE_CASE)
+        ) ?: findFirstMatch(
             textLines,
             Regex("""^\*?(\d{4,})\*?$""")
         ) ?: findFirstMatch(
@@ -83,38 +90,7 @@ class AutoChlorSystemTnLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
     }
 
     private fun findShipTo(textLines: List<String>): ShipToBlock {
-        val dropShipNameIndex = textLines.indexOfFirst {
-            compact(it).contains("AUTOCHLORSYSTEMLOSANGELES450")
-        }
-
-        if (dropShipNameIndex >= 0) {
-            val shipToName = "AUTO-CHLOR SYSTEM LOS ANGELES (450)"
-
-            val addressLine = textLines
-                .drop(dropShipNameIndex + 1)
-                .take(4)
-                .firstOrNull { compact(it).contains("4512WJEFFERSONBLVD") }
-                ?.let { "4512 W. JEFFERSON BLVD" }
-
-            val cityLine = textLines
-                .drop(dropShipNameIndex + 1)
-                .take(5)
-                .firstOrNull {
-                    val c = compact(it)
-                    c.contains("LOSANGELES") && c.contains("CA") && c.contains("90016")
-                }
-
-            val parsed = parseCityStateZip(cityLine)
-
-            return ShipToBlock(
-                shipToCustomer = shipToName,
-                addressLine1 = addressLine,
-                addressLine2 = null,
-                city = parsed.city ?: "LOS ANGELES",
-                state = parsed.state ?: "CA",
-                zip = parsed.zip ?: "90016-4005"
-            )
-        }
+        findDropShip(textLines)?.let { return it }
 
         val customer = findCustomerName(textLines)
 
@@ -128,12 +104,55 @@ class AutoChlorSystemTnLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         )
     }
 
+    private fun findDropShip(textLines: List<String>): ShipToBlock? {
+        if (!compact(textLines.joinToString(" ")).contains("DROPSHIPMENT")) return null
+
+        val dropShipNameIndex = textLines.indices.reversed().firstOrNull { index ->
+            val line = compact(textLines[index])
+            line.startsWith("AUTOCHLORSYSTEM") &&
+                    !line.contains("MEMPHISPLANT") &&
+                    Regex("""\d{3}$""").containsMatchIn(line)
+        } ?: return null
+
+        val compactName = compact(textLines[dropShipNameIndex])
+        val shipToName = when {
+            compactName.contains("JAMAICAQNS630") -> "AUTO-CHLOR SYSTEM JAMAICA QNS (630)"
+            compactName.contains("LOSANGELES450") -> "AUTO-CHLOR SYSTEM LOS ANGELES (450)"
+            else -> textLines[dropShipNameIndex].trim()
+        }
+
+        val addressSource = textLines.getOrNull(dropShipNameIndex + 1)
+        val addressLine = when (compact(addressSource.orEmpty())) {
+            "1305091STAVENUE" -> "130-50 91ST AVENUE"
+            "4512WJEFFERSONBLVD" -> "4512 W. JEFFERSON BLVD"
+            else -> addressSource?.trim()?.takeIf { it.isNotBlank() }
+        }
+
+        val cityLine = textLines.getOrNull(dropShipNameIndex + 2)
+        val parsed = parseCityStateZip(cityLine)
+        val normalizedCity = when (compact(parsed.city.orEmpty())) {
+            "RICHMONDHILLS" -> "RICHMOND HILLS"
+            "LOSANGELES" -> "LOS ANGELES"
+            else -> parsed.city
+        }
+
+        return ShipToBlock(
+            shipToCustomer = shipToName,
+            addressLine1 = addressLine,
+            addressLine2 = null,
+            city = normalizedCity,
+            state = parsed.state,
+            zip = parsed.zip
+        )
+    }
+
     private fun findItems(textLines: List<String>) =
         buildList {
             val seen = mutableSetOf<String>()
 
             textLines.forEachIndexed { index, line ->
-                val directParsed = parseDirectSkuLine(line)
+                val directParsed = parseSalesOrderLine(line)
+                    ?: parseDirectSkuLine(line)
                     ?: parseMalformedDirectSkuLine(textLines, index)
 
                 directParsed?.let { parsed ->
@@ -176,6 +195,22 @@ class AutoChlorSystemTnLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
                 )
             }
         }
+
+    private fun parseSalesOrderLine(line: String): ParsedProductLine? {
+        val normalized = line.replace(Regex("""\s+"""), " ").trim()
+        val match = Regex(
+            """^([\d,]+(?:\.\d+)?)\s+([A-Z0-9]+(?:-[A-Z0-9]+){2,})\s+(.+?)\s+(\d+(?:\.\d+)?)\s+([\d,]+(?:\.\d+)?)$""",
+            RegexOption.IGNORE_CASE
+        ).find(normalized) ?: return null
+
+        return ParsedProductLine(
+            inlineSku = match.groupValues[2],
+            sku = match.groupValues[2],
+            description = match.groupValues[3].trim(),
+            quantity = parseNumber(match.groupValues[1]),
+            unitPrice = parseNumber(match.groupValues[4])
+        )
+    }
 
     private fun parseDirectSkuLine(line: String): ParsedProductLine? {
         val normalized = line.replace(Regex("""\s+"""), " ").trim()
@@ -362,6 +397,7 @@ class AutoChlorSystemTnLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
 
             return match.groupValues[1]
                 .substringBefore("(")
+                .replace(Regex("""\s+Revision\s*:.*$""", RegexOption.IGNORE_CASE), "")
                 .trim()
         }
 
