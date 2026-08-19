@@ -87,6 +87,7 @@ class StrategyRegistry(
                     MedlineLayoutStrategy(),
                     MedivatorsLayoutStrategy(),
                     MedtronicSurgicalSolutionsLayoutStrategy(),
+                    MicroEssentialLaboratoryLayoutStrategy(),
                     MirOilLayoutStrategy(),
                     MoreFlavorLayoutStrategy(),
                     NalcoCompanyLayoutStrategy(),
