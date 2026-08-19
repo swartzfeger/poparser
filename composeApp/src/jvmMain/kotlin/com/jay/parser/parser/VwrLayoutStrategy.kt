@@ -215,7 +215,6 @@ class VwrLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
 
     private fun parseLegacyItems(lines: List<String>): List<ParsedPdfItem> {
         val items = mutableListOf<ParsedPdfItem>()
-        val seen = mutableSetOf<String>()
 
         for (i in 0 until lines.size - 1) {
             val row = lines[i].replace(Regex("""\s+"""), " ").trim()
@@ -227,6 +226,7 @@ class VwrLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
             ).find(row) ?: continue
 
             val quantity = rowMatch.groupValues[1].replace(",", "").toDoubleOrNull()
+            val uom = rowMatch.groupValues[2].uppercase()
             val rawSku = rowMatch.groupValues[3].trim().uppercase()
             val unitPrice = rowMatch.groupValues[4].replace(",", "").toDoubleOrNull()
 
@@ -237,15 +237,13 @@ class VwrLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
                 descLine.ifBlank { null }
             }
 
-            val key = "$sku|$quantity|$unitPrice"
-            if (!seen.add(key)) continue
-
             items.add(
                 item(
                     sku = sku,
                     description = description,
                     quantity = quantity,
-                    unitPrice = unitPrice
+                    unitPrice = unitPrice,
+                    uom = uom
                 )
             )
         }
@@ -796,7 +794,11 @@ class VwrLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
 
     private fun preserveVwrSku(rawSku: String): String {
         if (rawSku.isBlank()) return rawSku
-        return if (rawSku.startsWith("VWR-")) rawSku else normalizeSku(rawSku)
+        return when (rawSku) {
+            // Older VWR POs used this alias for catalog 60792-009.
+            "VWR-175-25V" -> "175-25V-100"
+            else -> if (rawSku.startsWith("VWR-")) rawSku else normalizeSku(rawSku)
+        }
     }
 
     private fun normalizeForMatch(text: String): String {
