@@ -40,6 +40,9 @@ class PdfTextExtractor {
                 if (looksLikeGeorges(firstPageLines)) {
                     return firstPageLines
                 }
+                if (looksLikeJayhawk(firstPageLines)) {
+                    return firstPageLines
+                }
             }
 
             val stripper = PositionTextStripper()
@@ -143,6 +146,24 @@ class PdfTextExtractor {
                 compactText.contains("VENDOR33006") &&
                 compactText.contains("CASSVILLEMRO") &&
                 compactText.contains("VENDORITEMNUMBER")
+    }
+
+    private fun looksLikeJayhawk(lines: List<PdfLine>): Boolean {
+        val compactText = lines.joinToString("") { it.text }
+            .uppercase()
+            .replace(Regex("""[^A-Z0-9]"""), "")
+
+        val looksLikeTexas =
+            compactText.contains("INFOJAYHAWKSALESCOM") &&
+                    compactText.contains("2613INDUSTRIALLN") &&
+                    compactText.contains("GARLANDTX75041")
+
+        val looksLikeWisconsin =
+            compactText.contains("JAYHAWKSALESMIDWEST") &&
+                    compactText.contains("2995SMOORLANDRD") &&
+                    compactText.contains("NEWBERLINWI53151")
+
+        return looksLikeTexas || looksLikeWisconsin
     }
 
     private fun groupIntoLines(tokens: List<PdfToken>): List<PdfLine> {

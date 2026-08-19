@@ -50,16 +50,16 @@ class JayhawkSalesWiLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
     private fun parseOrderNumber(lines: List<String>): String? {
         val joined = lines.joinToString("\n")
 
-        Regex("""P\.?\s*O\.?\s*NO\.?\s*(\d+)""", RegexOption.IGNORE_CASE)
+        Regex("""\b\d{1,2}/\d{1,2}/\d{2,4}\s+(\d{4,})\b""")
             .find(joined)
             ?.groupValues
             ?.get(1)
             ?.let { return it }
 
-        Regex("""\b(\d{4})\b""")
-            .findAll(joined)
-            .map { it.groupValues[1] }
-            .firstOrNull()
+        Regex("""P\.?\s*O\.?\s*NO\.?\s*(\d+)""", RegexOption.IGNORE_CASE)
+            .find(joined)
+            ?.groupValues
+            ?.get(1)
             ?.let { return it }
 
         return null

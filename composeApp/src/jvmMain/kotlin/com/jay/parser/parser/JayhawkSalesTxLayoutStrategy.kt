@@ -129,38 +129,7 @@ class JayhawkSalesTxLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
     }
 
     private fun parseItems(lines: List<String>): List<ParsedPdfItem> {
-        val raw = lines.joinToString("\n").uppercase()
-        val text = normalize(raw)
-
-        val isHoustonDropShip =
-            (
-                    raw.contains("AAAARREESSTTAAUURRAANNTTEEQQUUIIPPMMEENNTTCCOO") ||
-                            text.contains("AA RESTAURANT EQUIPMENT CO., INC.") ||
-                            text.contains("AA KITCHEN LEASING")
-                    ) &&
-                    (
-                            raw.contains("99223355BBIISSSSOONNNNEETTSSTT") ||
-                                    text.contains("9235 BISSONNET ST.") ||
-                                    raw.contains("HHOOUUSSTTOONN,,TTXX 7777007744") ||
-                                    text.contains("HOUSTON, TX 77074")
-                            )
-
-        // Hard rescue FIRST for the corrupted private-label dropship PO 12732
-        if (isHoustonDropShip) {
-            return listOf(
-                item(
-                    sku = "145-500V-100",
-                    description = ItemMapper.getItemDescription("145-500V-100").ifBlank {
-                        "CHLORINE TEST STRIPS"
-                    },
-                    quantity = 500.0,
-                    unitPrice = 1.17
-                )
-            )
-        }
-
         val items = mutableListOf<ParsedPdfItem>()
-        val seen = mutableSetOf<String>()
 
         var i = 0
         while (i < lines.size) {
@@ -175,6 +144,7 @@ class JayhawkSalesTxLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
                 val quantity = rowMatch.groupValues[1].replace(",", "").toDoubleOrNull()
                 val itemCode = rowMatch.groupValues[2].trim().uppercase()
                 val firstDesc = rowMatch.groupValues[3].trim()
+                val uom = rowMatch.groupValues[4].uppercase()
                 val unitPrice = rowMatch.groupValues[5].replace(",", "").toDoubleOrNull()
 
                 val descParts = mutableListOf(firstDesc)
@@ -207,17 +177,15 @@ class JayhawkSalesTxLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
                         cleanupDescription(descParts)
                     }
 
-                    val key = "$sku|$quantity|$unitPrice"
-                    if (seen.add(key)) {
-                        items.add(
-                            item(
-                                sku = sku,
-                                description = description,
-                                quantity = quantity,
-                                unitPrice = unitPrice
-                            )
+                    items.add(
+                        item(
+                            sku = sku,
+                            description = description,
+                            quantity = quantity,
+                            unitPrice = unitPrice,
+                            uom = uom
                         )
-                    }
+                    )
                 }
 
                 i = j
@@ -232,11 +200,11 @@ class JayhawkSalesTxLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
 
     private fun extractSku(descParts: List<String>, itemCode: String): String? {
         val joined = normalize(descParts.joinToString(" "))
+        val knownSkus = ItemMapper.getAllSkus().toHashSet()
 
-        Regex("""\b\d{3}-[A-Z0-9]+-\d{3,4}\b""")
-            .find(joined)
-            ?.groupValues
-            ?.get(0)
+        SKU_PATTERN.findAll(joined)
+            .map { it.value }
+            .firstOrNull(knownSkus::contains)
             ?.let { return it }
 
         return when (itemCode) {
@@ -321,4 +289,8 @@ class JayhawkSalesTxLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         val state: String?,
         val zip: String?
     )
+
+    private companion object {
+        val SKU_PATTERN = Regex("""\b[A-Z0-9]+(?:-[A-Z0-9]+){2,}\b""")
+    }
 }
