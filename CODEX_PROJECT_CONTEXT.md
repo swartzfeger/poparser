@@ -1,6 +1,6 @@
 # PO Parser - Codex Project Context
 
-Last updated: 2026-08-04
+Last updated: 2026-08-20
 
 ## How To Use This File
 
@@ -19,9 +19,10 @@ meaningful architectural, workflow, or product changes.
 - Repository: https://github.com/swartzfeger/poparser
 - Local path used on the Mac mini: `/Users/jay/dev/kotlin/poparser`
 - Current branch: `main`
-- Current version: `1.6.0`
-- Snapshot commit when this file was created: `b176564`
+- Current version: `1.7.2`
+- Code baseline audited for this handoff: `df340dc`
 - Technology: Kotlin Multiplatform, Compose Desktop, JVM 21
+- Gradle Wrapper: `8.14.4`
 - Development machine: macOS
 - Production client: Windows only
 
@@ -101,10 +102,47 @@ Fisher Scientific POs are unusually noisy and often require OCR. Fisher parsing
 contains special segmentation and PO-number recovery logic. Treat broad OCR or
 Fisher changes as high risk and test on Windows as well as macOS.
 
+`PdfTextExtractor` is shared, but some multi-page formats use narrowly
+fingerprinted plain-text paths to avoid positioned text from different pages
+being interleaved:
+
+- George's and Jayhawk use first-page plain extraction because later pages are
+  boilerplate or are not part of the order data.
+- Pinetree uses plain extraction across all pages because legitimate item rows
+  can continue onto page two. Keep its fingerprint specific to Pinetree.
+
+Recent Pinetree regression rules are important:
+
+- Customer-added `Indigo` text is not part of a SKU.
+- Wrapped `CHL-10000-` + `1V-100 Indigo` must resolve exactly to
+  `CHL-10000-1V-100`.
+- Wrapped `PER-10000-` + `1V-100 Indigo` must resolve exactly to
+  `PER-10000-1V-100`.
+- Product-code tokens may contain slash, period, or combined separators such as
+  `33820-BTB/L` and `33813-.25x6`.
+- Zero-quantity notes rows are not order items.
+
 OCR currently invokes an external Tesseract executable. On Windows it searches
 the app/working directory and standard Tesseract installation paths. On macOS it
 searches common Homebrew/MacPorts paths. Do not assume macOS OCR output exactly
 matches Windows output.
+
+## Current Layout Coverage
+
+`StrategyRegistry` currently registers 125 customer layout strategies. Inspect
+the registry rather than relying on an old customer list in a chat transcript.
+
+Notable layouts added or substantially revised since the original August 4
+context include Beta Procesos, Butler Chemical, Advance Products, Aldon/Gateway,
+C&M Representaciones, Devere, National Chemicals, Ramco XLSX, Apothecary
+Products, Cambridge Environmental, Franz Ziel, Gasco Industrial, McCoy Health
+Science, Rideau Group, St Marks Powder, Summit Supply, Technos DOC, Uni-Kem,
+Curis System, Daigger, George's, Laboratory Sales, United Scientific, Micro
+Essential Laboratory, VWR, Jayhawk, Ecolab/Nalco, and Pinetree.
+
+Ecolab and Nalco ship-to parsing must remain dynamic. Known addresses may help
+normalization, but new addresses and small variations such as a different door
+must still be parsed from the PO rather than forced to a single hard-coded value.
 
 ## Enrichment And UOM Rules
 
@@ -159,6 +197,11 @@ over bundled resources. Existing imports are backed up before replacement.
 Prices support three decimal places. JSON numbers omit unnecessary trailing
 zeroes, so `265.250` may be represented as `265.25` without losing value.
 
+The bundled defaults were most recently audited against **Master List
+08.18.26.xlsx** for version 1.7.2. That workbook's only resulting core-data
+change was VIKING PURE terms from `Prepaid` to `Net 30 Days`; generated item and
+GL data matched the existing bundled files.
+
 Application data locations:
 
 - macOS: `~/Library/Application Support/PO Parser/`
@@ -172,8 +215,8 @@ Master overrides are under `master-data/`. Packaging overrides are under
 Packaging support was introduced in version 1.6.0 and is preliminary.
 
 - Product dimensions and weights come from `productPackaging.json`.
-- The bundled August 5, 2026 dataset contains 180 products: all 180 have weights
-  and 150 have complete dimensions.
+- The bundled dataset contains 184 products: all 184 have weights and 183 have
+  complete dimensions.
 - The user can replace the data through **Update Packaging Data** using a CSV.
 - Missing measurements do not block order parsing; they produce a review status.
 - Box capacity reserves 10 percent for packing material (`MAX_FILL_RATIO = 0.90`).
@@ -199,8 +242,8 @@ The exporter intentionally produces:
 - CRLF line endings
 - quoted CSV cells
 - negative unit prices and amounts for Sage import
-- up to three decimal places for unit prices, with trailing zeroes omitted
-- an `Invoice Note` shipping summary repeated on each line of an order
+- exactly three decimal places for unit prices
+- an `Invoice Note` shipping summary on only the first line of an order
 
 The **No Ship Via**, **No Ship To**, and **No Invoice Note** settings can blank
 those fields during export. The parsed-order UI retains detailed volume, weight,
@@ -211,6 +254,10 @@ a schema change.
 ## Build And Test
 
 Use JDK 21.
+
+The repository pins Gradle 8.14.4 in
+`gradle/wrapper/gradle-wrapper.properties`. Always use `./gradlew` or
+`gradlew.bat`; a separately installed Gradle version should not control builds.
 
 Run the app on macOS:
 
@@ -242,6 +289,10 @@ Windows MSI/EXE build:
 powershell -ExecutionPolicy Bypass -File .\build-windows.ps1
 ```
 
+`build-windows.ps1` invokes `gradlew.bat`, so it uses the repository's wrapper.
+It currently sets `JAVA_HOME` to `C:\Program Files\Java\jdk-21.0.10`; adjust that
+path only when the Windows JDK installation differs.
+
 Compose native installers must be built on their target operating system. A
 successful macOS package does not prove that Windows packaging succeeds.
 
@@ -272,6 +323,33 @@ The application version currently appears in both:
 - `appVersion` in `composeApp/build.gradle.kts`
 
 Update both together. A future improvement should establish one version source.
+
+## Codex And Computer Handoff
+
+Codex task history should not be treated as synchronized across accounts or
+computers. For a handoff:
+
+1. Commit and push intended source, data, tests, and this context file.
+2. Confirm `git status --short` is clean, or explicitly document every remaining
+   local-only file.
+3. Clone or pull `main` on the destination computer and ask Codex to read this
+   file, inspect the repository state, and treat code/tests as newer evidence.
+4. Reattach representative PDFs, XLSX files, debug logs, and CSV exports when a
+   parsing task depends on them. Desktop samples are not stored in this repo.
+5. Copy runtime overrides separately when needed. Files under macOS
+   `~/Library/Application Support/PO Parser/` or Windows `%APPDATA%\PO Parser\`
+   are local application data and do not travel through Git.
+
+At this update, the working tree contains five untracked regression-test files:
+
+- `EcolabLayoutStrategyTest.kt`
+- `JayhawkSalesLayoutStrategyTest.kt`
+- `MicroEssentialLaboratoryLayoutStrategyTest.kt`
+- `PinetreeInstrumentsLayoutStrategyTest.kt`
+- `VwrLayoutStrategyTest.kt`
+
+These files will not reach another account or computer through Git until they
+are intentionally added and committed.
 
 ## Discussed But Not Implemented
 
