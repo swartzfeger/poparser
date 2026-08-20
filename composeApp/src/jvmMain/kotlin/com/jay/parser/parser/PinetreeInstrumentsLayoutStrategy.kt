@@ -69,6 +69,11 @@ class PinetreeInstrumentsLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
                     if (candidate.matches(Regex("""\d{5,}"""))) {
                         return candidate
                     }
+
+                    val trailingNumber = Regex("""\b(\d{5,})$""").find(candidate)
+                    if (trailingNumber != null) {
+                        return trailingNumber.groupValues[1]
+                    }
                 }
             }
         }
@@ -243,37 +248,37 @@ class PinetreeInstrumentsLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         var boxesPerCaseFromWrappedSku: Int? = null
 
         val patternA = Regex(
-            """^([A-Z0-9]+(?:-[A-Z0-9]+)*)\s+(.+?)\s+(\d+)\s+(\d+(?:\.\d{1,2})?)\s+0\.00%\s+\d[\d,]*\.\d{2}$""",
+            """^([A-Z0-9]+(?:[-/.]+[A-Z0-9]+)*)\s+(.+?)\s+(\d+)\s+(\d+(?:\.\d{1,2})?)\s+0\.00%\s+\d[\d,]*\.\d{2}$""",
             RegexOption.IGNORE_CASE
         ).find(first)
 
         val patternB = Regex(
-            """^([A-Z0-9]+(?:-[A-Z0-9]+)*)\s+(.+?)\s+([A-Z0-9-]+)\s+(\d+)\s+(\d+(?:\.\d{1,2})?)\s+0\.00%\s+\d[\d,]*\.\d{2}$""",
+            """^([A-Z0-9]+(?:[-/.]+[A-Z0-9]+)*)\s+(.+?)\s+([A-Z0-9-]+)\s+(\d+)\s+(\d+(?:\.\d{1,2})?)\s+0\.00%\s+\d[\d,]*\.\d{2}$""",
             RegexOption.IGNORE_CASE
         ).find(first)
 
         val patternC = Regex(
-            """^([A-Z0-9]+(?:-[A-Z0-9]+)*)\s+(.+?)\s+(\d+)\s+(\d+\.\d{1,2})\s+([A-Z0-9-]+)\s+EACH\s+(\d{1,2})\s+0\.00%\s+\d[\d,]*\.\d{2}$""",
+            """^([A-Z0-9]+(?:[-/.]+[A-Z0-9]+)*)\s+(.+?)\s+(\d+)\s+(\d+\.\d{1,2})\s+([A-Z0-9-]+)\s+EACH\s+(\d{1,2})\s+0\.00%\s+\d[\d,]*\.\d{2}$""",
             RegexOption.IGNORE_CASE
         ).find(first)
 
         val patternD = Regex(
-            """^([A-Z0-9]+(?:-[A-Z0-9]+)*)\s+(.+?)\s+([A-Z0-9-]+)\s+(\d+)EACH\s+(\d+(?:\.\d{1,2})?)\s+0\.00%\s+\d[\d,]*\.\d{2}$""",
+            """^([A-Z0-9]+(?:[-/.]+[A-Z0-9]+)*)\s+(.+?)\s+([A-Z0-9-]+)\s+(\d+)EACH\s+(\d+(?:\.\d{1,2})?)\s+0\.00%\s+\d[\d,]*\.\d{2}$""",
             RegexOption.IGNORE_CASE
         ).find(first)
 
         val patternE = Regex(
-            """^([A-Z0-9]+(?:-[A-Z0-9]+)*)\s+(.+?)\s+(\d+)EACH\s+(\d+(?:\.\d{1,2})?)\s+0\.00%\s+\d[\d,]*\.\d{2}$""",
+            """^([A-Z0-9]+(?:[-/.]+[A-Z0-9]+)*)\s+(.+?)\s+(\d+)EACH\s+(\d+(?:\.\d{1,2})?)\s+0\.00%\s+\d[\d,]*\.\d{2}$""",
             RegexOption.IGNORE_CASE
         ).find(first)
 
         val patternF = Regex(
-            """^([A-Z0-9]+(?:-[A-Z0-9]+)*)\s+(.+?)\s+([A-Z0-9-]+)\s+(\d+)Lotof\d+\s+(\d+(?:\.\d{1,2})?)\s+0\.00%\s+\d[\d,]*\.\d{2}$""",
+            """^([A-Z0-9]+(?:[-/.]+[A-Z0-9]+)*)\s+(.+?)\s+([A-Z0-9-]+)\s+(\d+)Lotof\d+\s+(\d+(?:\.\d{1,2})?)\s+0\.00%\s+\d[\d,]*\.\d{2}$""",
             RegexOption.IGNORE_CASE
         ).find(first)
 
         val patternG = Regex(
-            """^([A-Z0-9]+(?:-[A-Z0-9]+)*)\s+(.+?)\s+([A-Z0-9-]+)\s+(\d+)\s*[A-Z][A-Z0-9/]*\s+(\d[\d,]*(?:\.\d{1,2})?)\s+0\.00%\s+\d[\d,]*\.\d{2}$""",
+            """^([A-Z0-9]+(?:[-/.]+[A-Z0-9]+)*)\s+(.+?)\s+([A-Z0-9-]+)\s+(\d+)\s*[A-Z][A-Z0-9/]*\s+(\d[\d,]*(?:\.\d{1,2})?)\s+0\.00%\s+\d[\d,]*\.\d{2}$""",
             RegexOption.IGNORE_CASE
         ).find(first)
 
@@ -353,6 +358,7 @@ class PinetreeInstrumentsLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         var descriptionPortion = parsedRow.description
         var quantity = parsedRow.quantity
         val unitPrice = parsedRow.unitPrice
+        if (quantity <= 0.0) return null
         parsedRow.vendorCode?.let(vendorParts::add)
 
         val trailingVendor = extractTrailingVendorFragment(descriptionPortion)
@@ -372,8 +378,16 @@ class PinetreeInstrumentsLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
             if (cleaned.startsWith("Notes ", ignoreCase = true)) continue
 
             val noEach = cleaned.replace(Regex("""\s*EACH$""", RegexOption.IGNORE_CASE), "").trim()
+            val wrappedCount = Regex(
+                """\b(50|100)\s*(?:INDIGO|PEROXYSAN)\b""",
+                RegexOption.IGNORE_CASE
+            ).find(noEach)?.groupValues?.get(1)
 
             when {
+                vendorParts.lastOrNull()?.endsWith("-") == true && wrappedCount != null -> {
+                    vendorParts.add(wrappedCount)
+                }
+
                 noEach.equals("100", ignoreCase = true) -> vendorParts.add("100")
                 noEach.equals("50", ignoreCase = true) -> vendorParts.add("50")
                 noEach.equals("100 Indigo", ignoreCase = true) -> vendorParts.add("100")
@@ -384,6 +398,16 @@ class PinetreeInstrumentsLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
                 noEach.equals("50Indigo", ignoreCase = true) -> vendorParts.add("50")
                 noEach.equals("Indigo 50", ignoreCase = true) -> vendorParts.add("50")
                 noEach.equals("Indigo50", ignoreCase = true) -> vendorParts.add("50")
+
+                vendorParts.lastOrNull()?.endsWith("-") == true &&
+                        noEach.matches(Regex("""^100\b.*$""", RegexOption.IGNORE_CASE)) -> {
+                    vendorParts.add("100")
+                }
+
+                vendorParts.lastOrNull()?.endsWith("-") == true &&
+                        noEach.matches(Regex("""^50\b.*$""", RegexOption.IGNORE_CASE)) -> {
+                    vendorParts.add("50")
+                }
 
                 noEach.equals("box/cs", ignoreCase = true) -> Unit
 
@@ -510,6 +534,10 @@ class PinetreeInstrumentsLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         if (sku == "QAC-100-1V-") sku = "QAC-100-1V-100"
         if (sku == "CHL-2000-1V-") sku = "CHL-2000-1V-100"
 
+        if (sku.endsWith("-") && sku.dropLast(1) in ItemMapper.getAllSkus()) {
+            sku = sku.dropLast(1)
+        }
+
         sku = sku.replace(Regex("""LOTOF\d+$""", RegexOption.IGNORE_CASE), "")
         sku = sku.trim()
 
@@ -568,7 +596,7 @@ class PinetreeInstrumentsLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         if (s.startsWith("PST", ignoreCase = true)) return false
 
         return Regex(
-            """^[A-Z0-9]+(?:-[A-Z0-9]+)*\s+.+0\.00%\s+\d+(?:,\d{3})*\.\d{2}$""",
+            """^[A-Z0-9]+(?:[-/.]+[A-Z0-9]+)*\s+.+0\.00%\s+\d+(?:,\d{3})*\.\d{2}$""",
             RegexOption.IGNORE_CASE
         ).matches(s)
     }

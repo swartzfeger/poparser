@@ -43,6 +43,9 @@ class PdfTextExtractor {
                 if (looksLikeJayhawk(firstPageLines)) {
                     return firstPageLines
                 }
+                if (looksLikePinetree(firstPageLines)) {
+                    return extractPlainLines(document)
+                }
             }
 
             val stripper = PositionTextStripper()
@@ -164,6 +167,17 @@ class PdfTextExtractor {
                     compactText.contains("NEWBERLINWI53151")
 
         return looksLikeTexas || looksLikeWisconsin
+    }
+
+    private fun looksLikePinetree(lines: List<PdfLine>): Boolean {
+        val compactText = lines.joinToString("") { it.text }
+            .uppercase()
+            .replace(Regex("""[^A-Z0-9]"""), "")
+
+        return compactText.contains("PINETREEINSTRUMENTSINC") &&
+                compactText.contains("PURCHASEORDER") &&
+                compactText.contains("VENDORPRODCODE") &&
+                compactText.contains("169LEXINGTONCOURT")
     }
 
     private fun groupIntoLines(tokens: List<PdfToken>): List<PdfLine> {
