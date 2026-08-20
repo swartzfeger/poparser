@@ -378,12 +378,20 @@ class PinetreeInstrumentsLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
             if (cleaned.startsWith("Notes ", ignoreCase = true)) continue
 
             val noEach = cleaned.replace(Regex("""\s*EACH$""", RegexOption.IGNORE_CASE), "").trim()
+            val wrappedVial = Regex(
+                """\b(1V-(?:50|100))\s*(?:INDIGO)?\b""",
+                RegexOption.IGNORE_CASE
+            ).find(noEach)?.groupValues?.get(1)?.uppercase()
             val wrappedCount = Regex(
                 """\b(50|100)\s*(?:INDIGO|PEROXYSAN)\b""",
                 RegexOption.IGNORE_CASE
             ).find(noEach)?.groupValues?.get(1)
 
             when {
+                vendorParts.lastOrNull()?.endsWith("-") == true && wrappedVial != null -> {
+                    vendorParts.add(wrappedVial)
+                }
+
                 vendorParts.lastOrNull()?.endsWith("-") == true && wrappedCount != null -> {
                     vendorParts.add(wrappedCount)
                 }
