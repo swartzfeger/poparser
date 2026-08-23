@@ -9,7 +9,10 @@ import kotlin.math.floor
 
 class PackagingPlanner(
     private val productsProvider: () -> Map<String, ProductPackaging> = { PackagingDataStore.current() },
-    private val boxes: List<ShippingBox> = ShippingBoxes.all
+    private val boxes: List<ShippingBox> = ShippingBoxes.all,
+    private val suffixDefaultsProvider: () -> Map<String, ProductPackaging> = {
+        PackagingDataStore.suffixDefaults()
+    }
 ) {
 
     data class Result(
@@ -17,9 +20,15 @@ class PackagingPlanner(
         val summary: PackagingSummary
     )
 
-    fun calculate(lines: List<ExportOrderLine>): Result {
+    fun calculate(
+        lines: List<ExportOrderLine>,
+        customerId: String? = null
+    ): Result {
         val products = productsProvider()
-        val resolvedProducts = lines.associate { line -> line.sku to findProduct(products, line.sku) }
+        val suffixDefaults = suffixDefaultsProvider()
+        val resolvedProducts = lines.associate { line ->
+            line.sku to findProduct(products, suffixDefaults, line.sku)
+        }
         val measuredLines = lines.map { line ->
             val product = resolvedProducts[line.sku]
             line.copy(
@@ -85,7 +94,7 @@ class PackagingPlanner(
         }
 
         val units = buildUnits(shippableLines, resolvedProducts)
-        val packing = pack(units)
+        val packing = pack(units, eligibleBoxes(customerId))
         if (packing.failure != null) warnings += packing.failure
 
         val boxPlan = if (packing.failure == null) {
@@ -143,7 +152,10 @@ class PackagingPlanner(
             line.quantityForExport
         }
 
-    private fun pack(units: List<PackableUnit>): PackingResult {
+    private fun pack(
+        units: List<PackableUnit>,
+        eligibleBoxes: List<ShippingBox>
+    ): PackingResult {
         val sortedUnits = units.sortedWith(
             compareByDescending<PackableUnit> { it.volume }
                 .thenByDescending { maxOf(it.length, it.width, it.height) }
@@ -151,7 +163,7 @@ class PackagingPlanner(
         val totalVolume = sortedUnits.sumOf { it.volume }
         val totalWeight = sortedUnits.sumOf { it.weight }
 
-        val singleBox = boxes
+        val singleBox = eligibleBoxes
             .asSequence()
             .filter { totalVolume <= it.usableVolumeCubicInches + MEASUREMENT_EPSILON }
             .filter { totalWeight <= MAX_BOX_WEIGHT_POUNDS + MEASUREMENT_EPSILON }
@@ -178,7 +190,9 @@ class PackagingPlanner(
                 return@forEachIndexed
             }
 
-            val candidates = boxes.filter { unit.fits(it) && unit.volume <= it.usableVolumeCubicInches }
+            val candidates = eligibleBoxes.filter {
+                unit.fits(it) && unit.volume <= it.usableVolumeCubicInches
+            }
             if (candidates.isEmpty()) {
                 return PackingResult(loads, "${unit.sku} does not fit any configured box")
             }
@@ -197,15 +211,49 @@ class PackagingPlanner(
         return PackingResult(loads, null)
     }
 
+    private fun eligibleBoxes(customerId: String?): List<ShippingBox> {
+        // Null preserves compatibility for direct planner callers that predate customer-aware
+        // packing. Production enrichment always supplies a non-null customer ID.
+        if (customerId == null || normalizeCustomerId(customerId) in BOX_15_CUSTOMER_IDS) {
+            return boxes
+        }
+        return boxes.filterNot { it.id == PALLET_BOX_ID }
+    }
+
+    private fun normalizeCustomerId(customerId: String): String = customerId
+        .trim()
+        .uppercase()
+        .replace(Regex("""\s+"""), " ")
+
     private fun findProduct(
         products: Map<String, ProductPackaging>,
+        suffixDefaults: Map<String, ProductPackaging>,
         rawSku: String
     ): ProductPackaging? {
         val sku = rawSku.trim().uppercase()
-        return products[sku]
+        val exact = products[sku]
             ?: products[sku.removePrefix("SPC-")]
             ?: products[sku.removePrefix("DFS-")]
+        if (exact?.hasDimensions == true) return exact
+
+        val fallback = suffixDefaults.entries
+            .filter { (suffix) -> sku.endsWith(suffix) }
+            .maxByOrNull { (suffix) -> suffix.length }
+            ?.value
+            ?: return exact
+
+        if (exact == null) return fallback
+        return ProductPackaging(
+            lengthInches = exact.lengthInches.validDimensionOrNull() ?: fallback.lengthInches,
+            widthInches = exact.widthInches.validDimensionOrNull() ?: fallback.widthInches,
+            heightInches = exact.heightInches.validDimensionOrNull() ?: fallback.heightInches,
+            weightPounds = exact.weightPounds,
+            inferredLength = exact.inferredLength ||
+                    (exact.lengthInches.validDimensionOrNull() == null && fallback.inferredLength)
+        )
     }
+
+    private fun Double?.validDimensionOrNull(): Double? = this?.takeIf { it > 0.0 }
 
     private fun ProductPackaging.toUnit(
         sku: String,
@@ -328,6 +376,12 @@ class PackagingPlanner(
     }
 
     private companion object {
+        const val PALLET_BOX_ID = 15
+        val BOX_15_CUSTOMER_IDS = setOf(
+            "ECOLAB INC",
+            "DOVE MATERIAL",
+            "KROWNE METAL CORPORA"
+        )
         const val MAX_FILL_RATIO = 0.90
         const val MAX_BOX_WEIGHT_POUNDS = 50.0
         const val QUANTITY_EPSILON = 0.000001

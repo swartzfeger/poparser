@@ -367,7 +367,7 @@
     "lengthInches": 5,
     "widthInches": 3,
     "heightInches": 0.25,
-    "weightPounds": 0.001,
+    "weightPounds": 0.01,
     "inferredLength": false
   },
   "175-12V-100": {

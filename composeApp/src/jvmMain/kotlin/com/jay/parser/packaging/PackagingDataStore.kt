@@ -21,6 +21,10 @@ object PackagingDataStore {
     @Volatile
     private var cachedProducts: Map<String, ProductPackaging>? = null
 
+    private val bundledSuffixDefaults: Map<String, ProductPackaging> by lazy {
+        loadBundledProducts(SUFFIX_DEFAULTS_FILE)
+    }
+
     fun current(): Map<String, ProductPackaging> {
         cachedProducts?.let { return it }
         return synchronized(this) {
@@ -33,6 +37,8 @@ object PackagingDataStore {
         if (!file.isFile) return null
         return runCatching { json.decodeFromString<PackagingDataMetadata>(file.readText()) }.getOrNull()
     }
+
+    fun suffixDefaults(): Map<String, ProductPackaging> = bundledSuffixDefaults
 
     fun importCsv(file: File): PackagingDataImportResult {
         val parsed = PackagingCsvImporter().parse(file)
@@ -67,10 +73,14 @@ object PackagingDataStore {
             return json.decodeFromString(overrideFile.readText())
         }
 
-        val text = object {}.javaClass.getResourceAsStream("/data/$PRODUCTS_FILE")
+        return loadBundledProducts(PRODUCTS_FILE)
+    }
+
+    private fun loadBundledProducts(filename: String): Map<String, ProductPackaging> {
+        val text = object {}.javaClass.getResourceAsStream("/data/$filename")
             ?.bufferedReader()
             ?.use { it.readText() }
-            ?: error("Could not find bundled resource /data/$PRODUCTS_FILE")
+            ?: error("Could not find bundled resource /data/$filename")
         return json.decodeFromString(text)
     }
 
@@ -130,5 +140,6 @@ object PackagingDataStore {
     }
 
     private const val PRODUCTS_FILE = "productPackaging.json"
+    private const val SUFFIX_DEFAULTS_FILE = "packagingSuffixDefaults.json"
     private const val METADATA_FILE = "metadata.json"
 }

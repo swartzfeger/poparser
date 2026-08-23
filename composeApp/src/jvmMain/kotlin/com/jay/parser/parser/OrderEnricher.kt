@@ -111,7 +111,10 @@ class OrderEnricher {
                 )
             }
 
-        val packagingResult = packagingPlanner.calculate(lines)
+        val packagingResult = packagingPlanner.calculate(
+            lines = lines,
+            customerId = resolvedCustomer?.id.orEmpty()
+        )
 
         return ExportOrder(
             sourceFilename = sourceFilename,

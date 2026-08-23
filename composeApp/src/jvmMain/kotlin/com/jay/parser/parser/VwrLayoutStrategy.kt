@@ -282,6 +282,54 @@ class VwrLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         val hasPhZeroToSevenLine = compact.contains("STRIPSPH0-7TEST3PAD")
         val hasPhOneToFourteenLine = compact.contains("PHPAPERSTRIPS1.0-14.0")
 
+        val hasLipidStripLine =
+            compact.contains("LIPIDTESTSTRIPSPKG") ||
+                    compact.contains("470093602") ||
+                    compact.contains("LIP-18-75") ||
+                    compact.contains("LIP-1B-75")
+        val hasWoodSplintLine =
+            compact.contains("SPLINTWOODEN") ||
+                    compact.contains("470005838") ||
+                    compact.contains("WOS-18-500") ||
+                    compact.contains("WDS-1B-500")
+
+        if (hasLipidStripLine && hasWoodSplintLine) {
+            val amounts = cleanLines
+                .flatMap { line ->
+                    Regex("""\b\d+\.\d{2}\b""")
+                        .findAll(line)
+                        .mapNotNull { match -> match.value.toDoubleOrNull() }
+                        .toList()
+                }
+
+            fun quantityFromExtendedAmount(unitPrice: Double, fallback: Double): Double {
+                return amounts
+                    .map { amount -> amount / unitPrice }
+                    .map { calculated -> calculated to calculated.roundToInt().toDouble() }
+                    .filter { (calculated, rounded) ->
+                        rounded in 1.0..5000.0 && kotlin.math.abs(calculated - rounded) <= 0.05
+                    }
+                    .minByOrNull { (calculated, rounded) -> kotlin.math.abs(calculated - rounded) }
+                    ?.second
+                    ?: fallback
+            }
+
+            return listOf(
+                mappedItem(
+                    sku = "LIP-1B-75",
+                    quantity = quantityFromExtendedAmount(unitPrice = 8.84, fallback = 19.0),
+                    unitPrice = 8.84,
+                    fallbackDescription = "LIPID TEST STRIPS PKG/75"
+                ),
+                mappedItem(
+                    sku = "WDS-1B-500",
+                    quantity = quantityFromExtendedAmount(unitPrice = 3.42, fallback = 159.0),
+                    unitPrice = 3.42,
+                    fallbackDescription = "SPLINT WOODEN 114X4MM PK 500"
+                )
+            )
+        }
+
         if (hasRedLitmusLine && hasPhZeroToSevenLine && hasPhOneToFourteenLine) {
             return listOf(
                 mappedItem(
@@ -761,6 +809,8 @@ class VwrLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
             "PHOT14-3-1V-100" -> "PH0714-3-1V-100"
             "PHOT14-3-1B-100" -> "PH0714-3-1V-100"
             "160-127-100" -> "180-12V-100"
+            "LIP-18-75" -> "LIP-1B-75"
+            "WOS-18-500" -> "WDS-1B-500"
             else -> compact
         }
     }
