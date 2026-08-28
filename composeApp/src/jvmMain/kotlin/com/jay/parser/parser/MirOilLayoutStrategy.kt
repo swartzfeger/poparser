@@ -105,6 +105,8 @@ class MirOilLayoutStrategy : BaseLayoutStrategy() {
     }
 
     private fun findShipTo(lines: List<String>): ShipToBlock {
+        findNonMirOilShipTo(lines)?.let { return it }
+
         val joined = lines.joinToString("\n")
 
         val addressLine = lines
@@ -141,6 +143,49 @@ class MirOilLayoutStrategy : BaseLayoutStrategy() {
             zip = cityStateZip.zip
         )
     }
+
+    private fun findNonMirOilShipTo(lines: List<String>): ShipToBlock? {
+        val nameLine = lines.firstOrNull {
+            it.contains("Precision Laboratories, Inc.", ignoreCase = true)
+        } ?: return null
+
+        val shipToName = nameLine
+            .substringAfter("Precision Laboratories, Inc.", missingDelimiterValue = "")
+            .trim()
+        if (shipToName.isBlank() || shipToName.contains("MirOil", ignoreCase = true)) return null
+
+        val nameContinuation = lines
+            .firstOrNull { it.startsWith("415 Airpark Road", ignoreCase = true) }
+            ?.substringAfter("415 Airpark Road", missingDelimiterValue = "")
+            ?.substringBefore("Purchase Invoice No:", missingDelimiterValue = "")
+            ?.trim()
+            ?.takeIf { it.isNotBlank() && !it.containsPhoneOrEmail() }
+
+        val address = lines
+            .firstOrNull { it.contains("orders@preclaboratories.co", ignoreCase = true) }
+            ?.substringAfter("orders@preclaboratories.co", missingDelimiterValue = "")
+            ?.trim()
+            ?.takeIf { STREET_ADDRESS_PATTERN.containsMatchIn(it) }
+
+        val cityMatch = lines
+            .asSequence()
+            .map { it.replace(Regex("""^m\s+""", RegexOption.IGNORE_CASE), "").trim() }
+            .filterNot { it.contains("Cottonwood", ignoreCase = true) }
+            .mapNotNull { CITY_STATE_ZIP_PATTERN.find(it) }
+            .firstOrNull()
+
+        return ShipToBlock(
+            shipToCustomer = listOfNotNull(shipToName, nameContinuation).joinToString(" "),
+            addressLine1 = address,
+            addressLine2 = null,
+            city = cityMatch?.groupValues?.getOrNull(1)?.trim()?.uppercase(),
+            state = cityMatch?.groupValues?.getOrNull(2)?.uppercase(),
+            zip = cityMatch?.groupValues?.getOrNull(3)
+        )
+    }
+
+    private fun String.containsPhoneOrEmail(): Boolean =
+        contains("@") || Regex("""\d{3}\s+\d{3}\s+\d{4}""").containsMatchIn(this)
 
     private data class CityStateZip(
         val city: String?,
@@ -241,36 +286,21 @@ class MirOilLayoutStrategy : BaseLayoutStrategy() {
             val next = cleanItemLine(lines.getOrNull(i + 1).orEmpty())
             val next2 = cleanItemLine(lines.getOrNull(i + 2).orEmpty())
 
-            if (!isMirOilItemLine(line, next, next2)) continue
-
             val sku = findSupplierSku(line, next, next2) ?: continue
-            val quantity = findTotalEachQuantity(line, next, next2) ?: continue
-            val unitPrice = findCasePrice(line, next, next2)
+            val amounts = findItemAmounts(line, next, next2) ?: continue
 
-            val key = "$sku|$quantity|$unitPrice"
+            val key = "$sku|${amounts.totalEachQuantity}|${amounts.casePrice}"
             if (!seen.add(key)) continue
 
             items += ParsedPdfItem(
                 sku = sku,
                 description = null,
-                quantity = quantity,
-                unitPrice = unitPrice
+                quantity = amounts.totalEachQuantity,
+                unitPrice = amounts.casePrice
             )
         }
 
         return items
-    }
-
-    private fun isMirOilItemLine(line: String, next: String, next2: String): Boolean {
-        val window = "$line $next $next2".uppercase()
-
-        if (!window.contains("CHLORINE")) return false
-        if (!window.contains("PRECLAB-145")) return false
-        if (!window.contains("145-500")) return false
-
-        return Regex("""\b\d+(?:\.\d+)?\s+\$?\s*[\d,]+\.\d{2}\s+\$\s*\d+\.\d{2}""")
-            .containsMatchIn(window) ||
-                Regex("""\b(?:500|10000|12000)\b""").containsMatchIn(window)
     }
 
     private fun findSupplierSku(line: String, next: String, next2: String): String? {
@@ -282,66 +312,31 @@ class MirOilLayoutStrategy : BaseLayoutStrategy() {
             .replace(Regex("""\s+"""), " ")
 
         return when {
-            window.contains("145-500V-") && window.contains("100") -> "145-500V-100"
+            window.contains("106-QR5-") && window.contains("500V-100") -> "106-QR5-500V-100"
+            window.contains("CHLORINE") && window.contains("145-500") -> "145-500V-100"
             else -> null
         }
     }
 
-    private fun findTotalEachQuantity(line: String, next: String, next2: String): Double? {
+    private data class ItemAmounts(
+        val totalEachQuantity: Double,
+        val casePrice: Double
+    )
+
+    private fun findItemAmounts(line: String, next: String, next2: String): ItemAmounts? {
         val window = "$line $next $next2"
             .replace(",", "")
             .replace(Regex("""\s+"""), " ")
             .trim()
 
-        /*
-         * Normal extracted line examples:
-         * 500 20.00 $ 463.50 $ 0.93 10000 $ 9,270.00
-         * 500 1.00 $ 463.50 $ 0.93 500 $ 463.50
-         * 500 24.00 $ 463.50 $ 0.93 12000 $ 11124.00
-         *
-         * We intentionally parse Total QTY Each required, not Case Qty,
-         * because OrderEnricher's UOM logic should divide 145-500V-100 by 500
-         * for UOM customers.
-         */
-        Regex(
-            """\b500\s+\d+(?:\.\d+)?\s+\$?\s*[\d.]+\s+\$\s*\d+\.\d{2}\s+(\d+)\s+\$?\s*[\d.]+""",
-            RegexOption.IGNORE_CASE
-        ).find(window)
-            ?.groupValues
-            ?.getOrNull(1)
-            ?.toDoubleOrNull()
-            ?.let { return it }
+        val match = ITEM_AMOUNTS_PATTERN.find(window) ?: return null
+        val casePrice = match.groupValues[2].toDoubleOrNull() ?: return null
+        val totalEachQuantity = match.groupValues[4].toDoubleOrNull() ?: return null
 
-        /*
-         * Fallback: if the page text is badly reflowed, infer from case qty.
-         */
-        val caseQty = Regex("""\b500\s+(\d+(?:\.\d+)?)\s+\$?\s*463\.50""", RegexOption.IGNORE_CASE)
-            .find(window)
-            ?.groupValues
-            ?.getOrNull(1)
-            ?.toDoubleOrNull()
-
-        if (caseQty != null) {
-            return caseQty * 500.0
-        }
-
-        return null
-    }
-
-    private fun findCasePrice(line: String, next: String, next2: String): Double? {
-        val window = "$line $next $next2"
-            .replace(",", "")
-            .replace(Regex("""\s+"""), " ")
-            .trim()
-
-        Regex("""\b500\s+\d+(?:\.\d+)?\s+\$?\s*([\d.]+)\s+\$\s*\d+\.\d{2}""", RegexOption.IGNORE_CASE)
-            .find(window)
-            ?.groupValues
-            ?.getOrNull(1)
-            ?.toDoubleOrNull()
-            ?.let { return it }
-
-        return null
+        return ItemAmounts(
+            totalEachQuantity = totalEachQuantity,
+            casePrice = casePrice
+        )
     }
 
     private fun cleanItemLine(value: String): String {
@@ -353,5 +348,17 @@ class MirOilLayoutStrategy : BaseLayoutStrategy() {
             .replace("§", "$")
             .replace(Regex("""\s+"""), " ")
             .trim()
+    }
+
+    private companion object {
+        val STREET_ADDRESS_PATTERN = Regex("""^\d+\s+.+""")
+        val CITY_STATE_ZIP_PATTERN = Regex(
+            """^(.+?)\s+([A-Z]{2})\s+(\d{5})(?:-\d{4})?(?:\s+United States)?$""",
+            RegexOption.IGNORE_CASE
+        )
+        val ITEM_AMOUNTS_PATTERN = Regex(
+            """\b500\s+(\d+(?:\.\d+)?)\s+\$?\s*(\d+(?:\.\d+)?)\s+\$?\s*(\d+(?:\.\d+)?)\s+(\d+)\s+\$?\s*(\d+(?:\.\d+)?)""",
+            RegexOption.IGNORE_CASE
+        )
     }
 }

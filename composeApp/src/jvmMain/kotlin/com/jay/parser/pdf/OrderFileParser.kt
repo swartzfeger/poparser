@@ -12,6 +12,7 @@ class OrderFileParser(
     private val ocrPdfTextExtractor: OcrPdfTextExtractor = OcrPdfTextExtractor(),
     private val pdfFieldParser: PdfFieldParser = PdfFieldParser(),
     private val technosWordParser: TechnosWordParser = TechnosWordParser(),
+    private val producePackagingWordParser: ProducePackagingWordParser = ProducePackagingWordParser(),
     private val summitSupplyExcelParser: SummitSupplyExcelParser = SummitSupplyExcelParser(),
     private val precisionEuropeExcelParser: PrecisionEuropeExcelParser = PrecisionEuropeExcelParser(),
     private val flowChemExcelParser: FlowChemExcelParser = FlowChemExcelParser(),
@@ -26,6 +27,7 @@ class OrderFileParser(
             "pdf" -> parsePdf(file)
             "xlsx" -> parseExcel(file)
             "doc" -> listOf(technosWordParser.parse(file))
+            "docx" -> listOf(producePackagingWordParser.parse(file))
             "txt" -> parseText(file)
             else -> error("Unsupported file type: ${file.extension}")
         }
@@ -44,10 +46,11 @@ class OrderFileParser(
         val extractedLines = pdfTextExtractor.extractLines(file)
         val joinedNative = extractedLines.joinToString("\n") { it.text }
         val nativeLooksCorrupted = looksLikeCorruptedTextLayer(extractedLines)
+        val isCleanFisherOrderConfirmation = looksLikeCleanFisherOrderConfirmation(joinedNative)
 
         val preOcrCandidateLines = if (
             nativeLooksCorrupted ||
-            joinedNative.contains("FISHER", true) ||
+            (!isCleanFisherOrderConfirmation && joinedNative.contains("FISHER", true)) ||
             file.name.contains("FAX", true) ||
             file.nameWithoutExtension.matches(Regex("""\d{6,8}"""))
         ) {
@@ -87,7 +90,9 @@ class OrderFileParser(
 
         val linesToProcess = when {
             isFisher -> {
-                if (preOcrCandidateLines.isNotEmpty()) {
+                if (isCleanFisherOrderConfirmation) {
+                    extractedLines
+                } else if (preOcrCandidateLines.isNotEmpty()) {
                     preOcrCandidateLines
                 } else {
                     ocrPdfTextExtractor.extractLines(file)
@@ -168,6 +173,18 @@ class OrderFileParser(
         }
 
         return parsedOrders
+    }
+
+    private fun looksLikeCleanFisherOrderConfirmation(text: String): Boolean {
+        val normalized = text.uppercase()
+            .replace(Regex("""\s+"""), " ")
+
+        return normalized.contains("ORDER CONFIRMATION") &&
+                normalized.contains("PRECISION LABORATORIES") &&
+                normalized.contains("FISHER SCIENTIFIC CO") &&
+                normalized.contains("CUSTOMER ID") &&
+                normalized.contains("PRICE") &&
+                normalized.contains("EXTENSION")
     }
 
     private fun looksLikeCorruptedTextLayer(lines: List<PdfLine>): Boolean {

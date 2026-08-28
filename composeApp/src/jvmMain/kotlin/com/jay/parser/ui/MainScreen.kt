@@ -121,6 +121,7 @@ fun FrameWindowScope.MainScreen(
                 it.extension.equals("pdf", ignoreCase = true) ||
                         it.extension.equals("xlsx", ignoreCase = true) ||
                         it.extension.equals("doc", ignoreCase = true) ||
+                        it.extension.equals("docx", ignoreCase = true) ||
                         it.extension.equals("txt", ignoreCase = true)
             }
             .filterNot { it.absolutePath in existing }
@@ -601,7 +602,7 @@ private fun HeaderSection() {
             fontWeight = FontWeight.SemiBold
         )
         Text(
-            text = "Import PDF, XLSX, DOC, or TXT purchase orders, extract customer and item data, and export Sage-ready CSV.",
+            text = "Import PDF, XLSX, DOC, DOCX, or TXT purchase orders, extract customer and item data, and export Sage-ready CSV.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.secondary
         )
@@ -637,7 +638,7 @@ private fun FilePickerBanner(isDragOver: Boolean) {
                 ) {
                     Text(
                         text = if (isDragOver) {
-                            "Drop PDF, XLSX, DOC, or TXT files here"
+                            "Drop PDF, XLSX, DOC, DOCX, or TXT files here"
                         } else {
                             "Use Choose Files or drag files here"
                         },
@@ -655,7 +656,7 @@ private fun FilePickerBanner(isDragOver: Boolean) {
                         color = MaterialTheme.colorScheme.secondary
                     )
                     Text(
-                        text = "PDF, XLSX, legacy Word DOC, and plain-text purchase orders supported",
+                        text = "PDF, XLSX, Word DOC/DOCX, and plain-text purchase orders supported",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.secondary
                     )

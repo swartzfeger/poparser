@@ -54,16 +54,22 @@ class FisherScientificCoLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
     override fun parse(lines: List<String>): ParsedPdfFields {
         val textLines = nonBlankLines(lines)
         val fullText = textLines.joinToString("\n").uppercase()
+        val isOrderConfirmation = isCleanOrderConfirmation(fullText)
 
-        val shipToBlock = extractShipToBlock(textLines)
-        val primaryAddressData = resolveAddressFromShipToBlock(shipToBlock)
-            ?: resolveAddressFromStreet(shipToBlock ?: fullText)
-            ?: emptyMap()
-
-        val addressData = if (primaryAddressData["addressLine1"].isNullOrBlank()) {
-            resolveAddressFromStreet(fullText) ?: primaryAddressData
+        val addressData = if (isOrderConfirmation) {
+            // This format has a blank Ship To column. The visible Pittsburgh block is Sold To.
+            emptyMap()
         } else {
-            primaryAddressData
+            val shipToBlock = extractShipToBlock(textLines)
+            val primaryAddressData = resolveAddressFromShipToBlock(shipToBlock)
+                ?: resolveAddressFromStreet(shipToBlock ?: fullText)
+                ?: emptyMap()
+
+            if (primaryAddressData["addressLine1"].isNullOrBlank()) {
+                resolveAddressFromStreet(fullText) ?: primaryAddressData
+            } else {
+                primaryAddressData
+            }
         }
 
         return ParsedPdfFields(
@@ -76,8 +82,54 @@ class FisherScientificCoLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
             state = addressData["state"],
             zip = addressData["zip"],
             terms = null,
-            items = findItems(textLines)
+            items = if (isOrderConfirmation) {
+                findOrderConfirmationItems(textLines)
+            } else {
+                findItems(textLines)
+            }
         )
+    }
+
+    private fun isCleanOrderConfirmation(text: String): Boolean {
+        val normalized = text.uppercase()
+            .replace(Regex("""\s+"""), " ")
+
+        return normalized.contains("ORDER CONFIRMATION") &&
+                normalized.contains("CUSTOMER ID") &&
+                normalized.contains("FISHER SCIENTIFIC CO") &&
+                normalized.contains("QTY") &&
+                normalized.contains("ITEM") &&
+                normalized.contains("PRICE") &&
+                normalized.contains("EXTENSION")
+    }
+
+    private fun findOrderConfirmationItems(lines: List<String>) = buildList {
+        val seen = mutableSetOf<String>()
+
+        lines.forEach { rawLine ->
+            val line = rawLine
+                .replace("—", "-")
+                .replace("–", "-")
+                .replace(Regex("""\s+"""), " ")
+                .trim()
+            val match = ORDER_CONFIRMATION_ITEM_PATTERN.matchEntire(line) ?: return@forEach
+            val quantity = match.groupValues[1].replace(",", "").toDoubleOrNull() ?: return@forEach
+            val sku = match.groupValues[2].uppercase()
+            val unitPrice = match.groupValues[4].replace(",", "").toDoubleOrNull() ?: return@forEach
+            val key = "$sku|$quantity|$unitPrice"
+            if (!seen.add(key)) return@forEach
+
+            add(
+                item(
+                    sku = sku,
+                    description = ItemMapper.getItemDescription(sku).ifBlank {
+                        match.groupValues[3].trim()
+                    },
+                    quantity = quantity,
+                    unitPrice = unitPrice
+                )
+            )
+        }
     }
 
     private fun extractShipToBlock(lines: List<String>): String? {
@@ -610,6 +662,11 @@ class FisherScientificCoLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
     }
 
     private val unitTokens = setOf("PK", "PE", "PEK", "EA", "CS", "BX", "PR", "FE")
+
+    private val ORDER_CONFIRMATION_ITEM_PATTERN = Regex(
+        """^(\d+(?:\.\d+)?)\s+([A-Z0-9]+(?:-[A-Z0-9]+){2,})\s+(.+?)\s+([\d,]+\.\d{2,3})\s+([\d,]+\.\d{2})$""",
+        RegexOption.IGNORE_CASE
+    )
 
     private val knownOcrErrors = mapOf(
         "130-129-100" to "120-12V-100",
