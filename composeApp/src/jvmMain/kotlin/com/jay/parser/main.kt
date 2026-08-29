@@ -34,7 +34,7 @@ import java.io.File
 import javax.swing.SwingUtilities
 
 private const val APP_NAME = "PO Parser"
-private const val APP_VERSION = "1.7.4"
+private const val APP_VERSION = "1.7.5"
 private const val APP_VENDOR = "Jay Swartzfeger"
 private const val APP_COPYRIGHT = "© 2026 Precision Laboratories"
 
@@ -63,6 +63,7 @@ fun main() = application {
         var noShipVia by remember { mutableStateOf(false) }
         var noShipTo by remember { mutableStateOf(false) }
         var noInvoiceNote by remember { mutableStateOf(false) }
+        var roundUpToNearestCent by remember { mutableStateOf(true) }
         var masterListMessage by remember { mutableStateOf("") }
         var masterListImportResult by remember { mutableStateOf<MasterDataImportResult?>(null) }
         var masterListIsImporting by remember { mutableStateOf(false) }
@@ -76,7 +77,8 @@ fun main() = application {
                     MainScreen(
                         noShipVia = noShipVia,
                         noShipTo = noShipTo,
-                        noInvoiceNote = noInvoiceNote
+                        noInvoiceNote = noInvoiceNote,
+                        roundUpToNearestCent = roundUpToNearestCent
                     )
 
                     Column(
@@ -206,6 +208,23 @@ fun main() = application {
                                             Text("No Box Weights and Dimensions Needed")
                                             Text(
                                                 text = "No box weights and dimensions will be exported.",
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                    }
+
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                    ) {
+                                        Switch(
+                                            checked = roundUpToNearestCent,
+                                            onCheckedChange = { roundUpToNearestCent = it }
+                                        )
+                                        Column {
+                                            Text("Round Up to Nearest Cent")
+                                            Text(
+                                                text = "Round three-decimal unit prices ending in 5 to the next cent before calculating totals.",
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
                                         }

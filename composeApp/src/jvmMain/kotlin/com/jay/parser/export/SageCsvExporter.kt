@@ -42,9 +42,17 @@ class SageCsvExporter {
         orderDate: LocalDate = LocalDate.now(),
         noShipVia: Boolean = true,
         noShipTo: Boolean = true,
-        noInvoiceNote: Boolean = false
+        noInvoiceNote: Boolean = false,
+        roundUpToNearestCent: Boolean = true
     ) {
-        val csv = buildCsv(orders, orderDate, noShipVia, noShipTo, noInvoiceNote)
+        val csv = buildCsv(
+            orders = orders,
+            orderDate = orderDate,
+            noShipVia = noShipVia,
+            noShipTo = noShipTo,
+            noInvoiceNote = noInvoiceNote,
+            roundUpToNearestCent = roundUpToNearestCent
+        )
         val bytes = encodeWindows1252(csv)
         outputFile.writeBytes(bytes)
     }
@@ -54,7 +62,8 @@ class SageCsvExporter {
         orderDate: LocalDate = LocalDate.now(),
         noShipVia: Boolean = true,
         noShipTo: Boolean = true,
-        noInvoiceNote: Boolean = false
+        noInvoiceNote: Boolean = false,
+        roundUpToNearestCent: Boolean = true
     ): String {
         val rows = mutableListOf<List<String>>()
         rows += header
@@ -64,8 +73,12 @@ class SageCsvExporter {
             val dateString = orderDate.format(DateTimeFormatter.ofPattern("M/d/yyyy"))
 
             order.lines.forEachIndexed { index, line ->
-                val unitPrice = negativeMoney(line.unitPriceResolved)
-                val amount = negativeMoney(line.unitPriceResolved * line.quantityForExport)
+                val resolvedUnitPrice = adjustUnitPriceForExport(
+                    value = line.unitPriceResolved,
+                    roundUpToNearestCent = roundUpToNearestCent
+                )
+                val unitPrice = negativeMoney(resolvedUnitPrice)
+                val amount = negativeMoney(resolvedUnitPrice * line.quantityForExport)
 
                 val shipToName = if (noShipTo) "" else order.shipToCustomer.orEmpty()
                 val shipToAddressLine1 = if (noShipTo) "" else order.addressLine1.orEmpty()
@@ -128,6 +141,23 @@ class SageCsvExporter {
         return BigDecimal.valueOf(value)
             .setScale(3, RoundingMode.HALF_UP)
             .toPlainString()
+    }
+
+    private fun adjustUnitPriceForExport(
+        value: Double,
+        roundUpToNearestCent: Boolean
+    ): Double {
+        if (!roundUpToNearestCent) return value
+
+        val decimal = BigDecimal.valueOf(value).stripTrailingZeros()
+        val hasExactlyThreeDecimalsEndingInFive =
+            decimal.scale() == 3 && decimal.unscaledValue().abs().mod(BigDecimal.TEN.toBigInteger()).toInt() == 5
+
+        return if (hasExactlyThreeDecimalsEndingInFive) {
+            decimal.setScale(2, RoundingMode.HALF_UP).toDouble()
+        } else {
+            value
+        }
     }
 
     private fun negativeMoney(value: Double): Double {

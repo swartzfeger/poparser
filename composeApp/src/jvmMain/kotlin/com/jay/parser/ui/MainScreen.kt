@@ -81,7 +81,8 @@ data class UiState(
 fun FrameWindowScope.MainScreen(
     noShipVia: Boolean,
     noShipTo: Boolean,
-    noInvoiceNote: Boolean
+    noInvoiceNote: Boolean,
+    roundUpToNearestCent: Boolean
 ) {
     val queuedFiles = remember { mutableStateListOf<File>() }
     var parsedOrders by remember { mutableStateOf<List<ExportOrder>>(emptyList()) }
@@ -526,7 +527,8 @@ fun FrameWindowScope.MainScreen(
                                             orderDate = LocalDate.now(),
                                             noShipVia = noShipVia,
                                             noShipTo = noShipTo,
-                                            noInvoiceNote = noInvoiceNote
+                                            noInvoiceNote = noInvoiceNote,
+                                            roundUpToNearestCent = roundUpToNearestCent
                                         )
 
                                         uiState = UiState(
