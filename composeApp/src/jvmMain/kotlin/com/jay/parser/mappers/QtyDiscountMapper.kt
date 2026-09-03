@@ -42,13 +42,15 @@ object QtyDiscountMapper {
         val normalizedSku = normalizeSku(sku)
         val normalizedPriceLevel = normalize(priceLevel)
 
-        val rules = MasterDataStore.current().qtyDiscountRules
+        val masterData = MasterDataStore.current()
+        val itemQtyDiscountId = normalizeSku(masterData.itemCatalog.qtyDiscountIds[normalizedSku])
+        val rules = masterData.qtyDiscountRules
 
         val customerSpecificMatch = rules
             .filterNot { isAllCustomers(it.customerId) }
             .filter { rule ->
                 normalize(rule.customerId) == normalizedCustomerId &&
-                        rule.matchesSku(normalizedSku) &&
+                        rule.matchesSkuOrDiscountId(normalizedSku, itemQtyDiscountId) &&
                         rule.matchesPriceLevel(normalizedPriceLevel)
             }
             .bestRuleFor(quantity)
@@ -56,14 +58,17 @@ object QtyDiscountMapper {
         val globalMatch = rules
             .filter { isAllCustomers(it.customerId) }
             .filter { rule ->
-                rule.matchesSku(normalizedSku) &&
+                rule.matchesSkuOrDiscountId(normalizedSku, itemQtyDiscountId) &&
                         rule.matchesPriceLevel(normalizedPriceLevel)
             }
             .bestRuleFor(quantity)
 
         val match = customerSpecificMatch ?: globalMatch ?: return QtyDiscountResult(unitPrice, 0.0, null)
 
-        val discountedPrice = roundPrice(unitPrice * (1.0 - match.breakPoint.discountPercent))
+        val discountedPrice = roundDiscountedPrice(
+            unitPrice = unitPrice,
+            discountPercent = match.breakPoint.discountPercent
+        )
 
         return QtyDiscountResult(
             unitPrice = discountedPrice,
@@ -92,9 +97,16 @@ object QtyDiscountMapper {
             )
     }
 
-    private fun MasterQtyDiscountRule.matchesSku(normalizedSku: String): Boolean {
+    private fun MasterQtyDiscountRule.matchesSkuOrDiscountId(
+        normalizedSku: String,
+        itemQtyDiscountId: String
+    ): Boolean {
         return normalizeSku(itemId) == normalizedSku ||
-                normalizeSku(qtyDiscountId) == normalizedSku
+                normalizeSku(qtyDiscountId) == normalizedSku ||
+                (
+                        itemQtyDiscountId.isNotBlank() &&
+                                normalizeSku(qtyDiscountId) == itemQtyDiscountId
+                        )
     }
 
     private fun MasterQtyDiscountRule.matchesPriceLevel(normalizedPriceLevel: String): Boolean {
@@ -167,8 +179,9 @@ object QtyDiscountMapper {
         return normalize(customerId) in ALL_CUSTOMER_IDS
     }
 
-    private fun roundPrice(value: Double): Double {
-        return BigDecimal.valueOf(value)
+    private fun roundDiscountedPrice(unitPrice: Double, discountPercent: Double): Double {
+        return BigDecimal.valueOf(unitPrice)
+            .multiply(BigDecimal.ONE.subtract(BigDecimal.valueOf(discountPercent)))
             .setScale(3, RoundingMode.HALF_UP)
             .toDouble()
     }

@@ -11,15 +11,15 @@ class SchoolSpecialtyLayoutStrategyTest {
             "School Specialty LLC 8992411 1 088 16-JUL-26 1 of 1",
             "132 160-3645 EACH 16-JUL-26 \$1.1000 \$145.20 1",
             "165-12V-100 PAPERS PTC TASTE PK/100",
-            "108 160-3645 EACH 16-JUL-26 \$1.1000 \$118.80 2",
+            "36 160-3645 EACH 16-JUL-26 \$1.1000 \$39.60 2",
             "165-12V-100 PAPERS PTC TASTE PK/100"
         )
 
         val order = OrderEnricher().enrich("ATT8992411.pdf", parsed)
 
         assertEquals("8992411", order.orderNumber)
-        assertEquals(listOf(132.0, 108.0), order.lines.map { it.quantityRaw })
-        assertEquals(listOf(11.0, 9.0), order.lines.map { it.quantityForExport })
+        assertEquals(listOf(132.0, 36.0), order.lines.map { it.quantityRaw })
+        assertEquals(listOf(11.0, 3.0), order.lines.map { it.quantityForExport })
     }
 
     @Test
@@ -54,6 +54,22 @@ class SchoolSpecialtyLayoutStrategyTest {
         val order = OrderEnricher().enrich("ATT8991216.pdf", parsed)
 
         assertEquals(listOf(24.0, 250.0, 14.0), order.lines.map { it.quantityForExport })
+    }
+
+    @Test
+    fun keepsPrintedQuantityWhenPoAlreadyUsesFullPackPrice() {
+        val parsed = parseSchoolSpecialtyItems(
+            "School Specialty LLC 9053989 1 075 27-AUG-26 1 of 1",
+            "144 569867 EACH 28-SEP-26 \$8.6500 \$1,245.60 1",
+            "180-12V-100 LITMUS TEST PAPER BLUE VIALS/100 PK/12",
+            "11 2134798 EACH 22-SEP-26 \$13.2500 \$145.75 3",
+            "135-12V-100 PH PH TEST PAPERS 100 STRIPS PK12"
+        )
+
+        val order = OrderEnricher().enrich("ATT9053989.pdf", parsed)
+
+        assertEquals(listOf(144.0, 11.0), order.lines.map { it.quantityRaw })
+        assertEquals(listOf(144.0, 11.0), order.lines.map { it.quantityForExport })
     }
 
     private fun parseSchoolSpecialtyItems(vararg itemLines: String) =

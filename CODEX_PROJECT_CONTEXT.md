@@ -1,6 +1,6 @@
 # PO Parser - Codex Project Context
 
-Last updated: 2026-08-20
+Last updated: 2026-09-02
 
 ## How To Use This File
 
@@ -193,6 +193,12 @@ Bundled defaults live in:
 The UI's **Update Master List** dialog imports a client XLSX file and writes JSON
 overrides outside the installed application. Imported overrides take precedence
 over bundled resources. Existing imports are backed up before replacement.
+
+The Item Master List's `Qty Discount ID` column is retained in `ItemCatalog`.
+`QtyDiscountMapper` uses that per-SKU ID to connect actual items to grouped
+rules on the Qty Discounts sheet. This is required for aliases such as
+Bartovation quires, `PAA-1000-1V-50`, and the SPC chlorine SKUs. Older imported
+item JSON files that predate this field inherit the bundled ID mappings.
 
 Prices support three decimal places. JSON numbers omit unnecessary trailing
 zeroes, so `265.250` may be represented as `265.25` without losing value.

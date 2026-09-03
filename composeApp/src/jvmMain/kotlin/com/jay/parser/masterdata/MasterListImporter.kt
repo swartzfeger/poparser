@@ -47,7 +47,8 @@ class MasterListImporter {
                     bundle = MasterDataBundle(
                         itemCatalog = ItemCatalog(
                             prices = itemData.prices,
-                            descriptions = itemData.descriptions
+                            descriptions = itemData.descriptions,
+                            qtyDiscountIds = itemData.qtyDiscountIds
                         ),
                         customers = customers,
                         glAccounts = itemData.glAccounts,
@@ -117,6 +118,7 @@ class MasterListImporter {
         val descriptions = linkedMapOf<String, String>()
         val prices = linkedMapOf<String, Map<String, Double>>()
         val glAccounts = linkedMapOf<String, String>()
+        val qtyDiscountIds = linkedMapOf<String, String>()
 
         for (row in sheet.rowsAfterHeader()) {
             val sku = row.stringAt(headers["Item ID"]).normalizedSku()
@@ -130,6 +132,11 @@ class MasterListImporter {
             val salesAcct = row.stringAt(headers["Sales Acct"]).normalizedAccount()
             if (salesAcct.isNotBlank()) {
                 glAccounts[sku] = salesAcct
+            }
+
+            val qtyDiscountId = row.stringAt(headers["Qty Discount ID"]).normalizedSku()
+            if (qtyDiscountId.isNotBlank()) {
+                qtyDiscountIds[sku] = qtyDiscountId
             }
 
             val rowPrices = linkedMapOf<String, Double>()
@@ -153,7 +160,8 @@ class MasterListImporter {
         return ParsedItemData(
             descriptions = descriptions,
             prices = prices,
-            glAccounts = glAccounts
+            glAccounts = glAccounts,
+            qtyDiscountIds = qtyDiscountIds
         )
     }
 
@@ -327,7 +335,8 @@ class MasterListImporter {
     private data class ParsedItemData(
         val descriptions: Map<String, String>,
         val prices: Map<String, Map<String, Double>>,
-        val glAccounts: Map<String, String>
+        val glAccounts: Map<String, String>,
+        val qtyDiscountIds: Map<String, String>
     )
 
     private companion object {

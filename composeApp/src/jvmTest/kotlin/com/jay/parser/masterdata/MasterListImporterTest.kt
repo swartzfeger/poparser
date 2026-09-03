@@ -24,6 +24,7 @@ class MasterListImporterTest {
         assertEquals(12.345, bundle.itemCatalog.prices["ABC-1V-50"]?.get("DISTRIBUTOR"))
         assertEquals(18.519, bundle.itemCatalog.prices["ABC-1V-50"]?.get("DIST + 50%"))
         assertEquals(12.3, bundle.itemCatalog.prices["ABC-1V-50"]?.get("DIST + 100%"))
+        assertEquals("ABC", bundle.itemCatalog.qtyDiscountIds["ABC-1V-50"])
 
         assertEquals(1, bundle.qtyDiscountRules.size)
         val discount = bundle.qtyDiscountRules.first()
@@ -48,6 +49,8 @@ class MasterListImporterTest {
         assertTrue(json.contains("\"DISTRIBUTOR\": 12.345"))
         assertTrue(json.contains("\"DIST + 50%\": 18.519"))
         assertTrue(json.contains("\"DIST + 100%\": 12.300"))
+        assertTrue(json.contains("\"qtyDiscountIds\""))
+        assertTrue(json.contains("\"ABC-1V-50\": \"ABC\""))
     }
 
     private fun createWorkbook(): File {

@@ -80,10 +80,21 @@ object MasterDataStore {
 
     private fun loadBundle(): MasterDataBundle {
         return MasterDataBundle(
-            itemCatalog = loadJsonOverrideOrBundled(ITEMS_FILE),
+            itemCatalog = loadItemCatalog(),
             customers = loadJsonOverrideOrBundled(CUSTOMERS_FILE),
             glAccounts = loadJsonOverrideOrBundled(GL_ACCOUNTS_FILE),
             qtyDiscountRules = loadQtyDiscountRules()
+        )
+    }
+
+    private fun loadItemCatalog(): ItemCatalog {
+        val bundled = loadBundledJson<ItemCatalog>(ITEMS_FILE)
+        val overrideFile = dataDir.resolve(ITEMS_FILE)
+        if (!overrideFile.isFile) return bundled
+
+        val imported = json.decodeFromString<ItemCatalog>(overrideFile.readText())
+        return imported.copy(
+            qtyDiscountIds = bundled.qtyDiscountIds + imported.qtyDiscountIds
         )
     }
 
@@ -93,6 +104,10 @@ object MasterDataStore {
             return json.decodeFromString(overrideFile.readText())
         }
 
+        return loadBundledJson(filename)
+    }
+
+    private inline fun <reified T> loadBundledJson(filename: String): T {
         val resourcePath = "/data/$filename"
         val text = object {}.javaClass.getResourceAsStream(resourcePath)
             ?.bufferedReader()
@@ -138,6 +153,13 @@ object MasterDataStore {
             catalog.descriptions.entries.forEachIndexed { descriptionIndex, (sku, description) ->
                 append("    ${quoteJson(sku)}: ${quoteJson(description)}")
                 if (descriptionIndex < catalog.descriptions.size - 1) append(",")
+                append("\n")
+            }
+            append("  },\n")
+            append("  \"qtyDiscountIds\": {\n")
+            catalog.qtyDiscountIds.entries.forEachIndexed { index, (sku, qtyDiscountId) ->
+                append("    ${quoteJson(sku)}: ${quoteJson(qtyDiscountId)}")
+                if (index < catalog.qtyDiscountIds.size - 1) append(",")
                 append("\n")
             }
             append("  }\n")

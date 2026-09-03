@@ -159,7 +159,10 @@ class TsaInvoiceLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
 
     private fun findAccountCityStateZip(lines: List<String>): ParsedCityStateZip? {
         val pattern = Regex(
-            """([A-Za-z][A-Za-z .'-]+),\s*([A-Z]{2})\s*(\d{5}(?:-\d{4})?)""",
+            // WooCommerce can repeat the state when the billing city/state and
+            // ship-to columns collapse into one extracted row, for example:
+            // "ELPASO,TX,TX79925 6701ConvairRd.".
+            """([A-Za-z][A-Za-z .'-]+),\s*([A-Z]{2})(?:\s*,\s*\2)?\s*(\d{5}(?:-\d{4})?)""",
             RegexOption.IGNORE_CASE
         )
 
@@ -276,7 +279,7 @@ class TsaInvoiceLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
     private fun extractStreetCandidatesWithRanges(line: String): List<TextMatch> {
         val normalized = normalizeHumanText(line)
         val suffixPattern =
-            """(?:Rd|Road|Ave|Avenue|Blvd|Boulevard|Dr|Drive|Parkway|Pkwy|Way|Court|Ct|Hwy|Highway)\.?""" +
+            """(?:Rd|Road|Ave|Avenue|Blvd|Boulevard|Dr|Drive|Parkway|Pkwy|Way|Circle|Cir|Court|Ct|Hwy|Highway)\.?""" +
                     """(?:\s+(?:N|S|E|W|North|South|East|West|NE|NW|SE|SW))?"""
         val streetStartRegex = Regex("""\b\d{1,6}\b""")
         val streetFromStartRegex = Regex(

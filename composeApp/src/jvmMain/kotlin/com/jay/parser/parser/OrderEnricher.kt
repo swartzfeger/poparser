@@ -51,14 +51,6 @@ class OrderEnricher {
                     }
                 }
 
-                val rawQty = item.quantity ?: 0.0
-                val exportQty = getUomAdjustedQuantity(
-                    sku = sku,
-                    rawQuantity = rawQty,
-                    sourceUom = item.uom,
-                    resolvedCustomer = resolvedCustomer
-                )
-
                 val masterUnitPrice = ItemMapper.getItemPrice(
                     sku = sku,
                     priceLevel = resolvedCustomer?.priceLevel.orEmpty()
@@ -73,6 +65,16 @@ class OrderEnricher {
                 } else {
                     masterUnitPrice
                 }
+
+                val rawQty = item.quantity ?: 0.0
+                val exportQty = getUomAdjustedQuantity(
+                    sku = sku,
+                    rawQuantity = rawQty,
+                    sourceUom = item.uom,
+                    sourceUnitPrice = item.unitPrice,
+                    mappedUnitPrice = mappedUnitPrice,
+                    resolvedCustomer = resolvedCustomer
+                )
 
                 val uomAdjustedUnitPrice = getUomAdjustedUnitPrice(
                     sku = sku,
@@ -154,6 +156,8 @@ class OrderEnricher {
         sku: String,
         rawQuantity: Double,
         sourceUom: String?,
+        sourceUnitPrice: Double?,
+        mappedUnitPrice: Double,
         resolvedCustomer: ResolvedCustomer?
     ): Double {
         val customerId = resolvedCustomer?.id?.uppercase().orEmpty()
@@ -220,6 +224,34 @@ class OrderEnricher {
 
         if (!isUomCustomer(customerId)) {
             return rawQuantity
+        }
+
+        /*
+         * School Specialty mixes pricing conventions on the same PO layout.
+         * Some rows price individual vials, so the printed quantity must be
+         * divided by the SKU vial count. Other rows already use the sellable
+         * pack price and quantity. Compare the PO price both ways with the
+         * customer's master price and use the convention that fits best.
+         */
+        if (customerId == "SCHOOL SPECIALTY") {
+            val divisor = getSkuUomDivisor(normalizedSku)
+            if (divisor == null || divisor <= 1) return rawQuantity
+
+            if (sourceUnitPrice != null && sourceUnitPrice > 0.0 && mappedUnitPrice > 0.0) {
+                val directPriceDifference = kotlin.math.abs(sourceUnitPrice - mappedUnitPrice)
+                val convertedPriceDifference = kotlin.math.abs(
+                    sourceUnitPrice * divisor - mappedUnitPrice
+                )
+
+                return if (directPriceDifference <= convertedPriceDifference) {
+                    rawQuantity
+                } else {
+                    rawQuantity / divisor
+                }
+            }
+
+            // Preserve the previous behavior when either price is unavailable.
+            return rawQuantity / divisor
         }
 
         // Jayhawk WI is the exception: keep ordered quantity, divide mapped price instead.
