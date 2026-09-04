@@ -1,6 +1,6 @@
 # PO Parser - Codex Project Context
 
-Last updated: 2026-09-02
+Last updated: 2026-09-03
 
 ## How To Use This File
 
@@ -19,7 +19,7 @@ meaningful architectural, workflow, or product changes.
 - Repository: https://github.com/swartzfeger/poparser
 - Local path used on the Mac mini: `/Users/jay/dev/kotlin/poparser`
 - Current branch: `main`
-- Current version: `1.7.2`
+- Current version: `1.7.6`
 - Code baseline audited for this handoff: `df340dc`
 - Technology: Kotlin Multiplatform, Compose Desktop, JVM 21
 - Gradle Wrapper: `8.14.4`
@@ -129,7 +129,7 @@ matches Windows output.
 
 ## Current Layout Coverage
 
-`StrategyRegistry` currently registers 125 customer layout strategies. Inspect
+`StrategyRegistry` currently registers 127 customer layout strategies. Inspect
 the registry rather than relying on an old customer list in a chat transcript.
 
 Notable layouts added or substantially revised since the original August 4
@@ -139,6 +139,16 @@ Products, Cambridge Environmental, Franz Ziel, Gasco Industrial, McCoy Health
 Science, Rideau Group, St Marks Powder, Summit Supply, Technos DOC, Uni-Kem,
 Curis System, Daigger, George's, Laboratory Sales, United Scientific, Micro
 Essential Laboratory, VWR, Jayhawk, Ecolab/Nalco, and Pinetree.
+
+Hagnos Hygiene uses a clean Excel-generated PDF whose extracted bill-to and
+ship-to columns collapse onto shared text rows. Its dedicated strategy separates
+the repeated Taiwanese address, retains the ship-to contact, and parses the
+`US$` item rows with extension validation.
+
+Science Takeout uses a clean PDF with shipping and billing addresses extracted
+side by side. Its dedicated strategy selects the left-hand shipping address,
+uses the `@sciencetakeout.com` identity as a narrow fingerprint, and validates
+each item row against its extended amount.
 
 Ecolab and Nalco ship-to parsing must remain dynamic. Known addresses may help
 normalization, but new addresses and small variations such as a different door
@@ -204,9 +214,11 @@ Prices support three decimal places. JSON numbers omit unnecessary trailing
 zeroes, so `265.250` may be represented as `265.25` without losing value.
 
 The bundled defaults were most recently audited against **Master List
-08.18.26.xlsx** for version 1.7.2. That workbook's only resulting core-data
-change was VIKING PURE terms from `Prepaid` to `Net 30 Days`; generated item and
-GL data matched the existing bundled files.
+09.01.26.xlsx** for version 1.7.6. Item descriptions, prices, GL accounts,
+quantity-discount IDs, and quantity-discount rules matched the existing bundled
+data. The bundled customer list was refreshed to the workbook's 395 unique
+customers, including Hagnos shipping via `FEDIE`; Science Takeout remains
+`Prepaid`, `UPS GRNC`, at `DIST + 100%`.
 
 Application data locations:
 
