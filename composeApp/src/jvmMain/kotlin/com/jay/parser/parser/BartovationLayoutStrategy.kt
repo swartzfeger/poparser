@@ -144,7 +144,7 @@ class BartovationLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
     ): ParsedPdfItem? {
         val normalizedLine = line.replace(Regex("""\s+"""), " ").trim()
 
-        val rawSku = Regex("""^[A-Z0-9]+(?:-[A-Z0-9]+)*""", RegexOption.IGNORE_CASE)
+        val rawSku = Regex("""^[A-Z0-9]+(?:-[A-Z0-9]+)*\^?""", RegexOption.IGNORE_CASE)
             .find(normalizedLine)
             ?.value
             ?: return null
@@ -168,8 +168,11 @@ class BartovationLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
 
         val sku = normalizeBartovationSku(rawSku, combinedDescription)
         val mappedDescription = ItemMapper.getItemDescription(sku)
+        val requiresPoVerification = rawSku.endsWith("-SYN", ignoreCase = true) ||
+                rawSku.endsWith("^")
 
         val description = when {
+            requiresPoVerification -> "Verify PO"
             mappedDescription.isNotBlank() -> mappedDescription
             combinedDescription.isNotBlank() -> combinedDescription
             else -> sku
@@ -224,7 +227,10 @@ class BartovationLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
     }
 
     private fun normalizeBartovationSku(rawSku: String, description: String): String {
-        val sku = rawSku.uppercase().trim()
+        val sku = rawSku.uppercase()
+            .trim()
+            .removeSuffix("^")
+            .removeSuffix("-SYN")
 
         /*
          * Some OCR runs split "100 strips" into the end of the SKU:

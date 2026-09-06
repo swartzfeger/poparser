@@ -40,6 +40,13 @@ class OrderEnricher {
                     }
                 }
 
+                if (
+                    resolvedCustomer?.id.equals("BARTOVATION LLC", ignoreCase = true) &&
+                    item.description.equals("Verify PO", ignoreCase = true)
+                ) {
+                    description = "Verify PO"
+                }
+
                 if (description.isBlank()) {
                     val bestMatch = findUniqueClosestSku(sku, allKnownSkus, maxDistance = 3)
 

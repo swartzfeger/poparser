@@ -125,8 +125,9 @@ class ElectronicControlsDesignLayoutStrategy : BaseLayoutStrategy(), LayoutStrat
             val first = lines[i].replace(Regex("""\s+"""), " ").trim()
 
             val firstMatch = ITEM_ROW_PATTERN.find(first) ?: continue
-            val rowDetails = firstMatch.groupValues[1].trim()
-            val quantity = firstMatch.groupValues[2].replace(",", "").toDoubleOrNull() ?: continue
+            val customerPartNumber = firstMatch.groupValues[1].trim()
+            val rowDetails = firstMatch.groupValues[2].trim()
+            val quantity = firstMatch.groupValues[3].replace(",", "").toDoubleOrNull() ?: continue
 
             val second = lines.getOrNull(i + 1)
                 ?.replace(Regex("""\s+"""), " ")
@@ -138,20 +139,22 @@ class ElectronicControlsDesignLayoutStrategy : BaseLayoutStrategy(), LayoutStrat
                 .orEmpty()
 
             val completeSkuMatch = COMPLETE_SKU_PATTERN.find(rowDetails)
-            val splitSkuSuffixMatch = if (completeSkuMatch == null && rowDetails.endsWith("280-")) {
+            val splitSkuPrefix = SPLIT_SKU_PREFIX_PATTERN.find(rowDetails)?.value
+            val splitSkuSuffixMatch = if (completeSkuMatch == null && splitSkuPrefix != null) {
                 SPLIT_SKU_SUFFIX_PATTERN.find(second)
             } else {
                 null
             }
             val rawSku = completeSkuMatch?.value
-                ?: splitSkuSuffixMatch?.let { "280-${it.value}" }
+                ?: splitSkuSuffixMatch?.let { "$splitSkuPrefix${it.value}" }
+                ?: findSkuByCustomerPartNumber(customerPartNumber)
                 ?: continue
             val sku = normalizeSku(rawSku)
 
             val descriptionParts = mutableListOf<String>()
             rowDetails
                 .removeMatchedText(completeSkuMatch)
-                .removeSuffix("280-")
+                .removeMatchedText(SPLIT_SKU_PREFIX_PATTERN.find(rowDetails))
                 .trim()
                 .takeIf { it.isNotBlank() }
                 ?.let(descriptionParts::add)
@@ -196,16 +199,29 @@ class ElectronicControlsDesignLayoutStrategy : BaseLayoutStrategy(), LayoutStrat
     private fun String.removeMatchedText(match: MatchResult?): String =
         if (match == null) this else removeRange(match.range)
 
+    private fun findSkuByCustomerPartNumber(customerPartNumber: String): String? {
+        val normalizedPartNumber = normalizeCustomerPartNumber(customerPartNumber)
+
+        return ItemMapper.getAllSkus().firstOrNull { sku ->
+            normalizeCustomerPartNumber(ItemMapper.getItemDescription(sku))
+                .contains(normalizedPartNumber)
+        }
+    }
+
+    private fun normalizeCustomerPartNumber(value: String): String =
+        compact(value).replace("GO4", "G04")
+
     private fun compact(value: String): String {
         return value.uppercase().replace(Regex("""[^A-Z0-9]"""), "")
     }
 
     private companion object {
         val ITEM_ROW_PATTERN = Regex(
-            """^\d+\s+G\d+-\d+-\d+\s+(.+?)\s+[A-Z]\s+[A-Z]{2,5}\s+([\d,]+(?:\.\d+)?)\s+[\d,]+\.\d{2,3}\s+[A-Z][a-z]+\s*\d{1,2},\s*\d{4}\s+[\d,]+\.\d{2}$""",
+            """^\d+\s+(G[0O]4-\d+-\d+)\s+(.+?)\s+[A-Z]\s+[A-Z]{2,5}\s+([\d,]+(?:\.\d+)?)\s+[\d,]+\.\d{2,3}\b""",
             RegexOption.IGNORE_CASE
         )
-        val COMPLETE_SKU_PATTERN = Regex("""\b280-\d{2,3}-\d+\b""", RegexOption.IGNORE_CASE)
+        val COMPLETE_SKU_PATTERN = Regex("""\b(?:280|295|FAX)-\d{2,3}-\d+\b""", RegexOption.IGNORE_CASE)
+        val SPLIT_SKU_PREFIX_PATTERN = Regex("""\b(?:280|295|FAX)-$""", RegexOption.IGNORE_CASE)
         val SPLIT_SKU_SUFFIX_PATTERN = Regex("""\b\d{2,3}-\d+\b""", RegexOption.IGNORE_CASE)
     }
 }

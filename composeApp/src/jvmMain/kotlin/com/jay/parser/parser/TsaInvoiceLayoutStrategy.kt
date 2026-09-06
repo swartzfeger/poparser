@@ -444,6 +444,7 @@ class TsaInvoiceLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
             .replace(Regex("""([A-Za-z])([0-9])"""), "$1 $2")
             .replace(Regex("""([0-9])([A-Za-z])"""), "$1 $2")
             .replace(Regex("""\bTSA\s*DHS\b""", RegexOption.IGNORE_CASE), "TSA DHS")
+            .replace(Regex("""\bTSA\s*JAY\b""", RegexOption.IGNORE_CASE), "TSA JAY")
             .replace(".", ". ")
             .replace(Regex(""",(?=\S)"""), ", ")
             .replace(Regex("""\s+"""), " ")

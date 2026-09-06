@@ -294,6 +294,7 @@ object TsaLocationMapper {
         when (normalizedCity) {
             "NORTHCHARLESTON" -> aliases.add("NCHARLESTON")
             "CORPUSCHRISTI" -> aliases.add("CORPUS")
+            "MIDDLEBURGHEIGHT", "MIDDLEBURGHEIGHTS" -> aliases.add("MIDDLEBURG")
             "SAINTANN" -> aliases.add("STANN")
             "SAINTROSE" -> aliases.add("STROSE")
             "SAINTPAUL" -> aliases.add("STPAUL")
