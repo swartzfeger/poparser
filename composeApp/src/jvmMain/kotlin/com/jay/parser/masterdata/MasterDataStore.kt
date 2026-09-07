@@ -10,6 +10,9 @@ import java.math.RoundingMode
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 
 object MasterDataStore {
 
@@ -22,34 +25,58 @@ object MasterDataStore {
         appDataDirectory().resolve("master-data")
     }
 
+    private val bundledMasterDataMetadata: BundledMasterDataMetadata by lazy {
+        loadBundledJson(BUNDLED_METADATA_FILE)
+    }
+
     @Volatile
     private var cachedBundle: MasterDataBundle? = null
+
+    @Volatile
+    private var bundledRevisionCheckComplete: Boolean = false
 
     fun current(): MasterDataBundle {
         cachedBundle?.let { return it }
         return synchronized(this) {
+            retireOlderImportIfNeeded()
             cachedBundle ?: loadBundle().also { cachedBundle = it }
         }
     }
 
     fun metadata(): MasterDataMetadata? {
-        val file = dataDir.resolve(METADATA_FILE)
-        if (!file.isFile) return null
-        return runCatching {
-            json.decodeFromString<MasterDataMetadata>(file.readText())
-        }.getOrNull()
+        return synchronized(this) {
+            retireOlderImportIfNeeded()
+            readImportedMetadata()
+        }
+    }
+
+    fun bundledSourceFilename(): String = bundledMasterDataMetadata.sourceFilename
+
+    fun activeMasterListVersion(): String {
+        return synchronized(this) {
+            retireOlderImportIfNeeded()
+            val revision = readImportedMetadata()
+                ?.let(::importedRevision)
+                ?: LocalDate.parse(bundledMasterDataMetadata.revision)
+
+            revision.format(MASTER_LIST_VERSION_FORMAT)
+        }
     }
 
     fun importMasterList(file: File): MasterDataImportResult {
         val parsed = MasterListImporter().parse(file)
+        val importedAt = Instant.now()
         val metadata = MasterDataMetadata(
             sourceFilename = file.name,
-            importedAt = Instant.now().toString(),
+            importedAt = importedAt.toString(),
             customerCount = parsed.bundle.customers.size,
             descriptionCount = parsed.bundle.itemCatalog.descriptions.size,
             pricedItemCount = parsed.bundle.itemCatalog.prices.size,
             glAccountCount = parsed.bundle.glAccounts.size,
-            qtyDiscountRuleCount = parsed.bundle.qtyDiscountRules.size
+            qtyDiscountRuleCount = parsed.bundle.qtyDiscountRules.size,
+            sourceRevision = revisionFromFilename(file.name)?.toString()
+                ?: importedAt.atZone(ZoneOffset.UTC).toLocalDate().toString(),
+            bundledRevisionAtImport = bundledMasterDataMetadata.revision
         )
 
         synchronized(this) {
@@ -57,6 +84,7 @@ object MasterDataStore {
             backupExistingImport()
             writeBundle(parsed.bundle, metadata)
             cachedBundle = parsed.bundle
+            bundledRevisionCheckComplete = true
         }
 
         return MasterDataImportResult(
@@ -69,14 +97,70 @@ object MasterDataStore {
         synchronized(this) {
             if (dataDir.exists()) {
                 backupExistingImport()
-                listOf(ITEMS_FILE, CUSTOMERS_FILE, GL_ACCOUNTS_FILE, QTY_DISCOUNTS_FILE, METADATA_FILE)
-                    .forEach { dataDir.resolve(it).delete() }
+                importedDataFiles().forEach { it.delete() }
             }
             cachedBundle = loadBundle()
+            bundledRevisionCheckComplete = true
         }
     }
 
     fun dataDirectoryPath(): String = dataDir.absolutePath
+
+    private fun retireOlderImportIfNeeded() {
+        if (bundledRevisionCheckComplete) return
+
+        try {
+            val metadata = readImportedMetadata() ?: return
+            val importedRevision = importedRevision(metadata) ?: return
+            val bundledRevision = runCatching {
+                LocalDate.parse(bundledMasterDataMetadata.revision)
+            }.getOrNull() ?: return
+
+            if (!importedRevision.isBefore(bundledRevision)) return
+
+            backupExistingImport()
+            importedDataFiles().forEach { file ->
+                check(!file.isFile || file.delete()) {
+                    "Could not retire outdated master-data file ${file.name}"
+                }
+            }
+            cachedBundle = null
+        } finally {
+            bundledRevisionCheckComplete = true
+        }
+    }
+
+    private fun readImportedMetadata(): MasterDataMetadata? {
+        val file = dataDir.resolve(METADATA_FILE)
+        if (!file.isFile) return null
+
+        return runCatching {
+            json.decodeFromString<MasterDataMetadata>(file.readText())
+        }.getOrNull()
+    }
+
+    private fun importedRevision(metadata: MasterDataMetadata): LocalDate? {
+        return metadata.sourceRevision
+            ?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+            ?: revisionFromFilename(metadata.sourceFilename)
+            ?: runCatching {
+                Instant.parse(metadata.importedAt).atZone(ZoneOffset.UTC).toLocalDate()
+            }.getOrNull()
+    }
+
+    private fun revisionFromFilename(filename: String): LocalDate? {
+        val match = MASTER_LIST_DATE_PATTERN.find(filename) ?: return null
+        val month = match.groupValues[1].toIntOrNull() ?: return null
+        val day = match.groupValues[2].toIntOrNull() ?: return null
+        val rawYear = match.groupValues[3].toIntOrNull() ?: return null
+        val year = if (rawYear < 100) 2000 + rawYear else rawYear
+
+        return runCatching { LocalDate.of(year, month, day) }.getOrNull()
+    }
+
+    private fun importedDataFiles(): List<File> =
+        listOf(ITEMS_FILE, CUSTOMERS_FILE, GL_ACCOUNTS_FILE, QTY_DISCOUNTS_FILE, METADATA_FILE)
+            .map { dataDir.resolve(it) }
 
     private fun loadBundle(): MasterDataBundle {
         return MasterDataBundle(
@@ -190,9 +274,7 @@ object MasterDataStore {
     }
 
     private fun backupExistingImport() {
-        val existingFiles = listOf(ITEMS_FILE, CUSTOMERS_FILE, GL_ACCOUNTS_FILE, QTY_DISCOUNTS_FILE, METADATA_FILE)
-            .map { dataDir.resolve(it) }
-            .filter { it.isFile }
+        val existingFiles = importedDataFiles().filter { it.isFile }
 
         if (existingFiles.isEmpty()) return
 
@@ -228,4 +310,8 @@ object MasterDataStore {
     private const val GL_ACCOUNTS_FILE = "glAccounts.json"
     private const val QTY_DISCOUNTS_FILE = "qtyDiscounts.json"
     private const val METADATA_FILE = "metadata.json"
+    private const val BUNDLED_METADATA_FILE = "masterDataRevision.json"
+    private val MASTER_LIST_VERSION_FORMAT = DateTimeFormatter.ofPattern("MM.dd.yy")
+    private val MASTER_LIST_DATE_PATTERN =
+        Regex("""(?<!\d)(\d{1,2})[._-](\d{1,2})[._-](\d{2}|\d{4})(?!\d)""")
 }

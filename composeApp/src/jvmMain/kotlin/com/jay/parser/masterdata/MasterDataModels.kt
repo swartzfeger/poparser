@@ -35,7 +35,15 @@ data class MasterDataMetadata(
     val descriptionCount: Int,
     val pricedItemCount: Int,
     val glAccountCount: Int,
-    val qtyDiscountRuleCount: Int
+    val qtyDiscountRuleCount: Int,
+    val sourceRevision: String? = null,
+    val bundledRevisionAtImport: String? = null
+)
+
+@Serializable
+data class BundledMasterDataMetadata(
+    val sourceFilename: String,
+    val revision: String
 )
 
 data class MasterDataImportResult(

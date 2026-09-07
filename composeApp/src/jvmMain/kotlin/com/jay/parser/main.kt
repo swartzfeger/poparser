@@ -132,6 +132,7 @@ fun main() = application {
                                     buildString {
                                         appendLine(APP_NAME)
                                         appendLine("Version $APP_VERSION")
+                                        appendLine("Master List Version: ${MasterDataStore.activeMasterListVersion()}")
                                         appendLine()
                                         appendLine("Desktop tool for parsing purchase orders")
                                         appendLine("and extracting structured order data.")
@@ -251,10 +252,15 @@ fun main() = application {
                                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                                     Text(
                                         text = if (metadata == null) {
-                                            "Using bundled master data."
+                                            "Using bundled master data from ${MasterDataStore.bundledSourceFilename()}."
                                         } else {
                                             "Using imported master data from ${metadata.sourceFilename}."
                                         },
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+
+                                    Text(
+                                        text = "Master List Version: ${MasterDataStore.activeMasterListVersion()}",
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
 

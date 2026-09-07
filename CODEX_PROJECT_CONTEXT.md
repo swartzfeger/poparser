@@ -1,6 +1,6 @@
 # PO Parser - Codex Project Context
 
-Last updated: 2026-09-03
+Last updated: 2026-09-07
 
 ## How To Use This File
 
@@ -19,7 +19,7 @@ meaningful architectural, workflow, or product changes.
 - Repository: https://github.com/swartzfeger/poparser
 - Local path used on the Mac mini: `/Users/jay/dev/kotlin/poparser`
 - Current branch: `main`
-- Current version: `1.7.6`
+- Current version: `1.7.8`
 - Code baseline audited for this handoff: `df340dc`
 - Technology: Kotlin Multiplatform, Compose Desktop, JVM 21
 - Gradle Wrapper: `8.14.4`
@@ -214,11 +214,18 @@ Prices support three decimal places. JSON numbers omit unnecessary trailing
 zeroes, so `265.250` may be represented as `265.25` without losing value.
 
 The bundled defaults were most recently audited against **Master List
-09.01.26.xlsx** for version 1.7.6. Item descriptions, prices, GL accounts,
+09.01.26.xlsx**. Item descriptions, prices, GL accounts,
 quantity-discount IDs, and quantity-discount rules matched the existing bundled
 data. The bundled customer list was refreshed to the workbook's 395 unique
 customers, including Hagnos shipping via `FEDIE`; Science Takeout remains
 `Prepaid`, `UPS GRNC`, at `DIST + 100%`.
+
+The bundled revision is declared in `data/masterDataRevision.json`. On startup,
+`MasterDataStore` compares that revision with any persisted user import. An older
+import is backed up and retired automatically so a newly shipped bundled master
+list takes effect without requiring **Restore Defaults**. An imported list with
+the same or a newer revision remains active. Legacy metadata derives its revision
+from the source filename, falling back to its import date when necessary.
 
 Application data locations:
 
