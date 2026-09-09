@@ -117,21 +117,28 @@ class TcdPartsLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         for (i in lines.indices) {
             val line = lines[i].replace(Regex("""\s+"""), " ").trim()
 
-            val rowMatch = Regex(
-                """^([\d,]+\.\d{3})\s*([A-Z0-9]+)\s+([A-Z0-9-]+)\s+(.+?)\s+([\d,]+\.\d{4})\s+([A-Z0-9]+)\s+([\d,]+\.\d{2})$""",
-                RegexOption.IGNORE_CASE
-            ).find(line)
+            val rowMatch = ITEM_ROW_PATTERN.find(line)
 
             if (rowMatch != null) {
                 val quantity = rowMatch.groupValues[1].replace(",", "").toDoubleOrNull()
                 val description = rowMatch.groupValues[4].trim()
                 val unitPrice = rowMatch.groupValues[5].replace(",", "").toDoubleOrNull()
 
-                val partLine = lines.getOrNull(i + 1)?.replace(Regex("""\s+"""), " ")?.trim().orEmpty()
-                val sku = Regex(
-                    """PartNo\.:\s*([A-Z0-9]+(?:-[A-Z0-9]+)+)""",
-                    RegexOption.IGNORE_CASE
-                ).find(partLine)?.groupValues?.get(1)?.trim()
+                val sku = lines
+                    .drop(i + 1)
+                    .take(4)
+                    .takeWhile { candidate ->
+                        val normalizedCandidate = candidate.replace(Regex("""\s+"""), " ").trim()
+                        !compact(candidate).startsWith("TOTAL:") &&
+                                ITEM_ROW_PATTERN.find(normalizedCandidate) == null
+                    }
+                    .firstNotNullOfOrNull { partLine ->
+                        PART_NUMBER_PATTERN.find(partLine)
+                            ?.groupValues
+                            ?.get(1)
+                            ?.trim()
+                    }
+                    ?.let(::normalizeTcdSku)
 
                 if (sku != null) {
                     val mappedDescription = ItemMapper.getItemDescription(sku).ifBlank { description }
@@ -149,6 +156,11 @@ class TcdPartsLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         }
 
         return items
+    }
+
+    private fun normalizeTcdSku(rawSku: String): String {
+        return rawSku.uppercase()
+            .replace(Regex("""-(\d+)-V-(\d+)$"""), "-$1V-$2")
     }
 
     private fun compact(value: String): String {
@@ -169,4 +181,15 @@ class TcdPartsLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         val state: String?,
         val zip: String?
     )
+
+    private companion object {
+        val ITEM_ROW_PATTERN = Regex(
+            """^([\d,]+\.\d{3,4})\s*([A-Z0-9]+)\s+([A-Z0-9-]+)\s+(.+?)\s+([\d,]+\.\d{4})\s+([A-Z0-9]+)\s+([\d,]+\.\d{2})$""",
+            RegexOption.IGNORE_CASE
+        )
+        val PART_NUMBER_PATTERN = Regex(
+            """Part\s*No\.:\s*([A-Z0-9]+(?:-[A-Z0-9]+)+)""",
+            RegexOption.IGNORE_CASE
+        )
+    }
 }
