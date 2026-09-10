@@ -1,6 +1,6 @@
 # PO Parser - Codex Project Context
 
-Last updated: 2026-09-07
+Last updated: 2026-09-10
 
 ## How To Use This File
 
@@ -19,14 +19,15 @@ meaningful architectural, workflow, or product changes.
 - Repository: https://github.com/swartzfeger/poparser
 - Local path used on the Mac mini: `/Users/jay/dev/kotlin/poparser`
 - Current branch: `main`
-- Current version: `1.7.8`
-- Code baseline audited for this handoff: `df340dc`
+- Current version: `1.8.0`
+- Code baseline audited before the current Chosun and Covenant changes: `f920955`
 - Technology: Kotlin Multiplatform, Compose Desktop, JVM 21
 - Gradle Wrapper: `8.14.4`
 - Development machine: macOS
 - Production client: Windows only
 
-PO Parser imports customer purchase orders in PDF, XLSX, supported legacy DOC, or supported plain-text TXT format, extracts order
+PO Parser imports customer purchase orders in PDF, XLSX, supported DOC/DOCX, or
+supported plain-text TXT format, extracts order
 and item data, enriches it with Precision Laboratories master data, estimates
 shipping boxes, and exports a Sage-ready CSV.
 
@@ -56,6 +57,8 @@ quantity.
   `composeApp/src/jvmMain/kotlin/com/jay/parser/pdf/OrderFileParser.kt`
 - TECHNOS legacy Word table parsing:
   `composeApp/src/jvmMain/kotlin/com/jay/parser/parser/TechnosWordParser.kt`
+- Produce Packaging DOCX table parsing:
+  `composeApp/src/jvmMain/kotlin/com/jay/parser/parser/ProducePackagingWordParser.kt`
 - Native PDF extraction:
   `composeApp/src/jvmMain/kotlin/com/jay/parser/pdf/PdfTextExtractor.kt`
 - OCR extraction:
@@ -129,7 +132,7 @@ matches Windows output.
 
 ## Current Layout Coverage
 
-`StrategyRegistry` currently registers 127 customer layout strategies. Inspect
+`StrategyRegistry` currently registers 125 customer layout strategies. Inspect
 the registry rather than relying on an old customer list in a chat transcript.
 
 Notable layouts added or substantially revised since the original August 4
@@ -139,6 +142,12 @@ Products, Cambridge Environmental, Franz Ziel, Gasco Industrial, McCoy Health
 Science, Rideau Group, St Marks Powder, Summit Supply, Technos DOC, Uni-Kem,
 Curis System, Daigger, George's, Laboratory Sales, United Scientific, Micro
 Essential Laboratory, VWR, Jayhawk, Ecolab/Nalco, and Pinetree.
+
+Later additions include Produce Packaging DOCX, Hagnos Hygiene, Science Takeout,
+Cardigan, and LD Carlson. Version 1.8.0 also includes targeted fixes for ECA
+Educational Services, TCD Parts, TSA locations, Electronic Controls Design,
+Bartovation discount identifiers, School Specialty pricing, MirOil, Fisher's
+clean non-OCR format, and VWR.
 
 Hagnos Hygiene uses a clean Excel-generated PDF whose extracted bill-to and
 ship-to columns collapse onto shared text rows. Its dedicated strategy separates
@@ -153,6 +162,22 @@ each item row against its extended amount.
 Ecolab and Nalco ship-to parsing must remain dynamic. Known addresses may help
 normalization, but new addresses and small variations such as a different door
 must still be parsed from the PO rather than forced to a single hard-coded value.
+
+Chosun Measurement POs do not carry dedicated PO numbers. Its strategy derives
+one from the document date using `CHO` + `MMddyy`; for example, September 10,
+2026 becomes `CHO091026`. Chosun's `LABELS <product>` notation maps to the
+existing `PLBL` master SKU, and quantities such as four packages of
+`145-500V-100` remain four rather than being divided by the vial count.
+
+Covenant Aviation Security POs are image-only, low-contrast scans. A narrowly
+fingerprinted grayscale PSM 4 OCR pass preserves their boxed date and item table.
+The printed `CAS-549650 WJR` value is not used as the exported PO number; the
+strategy derives `COV` + `MMddyy` from the document date, such as `COV091026`.
+OCR may confuse boxed date slashes with `7`, so date recovery validates the
+result against real calendar dates. If OCR drops the boxed date entirely, the
+scanner PDF's creation date is used as a Covenant-only fallback. Covenant's
+`TSAPER100` quantity is recovered from extension divided by unit price and
+checked against master pricing.
 
 ## Enrichment And UOM Rules
 
@@ -240,6 +265,8 @@ Master overrides are under `master-data/`. Packaging overrides are under
 Packaging support was introduced in version 1.6.0 and is preliminary.
 
 - Product dimensions and weights come from `productPackaging.json`.
+- Missing exact dimensions may fall back to bundled SKU-suffix defaults from
+  `packagingSuffixDefaults.json`; exact product weights remain authoritative.
 - The bundled dataset contains 184 products: all 184 have weights and 183 have
   complete dimensions.
 - The user can replace the data through **Update Packaging Data** using a CSV.
@@ -247,6 +274,8 @@ Packaging support was introduced in version 1.6.0 and is preliminary.
 - Box capacity reserves 10 percent for packing material (`MAX_FILL_RATIO = 0.90`).
 - Maximum weight is 50 pounds per box.
 - Box IDs 1 through 15 and dimensions are defined in `ShippingBoxes.kt`.
+- Box 15 is pallet-sized and is reserved for Ecolab, Dove Material, and Krowne;
+  other customers use Box 1 as their largest eligible box.
 - Packaging calculations use `quantityForExport`, not `quantityRaw`.
 - The UI shows total boxes and box plan in the parsed-order summary.
 - The CSV writes the shipping plan to `Invoice Note`; packaging measurements stay in the UI.
@@ -270,11 +299,15 @@ The exporter intentionally produces:
 - exactly three decimal places for unit prices
 - an `Invoice Note` shipping summary on only the first line of an order
 
-The **No Ship Via**, **No Ship To**, and **No Invoice Note** settings can blank
-those fields during export. The parsed-order UI retains detailed volume, weight,
-box-plan, and packaging-status information that is no longer exported as separate
-CSV columns. Preserve Sage column ordering unless the client explicitly approves
-a schema change.
+The **Round Up to Nearest Cent** setting defaults on. It rounds a three-decimal
+unit price ending in 5 to two decimals before calculating the exported amount;
+turning it off preserves the three-decimal master price.
+
+The **No Ship Via**, **No Ship To**, and **No Box Weights and Dimensions Needed**
+settings can blank those fields or the packaging Invoice Note during export. The
+parsed-order UI retains detailed volume, weight, box-plan, and packaging-status
+information that is no longer exported as separate CSV columns. Preserve Sage
+column ordering unless the client explicitly approves a schema change.
 
 ## Build And Test
 
@@ -408,6 +441,8 @@ Focused tests currently cover:
 - Beta Procesos
 - Butler Chemical Products
 - Cambridge Environmental
+- Chosun Measurement
+- Covenant Aviation Security
 - Electronic Controls Design
 - Eisco
 - Fisher Scientific

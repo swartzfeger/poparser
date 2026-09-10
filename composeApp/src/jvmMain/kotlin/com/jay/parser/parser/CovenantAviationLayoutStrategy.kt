@@ -4,6 +4,8 @@ import com.jay.parser.mappers.CustomerMapper
 import com.jay.parser.mappers.ItemMapper
 import com.jay.parser.pdf.ParsedPdfFields
 import com.jay.parser.pdf.ParsedPdfItem
+import java.time.DateTimeException
+import java.time.LocalDate
 
 class CovenantAviationLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
 
@@ -76,24 +78,62 @@ class CovenantAviationLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
     }
 
     private fun parseOrderNumber(lines: List<String>): String? {
-        for (line in lines) {
-            val normalized = line.replace(Regex("""\s+"""), " ").trim()
+        val date = lines
+            .firstNotNullOfOrNull(::parseDateLine)
+            ?: return null
 
-            val inline = Regex(
-                """PO\s*#?\s*[:\-]?\s*([A-Z0-9\-]+\s*[A-Z0-9\-]*)""",
-                RegexOption.IGNORE_CASE
-            ).find(normalized)
+        return "COV%02d%02d%02d".format(
+            date.monthValue,
+            date.dayOfMonth,
+            date.year % 100
+        )
+    }
 
-            if (inline != null) {
-                return inline.groupValues[1].trim()
-            }
+    private fun parseDateLine(line: String): LocalDate? {
+        if (!line.contains("DATE", ignoreCase = true)) return null
+
+        val normalized = line.replace(Regex("""\s+"""), " ").trim()
+        val exact = Regex(
+            """DATE\s*[:;]?\s*[^0-9]*(\d{1,2})\s*[/.-]\s*(\d{1,2})\s*[/.-]\s*(20\d{2})""",
+            RegexOption.IGNORE_CASE
+        ).find(normalized)
+        if (exact != null) {
+            return validDate(
+                year = exact.groupValues[3].toInt(),
+                month = exact.groupValues[1].toInt(),
+                day = exact.groupValues[2].toInt()
+            )
         }
 
-        val joined = lines.joinToString(" ")
-        return Regex(
-            """PO\s*#?\s*[:\-]?\s*([A-Z0-9\-]+\s*[A-Z0-9\-]*)""",
-            RegexOption.IGNORE_CASE
-        ).find(joined)?.groupValues?.get(1)?.trim()
+        val yearMatch = Regex("""20\d{2}""").find(normalized) ?: return null
+        val dateStart = normalized.indexOf("DATE", ignoreCase = true)
+        if (dateStart < 0 || yearMatch.range.last < dateStart) return null
+
+        val ocrSignal = normalized
+            .substring(dateStart + 4, yearMatch.range.last + 1)
+            .uppercase()
+            .replace('O', '0')
+            .replace('I', '1')
+            .replace('L', '1')
+            .filter { it.isDigit() || it == '/' }
+            .replace('/', '7')
+        val year = yearMatch.value.toInt()
+
+        return (1..12).asSequence()
+            .flatMap { month ->
+                (1..31).asSequence().mapNotNull { day -> validDate(year, month, day) }
+            }
+            .singleOrNull { candidate ->
+                "${candidate.monthValue}7${candidate.dayOfMonth}7${candidate.year}" == ocrSignal
+            }
+    }
+
+    private fun validDate(year: Int, month: Int, day: Int): LocalDate? {
+        return try {
+            LocalDate.of(year, month, day)
+        } catch (_: DateTimeException) {
+            null
+        }
     }
 
     private fun parseTerms(lines: List<String>): String? {
@@ -186,33 +226,21 @@ class CovenantAviationLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
 
     private fun parseItems(lines: List<String>): List<ParsedPdfItem> {
         val items = mutableListOf<ParsedPdfItem>()
+        val seen = mutableSetOf<String>()
 
-        val startIndex = lines.indexOfFirst {
-            val c = compact(it)
-            c.contains("PARTNUMBER") &&
-                    c.contains("DESCRIPTION") &&
-                    c.contains("PRICE")
-        }
+        for (i in lines.indices) {
+            if (!compact(lines[i]).contains("TSAPER100")) continue
 
-        if (startIndex == -1) return emptyList()
-
-        for (i in startIndex + 1 until lines.size) {
-            val line = lines[i].replace(Regex("""\s+"""), " ").trim()
-            val compactLine = compact(line)
-
-            if (line.isBlank()) continue
-            if (compactLine.contains("TOTAL")) break
-            if (compactLine.contains("PLEASESENDORDERCONFIRMATION")) break
-
-            val match = Regex(
-                """^([A-Z0-9\-]+)\s+(.+?)\s+S?\$?\s*([\d,]+\.\d{2})]?\s+\$?\s*([\d,]+\.\d{2})$""",
-                RegexOption.IGNORE_CASE
-            ).find(line) ?: continue
-
-            val sku = match.groupValues[1].trim().uppercase()
-            val descriptionRaw = match.groupValues[2].trim()
-            val unitPrice = match.groupValues[3].replace(",", "").toDoubleOrNull() ?: continue
-            val extPrice = match.groupValues[4].replace(",", "").toDoubleOrNull() ?: continue
+            val sku = "TSAPER100"
+            val priceValues = nearbyIndices(i, lines.lastIndex)
+                .map { lines[it].replace(Regex("""\s+"""), " ").trim() }
+                .filterNot { compact(it).contains("TOTAL") }
+                .map { monetaryValues(it) }
+                .firstOrNull { it.size >= 2 }
+                ?: continue
+            val money = priceValues
+            val unitPrice = money[money.lastIndex - 1]
+            val extPrice = money.last()
 
             val quantity = if (unitPrice != 0.0) {
                 extPrice / unitPrice
@@ -226,9 +254,10 @@ class CovenantAviationLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
                 quantity
             }
 
-            val description = ItemMapper.getItemDescription(sku).ifBlank {
-                descriptionRaw.ifBlank { sku }
-            }
+            val description = ItemMapper.getItemDescription(sku).ifBlank { sku }
+
+            val key = "$sku|$normalizedQuantity|$unitPrice"
+            if (!seen.add(key)) continue
 
             items.add(
                 item(
@@ -242,6 +271,21 @@ class CovenantAviationLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
 
         return items
     }
+
+    private fun nearbyIndices(center: Int, lastIndex: Int): Sequence<Int> = sequence {
+        yield(center)
+        for (distance in 1..lastIndex) {
+            val before = center - distance
+            val after = center + distance
+            if (before >= 0) yield(before)
+            if (after <= lastIndex) yield(after)
+        }
+    }
+
+    private fun monetaryValues(line: String): List<Double> = Regex("""\d[\d,]*\.\d{2}""")
+        .findAll(line)
+        .mapNotNull { it.value.replace(",", "").toDoubleOrNull() }
+        .toList()
 
     private fun compact(value: String): String {
         return value.uppercase().replace(Regex("""[^A-Z0-9#]"""), "")

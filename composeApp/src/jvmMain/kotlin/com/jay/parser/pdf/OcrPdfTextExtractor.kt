@@ -7,6 +7,8 @@ import java.awt.geom.AffineTransform
 import java.awt.image.BufferedImage
 import java.io.File
 import java.nio.file.Files
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import javax.imageio.ImageIO
 import kotlin.math.max
 
@@ -96,6 +98,31 @@ class OcrPdfTextExtractor(
                         if (tableText.isNotBlank()) pageText = tableText
                         grayscaleFile.delete()
                     }
+
+                    /*
+                     * Covenant's low-contrast scans lose the boxed date, PO field,
+                     * and table columns after binarization. Grayscale PSM 4 retains
+                     * the complete single-row form across the known scan variants.
+                     */
+                    if (looksLikeCovenant(pageText)) {
+                        val grayscaleFile = File(tempDir, "page_${i}_covenant_gray.png")
+                        ImageIO.write(grayscaleImage, "png", grayscaleFile)
+                        val formText = runTesseract(grayscaleFile, pageSegmentationMode = 4)
+                        if (formText.isNotBlank()) {
+                            // Some scans expose the SKU only in the form pass and the
+                            // price columns only in the original pass. Preserve both.
+                            pageText = "$formText\n$pageText"
+                        }
+                        grayscaleFile.delete()
+
+                        val scanDate = document.documentInformation.creationDate
+                            ?.toInstant()
+                            ?.atZone(ZoneId.systemDefault())
+                            ?.toLocalDate()
+                        if (scanDate != null) {
+                            pageText += "\nDATE: ${scanDate.format(COVENANT_DATE_FORMAT)}"
+                        }
+                    }
                     pageText.lines()
                         .filter { it.isNotBlank() }
                         .forEach { allLines.add(PdfLine(tokens = emptyList(), text = it.trim())) }
@@ -156,6 +183,13 @@ class OcrPdfTextExtractor(
                 compactText.contains("OFFICEQVORTEXCHEMICALSCOM")
     }
 
+    private fun looksLikeCovenant(text: String): Boolean {
+        val compactText = text.uppercase().replace(Regex("""[^A-Z0-9]"""), "")
+        return compactText.contains("COVENANTAVIATIONSECURITY") &&
+                compactText.contains("MALLORYSAFETY") &&
+                compactText.contains("44380OSGOODROAD")
+    }
+
     private fun rotateImageClockwise90(image: BufferedImage): BufferedImage {
         val rads = Math.toRadians(90.0)
         val sin = Math.abs(Math.sin(rads))
@@ -181,6 +215,7 @@ class OcrPdfTextExtractor(
         private const val PDF_POINTS_PER_INCH = 72f
         private const val MAX_NORMAL_PAGE_EDGE_POINTS = 1200f
         private const val MAX_RENDER_EDGE_PIXELS = 2400f
+        private val COVENANT_DATE_FORMAT = DateTimeFormatter.ofPattern("M/d/yyyy")
 
         private fun defaultTesseractCommand(): String {
             val os = System.getProperty("os.name").lowercase()

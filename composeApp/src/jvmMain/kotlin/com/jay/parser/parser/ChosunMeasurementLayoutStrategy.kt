@@ -54,13 +54,19 @@ class ChosunMeasurementLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
     private fun parseOrderNumber(lines: List<String>): String? {
         val joined = lines.joinToString(" ")
 
-        val match = Regex("""Date:\s*(\d{4})\.(\d{2})\.(\d{2})""", RegexOption.IGNORE_CASE)
+        val match = Regex(
+            """Date:\s*(\d{4})[./-](\d{2})[./-](\d{2})""",
+            RegexOption.IGNORE_CASE
+        )
             .find(joined)
-            ?: Regex("""\b(\d{4})\.(\d{2})\.(\d{2})\b""")
+            ?: Regex("""\b(\d{4})[./-](\d{2})[./-](\d{2})\b""")
                 .find(joined)
             ?: return null
 
-        return "PO${match.groupValues[1]}${match.groupValues[2]}${match.groupValues[3]}"
+        val year = match.groupValues[1].takeLast(2)
+        val month = match.groupValues[2]
+        val day = match.groupValues[3]
+        return "CHO$month$day$year"
     }
 
     private fun parseShipTo(lines: List<String>): ShipToBlock {
@@ -124,10 +130,12 @@ class ChosunMeasurementLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
     }
 
     private fun normalizeChosunSku(raw: String): String {
-        return raw
+        val normalized = raw
             .trim()
             .uppercase()
             .replace(Regex("""\s+"""), " ")
+
+        return if (normalized.startsWith("LABELS ")) "PLBL" else normalized
     }
 
     private fun normalize(text: String): String {
