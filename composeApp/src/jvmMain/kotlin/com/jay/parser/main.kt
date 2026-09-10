@@ -34,7 +34,7 @@ import java.io.File
 import javax.swing.SwingUtilities
 
 private const val APP_NAME = "PO Parser"
-private const val APP_VERSION = "1.7.9"
+private const val APP_VERSION = "1.8.0"
 private const val APP_VENDOR = "Jay Swartzfeger"
 private const val APP_COPYRIGHT = "© 2026 Precision Laboratories"
 

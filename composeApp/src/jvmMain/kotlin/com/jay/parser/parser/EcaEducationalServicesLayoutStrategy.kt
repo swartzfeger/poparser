@@ -3,8 +3,10 @@ package com.jay.parser.parser
 import com.jay.parser.mappers.ItemMapper
 import com.jay.parser.pdf.ParsedPdfFields
 import com.jay.parser.pdf.ParsedPdfItem
+import com.jay.parser.pdf.PdfLine
+import kotlin.math.abs
 
-class EcaEducationalServicesLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
+class EcaEducationalServicesLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy, PositionedLayoutStrategy {
 
     override val name: String = "ECA EDUCATIONAL SERVICES"
 
@@ -46,6 +48,17 @@ class EcaEducationalServicesLayoutStrategy : BaseLayoutStrategy(), LayoutStrateg
             terms = parseTerms(clean),
             items = parseItems(clean)
         )
+    }
+
+    override fun parsePositioned(lines: List<PdfLine>): ParsedPdfFields {
+        val parsed = parse(lines.map(PdfLine::text))
+        val positionedItems = parsePositionedItems(lines)
+
+        return if (positionedItems.isNotEmpty()) {
+            parsed.copy(items = positionedItems)
+        } else {
+            parsed
+        }
     }
 
     private fun parseOrderNumber(lines: List<String>): String? {
@@ -143,16 +156,14 @@ class EcaEducationalServicesLayoutStrategy : BaseLayoutStrategy(), LayoutStrateg
         val seen = mutableSetOf<String>()
 
         for (line in lines) {
-            val match = Regex(
-                """^(\d+)\s+([A-Z0-9-]+)\s+([A-Z0-9]+)\s+(.+?)\s+EA\s+([\d.]+)\s+EACH\s+([\d.]+)\s+([\d.]+)$""",
-                RegexOption.IGNORE_CASE
-            ).find(line.trim()) ?: continue
+            val match = ITEM_ROW_PATTERN.find(line.trim()) ?: continue
 
             val vendorItem = match.groupValues[2].trim()
             val sku = normalizeEcaSku(match.groupValues[3])
             val descriptionFromPo = match.groupValues[4].trim()
             val quantity = match.groupValues[5].toDoubleOrNull() ?: continue
-            val unitPrice = match.groupValues[6].toDoubleOrNull() ?: continue
+            val uom = match.groupValues[6].trim().uppercase()
+            val unitPrice = match.groupValues[7].toDoubleOrNull() ?: continue
 
             val description = ItemMapper.getItemDescription(sku).ifBlank {
                 descriptionFromPo
@@ -165,7 +176,8 @@ class EcaEducationalServicesLayoutStrategy : BaseLayoutStrategy(), LayoutStrateg
                         sku = sku,
                         description = description,
                         quantity = quantity,
-                        unitPrice = unitPrice
+                        unitPrice = unitPrice,
+                        uom = uom
                     )
                 )
             }
@@ -174,11 +186,127 @@ class EcaEducationalServicesLayoutStrategy : BaseLayoutStrategy(), LayoutStrateg
         return items
     }
 
-    private fun normalizeEcaSku(raw: String): String {
-        return when (raw.trim().uppercase()) {
-            "CHL3001V100" -> "CHL-300-1V-100"
-            else -> raw.trim().uppercase()
+    private fun parsePositionedItems(lines: List<PdfLine>): List<ParsedPdfItem> {
+        return lines.mapNotNull { line ->
+            val skuColumnTokens = line.tokens.filter { it.x >= SKU_COLUMN_START && it.x < SKU_COLUMN_END }
+            if (skuColumnTokens.isEmpty()) return@mapNotNull null
+
+            val rawSku = skuColumnTokens.sortedBy { it.x }.joinToString("") { it.text }.trim()
+            val sku = normalizeEcaSku(rawSku)
+
+            val baseY = skuColumnTokens
+                .groupingBy { it.y }
+                .eachCount()
+                .maxByOrNull { it.value }
+                ?.key
+                ?: return@mapNotNull null
+
+            val quantity = correctedOrBaseNumber(line, QUANTITY_COLUMN_START, QUANTITY_COLUMN_END, baseY)
+                ?: return@mapNotNull null
+            val unitPrice = correctedOrBaseNumber(line, UNIT_PRICE_COLUMN_START, UNIT_PRICE_COLUMN_END, baseY)
+                ?: return@mapNotNull null
+            val extendedPrice = correctedOrBaseNumber(line, EXTENDED_PRICE_COLUMN_START, EXTENDED_PRICE_COLUMN_END, baseY)
+            val descriptionFromPo = textAtBaseY(line, DESCRIPTION_COLUMN_START, DESCRIPTION_COLUMN_END, baseY)
+            val uom = textAtBaseY(line, UOM_COLUMN_START, UOM_COLUMN_END, baseY).uppercase()
+
+            if (extendedPrice != null && abs(quantity * unitPrice - extendedPrice) > EXTENSION_TOLERANCE) {
+                return@mapNotNull null
+            }
+
+            item(
+                sku = sku,
+                description = ItemMapper.getItemDescription(sku).ifBlank { descriptionFromPo },
+                quantity = quantity,
+                unitPrice = unitPrice,
+                uom = uom.ifBlank { null }
+            )
         }
+    }
+
+    private fun textAtBaseY(
+        line: PdfLine,
+        startX: Float,
+        endX: Float,
+        baseY: Float
+    ): String {
+        return line.tokens
+            .filter {
+                it.x >= startX &&
+                    it.x < endX &&
+                    abs(it.y - baseY) <= CORRECTION_Y_TOLERANCE
+            }
+            .sortedBy { it.x }
+            .joinToString("") { it.text }
+            .trim()
+    }
+
+    private fun correctedOrBaseNumber(
+        line: PdfLine,
+        startX: Float,
+        endX: Float,
+        baseY: Float
+    ): Double? {
+        val columnTokens = line.tokens.filter { it.x >= startX && it.x < endX }
+
+        val corrected = columnTokens
+            .filter { abs(it.y - baseY) > CORRECTION_Y_TOLERANCE }
+            .sortedBy { it.x }
+            .joinToString("") { it.text }
+            .let(::parseMarkedNumber)
+
+        if (corrected != null) return corrected
+
+        return columnTokens
+            .filter { abs(it.y - baseY) <= CORRECTION_Y_TOLERANCE }
+            .sortedBy { it.x }
+            .joinToString("") { it.text }
+            .let(::parseMarkedNumber)
+    }
+
+    private fun parseMarkedNumber(value: String): Double? {
+        val numericText = value.filter { it.isDigit() || it == '.' || it == ',' }
+        return Regex("""\d[\d,]*(?:\.\d+)?""")
+            .find(numericText)
+            ?.value
+            ?.replace(",", "")
+            ?.toDoubleOrNull()
+    }
+
+    private fun normalizeEcaSku(raw: String): String {
+        val normalized = raw.trim().uppercase().replace(Regex("""[^A-Z0-9]"""), "")
+        val knownSkus = ItemMapper.getAllSkus()
+
+        knownSkus.singleOrNull { sku -> compactSku(sku) == normalized }?.let { return it }
+
+        val zeroCorrected = normalized.replace('O', '0')
+        return knownSkus.singleOrNull { sku -> compactSku(sku) == zeroCorrected }
+            ?: raw.trim().uppercase()
+    }
+
+    private fun compactSku(value: String): String {
+        return value.uppercase().replace(Regex("""[^A-Z0-9]"""), "")
+    }
+
+    private companion object {
+        val ITEM_ROW_PATTERN = Regex(
+            """^(\d+)\s+([A-Z0-9-]+)\s+([A-Z0-9]+)\s+(.+?)\s+([\d.]+)\s+([A-Z]+)\s+([\d.]+)\s+([\d.]+)$""",
+            RegexOption.IGNORE_CASE
+        )
+
+        const val SKU_COLUMN_START = 105f
+        const val SKU_COLUMN_END = 180f
+        const val DESCRIPTION_COLUMN_START = 180f
+        const val DESCRIPTION_COLUMN_END = 348f
+        const val QUANTITY_COLUMN_START = 348f
+        const val QUANTITY_COLUMN_END = 387f
+        const val UOM_COLUMN_START = 387f
+        const val UOM_COLUMN_END = 438f
+        const val UNIT_PRICE_COLUMN_START = 438f
+        const val UNIT_PRICE_COLUMN_END = 503f
+        const val EXTENDED_PRICE_COLUMN_START = 503f
+        const val EXTENDED_PRICE_COLUMN_END = 575f
+        const val CORRECTION_Y_TOLERANCE = 0.25f
+        const val EXTENSION_TOLERANCE = 0.02
     }
 
     private fun normalize(text: String): String {

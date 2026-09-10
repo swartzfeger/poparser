@@ -353,6 +353,7 @@ class OrderEnricher {
             "BAILEYS THERMOMETERS",
             "BLUE DRAGON DEFENSE",
             "BUNZL",
+            "CARDIGAN",
             "DIVERSIFIED FOODSERV",
             "CHARLOTTE PRODUCTS",
             "TCD PARTS",
@@ -370,6 +371,7 @@ class OrderEnricher {
             "DOVE MATERIAL",
             "BUTLER CHEMICAL PROD",
             "KROWNE METAL CORPORA",
+            "LD CARLSON",
             "JAYHAWK SALES TX",
             "JAYHAWK SALES WI",
             "WESTLAB"
