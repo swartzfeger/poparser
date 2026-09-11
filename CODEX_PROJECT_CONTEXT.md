@@ -1,6 +1,6 @@
 # PO Parser - Codex Project Context
 
-Last updated: 2026-09-10
+Last updated: 2026-09-11
 
 ## How To Use This File
 
@@ -19,8 +19,8 @@ meaningful architectural, workflow, or product changes.
 - Repository: https://github.com/swartzfeger/poparser
 - Local path used on the Mac mini: `/Users/jay/dev/kotlin/poparser`
 - Current branch: `main`
-- Current version: `1.8.0`
-- Code baseline audited before the current Chosun and Covenant changes: `f920955`
+- Current version: `1.8.2`
+- Code baseline audited before the 09.11.26 master-data update: `1897bb7`
 - Technology: Kotlin Multiplatform, Compose Desktop, JVM 21
 - Gradle Wrapper: `8.14.4`
 - Development machine: macOS
@@ -243,12 +243,12 @@ item JSON files that predate this field inherit the bundled ID mappings.
 Prices support three decimal places. JSON numbers omit unnecessary trailing
 zeroes, so `265.250` may be represented as `265.25` without losing value.
 
-The bundled defaults were most recently audited against **Master List
-09.01.26.xlsx**. Item descriptions, prices, GL accounts,
-quantity-discount IDs, and quantity-discount rules matched the existing bundled
-data. The bundled customer list was refreshed to the workbook's 395 unique
-customers, including Hagnos shipping via `FEDIE`; Science Takeout remains
-`Prepaid`, `UPS GRNC`, at `DIST + 100%`.
+The bundled defaults were most recently refreshed from **Master List
+09.11.26.xlsx**. The bundle contains 395 unique customers, 634 item
+descriptions, 499 priced items, 662 GL-account mappings, 70 quantity-discount
+IDs, and 62 quantity-discount rules. Compared with 09.01.26, customer records,
+quantity-discount mappings/rules, and the 184 packaging records were unchanged;
+item descriptions/prices and GL mappings were refreshed from the workbook.
 
 The bundled revision is declared in `data/masterDataRevision.json`. On startup,
 `MasterDataStore` compares that revision with any persisted user import. An older
