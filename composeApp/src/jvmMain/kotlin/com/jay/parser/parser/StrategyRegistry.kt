@@ -37,6 +37,7 @@ class StrategyRegistry(
                     ChemSupplyLayoutStrategy(),
                     ChosunMeasurementLayoutStrategy(),
                     CmRepresentacionesLayoutStrategy(),
+                    ColoradoEarlyEducationLayoutStrategy(),
                     CommunityLearningLayoutStrategy(),
                     CompanhiaNitroLayoutStrategy(),
                     ContecDistributionLayoutStrategy(),

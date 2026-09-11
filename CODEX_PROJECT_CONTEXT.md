@@ -132,7 +132,7 @@ matches Windows output.
 
 ## Current Layout Coverage
 
-`StrategyRegistry` currently registers 125 customer layout strategies. Inspect
+`StrategyRegistry` currently registers 126 customer layout strategies. Inspect
 the registry rather than relying on an old customer list in a chat transcript.
 
 Notable layouts added or substantially revised since the original August 4
@@ -142,6 +142,11 @@ Products, Cambridge Environmental, Franz Ziel, Gasco Industrial, McCoy Health
 Science, Rideau Group, St Marks Powder, Summit Supply, Technos DOC, Uni-Kem,
 Curis System, Daigger, George's, Laboratory Sales, United Scientific, Micro
 Essential Laboratory, VWR, Jayhawk, Ecolab/Nalco, and Pinetree.
+
+Colorado Early Education Network uses a clean Word-generated PDF with adjacent
+bill-to and ship-to columns. Its positioned strategy reads the right-hand ship-to
+column dynamically and joins wrapped item numbers such as
+`CHL-10000-1V-` + `100` without invoking fuzzy SKU correction.
 
 Later additions include Produce Packaging DOCX, Hagnos Hygiene, Science Takeout,
 Cardigan, and LD Carlson. Version 1.8.0 also includes targeted fixes for ECA
@@ -442,6 +447,7 @@ Focused tests currently cover:
 - Butler Chemical Products
 - Cambridge Environmental
 - Chosun Measurement
+- Colorado Early Education Network
 - Covenant Aviation Security
 - Electronic Controls Design
 - Eisco
