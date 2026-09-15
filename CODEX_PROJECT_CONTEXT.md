@@ -1,6 +1,6 @@
 # PO Parser - Codex Project Context
 
-Last updated: 2026-09-11
+Last updated: 2026-09-15
 
 ## How To Use This File
 
@@ -19,7 +19,7 @@ meaningful architectural, workflow, or product changes.
 - Repository: https://github.com/swartzfeger/poparser
 - Local path used on the Mac mini: `/Users/jay/dev/kotlin/poparser`
 - Current branch: `main`
-- Current version: `1.8.2`
+- Current version: `1.8.3`
 - Code baseline audited before the 09.11.26 master-data update: `1897bb7`
 - Technology: Kotlin Multiplatform, Compose Desktop, JVM 21
 - Gradle Wrapper: `8.14.4`
@@ -142,6 +142,10 @@ Products, Cambridge Environmental, Franz Ziel, Gasco Industrial, McCoy Health
 Science, Rideau Group, St Marks Powder, Summit Supply, Technos DOC, Uni-Kem,
 Curis System, Daigger, George's, Laboratory Sales, United Scientific, Micro
 Essential Laboratory, VWR, Jayhawk, Ecolab/Nalco, and Pinetree.
+
+Chem Mark purchase orders use a dedicated XLSX parser. The parser selects
+`CHEM MARK OF EAST TE` or `CHEM MARK of SAN ANT` from the ship-to company name;
+it must not infer the account from the workbook heading alone.
 
 Colorado Early Education Network uses a clean Word-generated PDF with adjacent
 bill-to and ship-to columns. Its positioned strategy reads the right-hand ship-to
