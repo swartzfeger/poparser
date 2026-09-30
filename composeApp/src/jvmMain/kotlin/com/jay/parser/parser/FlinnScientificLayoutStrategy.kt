@@ -34,18 +34,41 @@ class FlinnScientificLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
 
     override fun parse(lines: List<String>): ParsedPdfFields {
         val clean = nonBlankLines(lines).map { it.replace(Regex("""\s+"""), " ").trim() }
+        val shipTo = parseShipTo(clean)
 
         return ParsedPdfFields(
             customerName = "FLINN SCIENTIFIC, INC.",
             orderNumber = parseOrderNumber(clean),
             shipToCustomer = "Flinn Scientific Inc.",
-            addressLine1 = "950 N. Raddant Road",
+            addressLine1 = shipTo?.addressLine1,
             addressLine2 = null,
-            city = "Batavia",
-            state = "IL",
-            zip = "60510",
+            city = shipTo?.city,
+            state = shipTo?.state,
+            zip = shipTo?.zip,
             terms = null,
             items = parseItems(clean)
+        )
+    }
+
+    private fun parseShipTo(lines: List<String>): ShipToAddress? {
+        val street = lines.withIndex().firstNotNullOfOrNull { (index, line) ->
+            SHIP_TO_STREET_PATTERN.find(line)?.let { match ->
+                index to "${match.groupValues[1]} N. Raddant Road"
+            }
+        } ?: return null
+
+        val locality = lines
+            .drop(street.first + 1)
+            .take(3)
+            .firstNotNullOfOrNull { line ->
+                LOCALITY_PATTERN.findAll(line).lastOrNull()
+            }
+
+        return ShipToAddress(
+            addressLine1 = street.second,
+            city = locality?.groupValues?.get(1)?.toDisplayCity(),
+            state = locality?.groupValues?.get(2)?.uppercase(),
+            zip = locality?.groupValues?.get(3)
         )
     }
 
@@ -191,5 +214,27 @@ class FlinnScientificLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
             .replace("ORIVE", "DRIVE")
             .replace(Regex("""\s+"""), " ")
             .trim()
+    }
+
+    private fun String.toDisplayCity(): String = lowercase()
+        .split(Regex("""\s+"""))
+        .joinToString(" ") { word -> word.replaceFirstChar { it.uppercase() } }
+
+    private data class ShipToAddress(
+        val addressLine1: String,
+        val city: String?,
+        val state: String?,
+        val zip: String?
+    )
+
+    private companion object {
+        val SHIP_TO_STREET_PATTERN = Regex(
+            """\b(\d{2,6})\s+N\.?\s+RADDANT\s+(?:ROAD|RD\.?)\b""",
+            RegexOption.IGNORE_CASE
+        )
+        val LOCALITY_PATTERN = Regex(
+            """\b([A-Z][A-Z .'-]*?),?\s+([A-Z]{2})\s+(\d{5}(?:-\d{4})?)\b""",
+            RegexOption.IGNORE_CASE
+        )
     }
 }

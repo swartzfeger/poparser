@@ -1,6 +1,6 @@
 # PO Parser - Codex Project Context
 
-Last updated: 2026-09-15
+Last updated: 2026-09-29
 
 ## How To Use This File
 
@@ -19,8 +19,8 @@ meaningful architectural, workflow, or product changes.
 - Repository: https://github.com/swartzfeger/poparser
 - Local path used on the Mac mini: `/Users/jay/dev/kotlin/poparser`
 - Current branch: `main`
-- Current version: `1.8.3`
-- Code baseline audited before the 09.11.26 master-data update: `1897bb7`
+- Current version: `1.8.5`
+- Code baseline before the current RILAB update: `4392367`
 - Technology: Kotlin Multiplatform, Compose Desktop, JVM 21
 - Gradle Wrapper: `8.14.4`
 - Development machine: macOS
@@ -100,6 +100,20 @@ When changing a customer parser:
 - Add a focused regression test using representative extracted lines.
 - Run the full test suite because similar SKUs and PO labels occur across
   customers.
+
+RILAB has three supported input variants: its Excel purchase order, the modern
+Odoo PDF, and an older table-style PDF headed `Rilab SPA`. Modern Odoo rows may
+repeat the SKU in both ordinary and `H40` brackets, may insert a dash after
+`H40`, and may wrap a duplicate SKU onto another line. Prefer the `H40` tag,
+deduplicate the logical row, and exclude freight/transport rows. The older table
+format uses Spanish decimal separators and sometimes places a row's quantity or
+unit price on an adjacent extracted line.
+
+Flinn Scientific POs are image-only scans and enter the parser through OCR. The
+`To` and `Ship To` columns are commonly merged into the same extracted lines.
+Parse the right-hand Raddant Road street number and the following right-hand
+Batavia locality dynamically; current examples use both 770 and 950 N. Raddant
+Road. Do not reinstate a fixed 950 address.
 
 Fisher Scientific POs are unusually noisy and often require OCR. Fisher parsing
 contains special segmentation and PO-number recovery logic. Treat broad OCR or
