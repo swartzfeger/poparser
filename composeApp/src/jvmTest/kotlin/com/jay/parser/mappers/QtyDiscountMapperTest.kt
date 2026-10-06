@@ -69,4 +69,20 @@ class QtyDiscountMapperTest {
         assertEquals(0.05, customChlorine.discountPercent)
         assertEquals(3.848, customChlorine.unitPrice)
     }
+
+    @Test
+    fun usesBartovationFixedPriceForQac1500FiveHundredUnitTier() {
+        fun priceAt(quantity: Double): Double = QtyDiscountMapper.applyQtyDiscount(
+            customerId = "BARTOVATION LLC",
+            sku = "QAC-1500-1V-50",
+            quantity = quantity,
+            unitPrice = 3.9525,
+            priceLevel = "DIST - 15%"
+        ).unitPrice
+
+        assertEquals(3.834, priceAt(499.0))
+        assertEquals(3.75, priceAt(500.0))
+        assertEquals(3.75, priceAt(4_999.0))
+        assertEquals(3.597, priceAt(5_000.0))
+    }
 }

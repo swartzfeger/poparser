@@ -1,6 +1,6 @@
 # PO Parser - Codex Project Context
 
-Last updated: 2026-09-29
+Last updated: 2026-10-06
 
 ## How To Use This File
 
@@ -262,11 +262,17 @@ Prices support three decimal places. JSON numbers omit unnecessary trailing
 zeroes, so `265.250` may be represented as `265.25` without losing value.
 
 The bundled defaults were most recently refreshed from **Master List
-09.11.26.xlsx**. The bundle contains 395 unique customers, 634 item
-descriptions, 499 priced items, 662 GL-account mappings, 70 quantity-discount
-IDs, and 62 quantity-discount rules. Compared with 09.01.26, customer records,
-quantity-discount mappings/rules, and the 184 packaging records were unchanged;
-item descriptions/prices and GL mappings were refreshed from the workbook.
+10.06.26.xlsx**. The bundle contains 304 active customers, 634 item
+descriptions, 499 priced items, 659 GL-account mappings, 70 quantity-discount
+IDs, and 62 quantity-discount rules. Compared with 09.11.26, the active-only
+customer report removed 92 inactive customers, added `TSA-SEATAC`, updated three
+customer records, and removed three obsolete GL mappings. Item data and quantity
+discount rules were unchanged. Existing customer layout strategies remain in
+the codebase so a later master-list refresh can reactivate those customers.
+
+Bartovation's `QAC-1500-1V-50` 500-unit discount tier is an explicit fixed
+price of `$3.75` through quantity 4,999. The 250-unit percentage tier and the
+5,000-unit 9% tier retain their normal calculations.
 
 The bundled revision is declared in `data/masterDataRevision.json`. On startup,
 `MasterDataStore` compares that revision with any persisted user import. An older

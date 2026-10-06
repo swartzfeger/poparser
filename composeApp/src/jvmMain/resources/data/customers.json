@@ -1,12 +1,5 @@
 [
     {
-        "id": "A-1 BARTON WATER CON",
-        "name": "A-1 BARTON WATER CONDITION",
-        "terms": "Prepaid",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
         "id": "ADVANCE PRODUCTS & S",
         "name": "ADVANCE PRODUCTS & SYSTEMS",
         "terms": "Prepaid",
@@ -35,45 +28,10 @@
         "priceLevel": "DIST + 50%"
     },
     {
-        "id": "ALLPOINTS IL",
-        "name": "ALLPOINTS",
-        "terms": "Prepaid",
-        "shipVia": "UPS THRD",
-        "priceLevel": "DIST - 15%"
-    },
-    {
-        "id": "ALPHA ASSEMBLY SOLUT",
-        "name": "ALPHA ASSEMBLY SOLUTIONS",
-        "terms": "Prepaid",
-        "shipVia": "FEDC",
-        "priceLevel": "DIST + 50%"
-    },
-    {
-        "id": "ALPHA CHEMICAL SERVI",
-        "name": "ALPHA CHEMICAL SERVICE",
-        "terms": "Net 30 Days",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
         "id": "APOTHECARY PRODUCTS",
         "name": "APOTHECARY PRODUCTS",
         "terms": "1% 10, Net 30 Days",
         "shipVia": "FEDC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
-        "id": "APPLIED INDUSTRIAL T",
-        "name": "APPLIED INDUSTRIAL TECHNOLOGIE",
-        "terms": "Net 30 Days",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
-        "id": "AQUA BACKFLOW",
-        "name": "AQUA BACKFLOW & CHLORINATION, INC",
-        "terms": "Prepaid",
-        "shipVia": "UPS GRNC",
         "priceLevel": "DIST + 100%"
     },
     {
@@ -98,13 +56,6 @@
         "priceLevel": "DIST + 10%"
     },
     {
-        "id": "ATHEA LABORATORIES",
-        "name": "ATHEA LABORATORIES",
-        "terms": "Net 30 Days",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
         "id": "AUTO-CHLOR SYSTEM TN",
         "name": "AUTO-CHLOR SYSTEM-MEMPHIS PLANT",
         "terms": "1% 10, Net 30 Days",
@@ -117,13 +68,6 @@
         "terms": "Prepaid",
         "shipVia": "UPS GRNC",
         "priceLevel": "DISTRIBUTOR"
-    },
-    {
-        "id": "BAE SYSTEMS ORDNANCE",
-        "name": "BAE SYSTEMS, ORDNANCE SYSTEMS INC",
-        "terms": "Prepaid",
-        "shipVia": "FEDC",
-        "priceLevel": "DIST + 100%"
     },
     {
         "id": "BAILEYS THERMOMETERS",
@@ -140,13 +84,6 @@
         "priceLevel": "DIST - 15%"
     },
     {
-        "id": "BENNETT MARINE UTILI",
-        "name": "BENNETT MARINE UTILITY INC.",
-        "terms": "Net 30 Days",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
         "id": "BETA PROCESOS",
         "name": "BETA COMMERCIAL LLC",
         "terms": "Prepaid",
@@ -154,53 +91,11 @@
         "priceLevel": "DIST + 50%"
     },
     {
-        "id": "BILL ALEMAN INC",
-        "name": "BILL ALEMAN, INC.",
-        "terms": "1% 10, Net 30 Days",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
-        "id": "BLUE DRAGON DEFENSE",
-        "name": "BLUE DRAGON DEFENSE",
-        "terms": "Prepaid",
-        "shipVia": "FEDC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
-        "id": "BSG HANDCRAFT",
-        "name": "BSG HANDCRAFT",
-        "terms": "1% 10, Net 30 Days",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
-        "id": "BUNZL",
-        "name": "BUNZL HICKORY (24-245)",
-        "terms": "Net 30 Days",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
-        "id": "BURNS CHEMICAL SERVI",
-        "name": "BURNS CHEMICAL SERVICES",
-        "terms": "Prepaid",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
         "id": "BUTLER CHEMICAL PROD",
         "name": "BUTLER CHEMICAL PRODUCTS",
         "terms": "1% 10, Net 30 Days",
         "shipVia": "UPS GRNC",
         "priceLevel": "DIST + 50%"
-    },
-    {
-        "id": "BYRON WHITE FORMULAS",
-        "name": "BYRON WHITE FORMULAS",
-        "terms": "Prepaid",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
     },
     {
         "id": "C&M REPRESENTACIO",
@@ -231,32 +126,11 @@
         "priceLevel": "DIST - 5%"
     },
     {
-        "id": "CENTRAL SANITARY SUP",
-        "name": "BRADLEY IFS",
-        "terms": "Prepaid",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
         "id": "CHARLOTTE PRODUCTS",
         "name": "CHARLOTTE PRODUCTS LTD.",
         "terms": "Net 30 Days",
         "shipVia": "UPS GRNC",
         "priceLevel": "DIST + 10%"
-    },
-    {
-        "id": "CHEM MARK OF EAST TE",
-        "name": "CHEM MARK OF EAST TEXAS",
-        "terms": "Prepaid",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
-        "id": "CHEM MARK of SAN ANT",
-        "name": "CHEM MARK of SAN ANTONIO, INC",
-        "terms": "Prepaid",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
     },
     {
         "id": "CHEM-SUPPLY",
@@ -273,52 +147,10 @@
         "priceLevel": "DISTRIBUTOR"
     },
     {
-        "id": "CLARKSON LABORATORY",
-        "name": "CLARKSON LABORATORY & SUPPLY",
-        "terms": "1% 10, Net 30 Days",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
         "id": "COLORADO EARLY EDUCA",
         "name": "COLORADO EARLY EDUCATION NETWORK",
         "terms": "Net 30 Days",
         "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
-        "id": "COMMUNITY LEARNING",
-        "name": "COMMUNITY LEARNING LLC",
-        "terms": "Net 30 Days",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
-        "id": "COMPANHIA NITRO",
-        "name": "BTG PACTUAL COMMODITIES SERTRADING S.A",
-        "terms": "Prepaid",
-        "shipVia": "SPECIAL",
-        "priceLevel": "DIST + 100%"
-    },
-    {
-        "id": "CONTAINMENT TECH",
-        "name": "CONTAINMENT TECH GROUP",
-        "terms": "Prepaid",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
-        "id": "CONTEC DISTRIBUTION",
-        "name": "CONTEC DISTRIBUTION CENTER-WP",
-        "terms": "Net 30 Days",
-        "shipVia": "UPS Collect",
-        "priceLevel": "DIST + 100%"
-    },
-    {
-        "id": "CORPOLAB INC",
-        "name": "CORPOLAB INC",
-        "terms": "Prepaid",
-        "shipVia": "FedEx Ground",
         "priceLevel": "DIST + 100%"
     },
     {
@@ -343,27 +175,6 @@
         "priceLevel": "DIST + 100%"
     },
     {
-        "id": "CURIS SYSTEM",
-        "name": "CURIS SYSTEMS",
-        "terms": "Prepaid",
-        "shipVia": "FEDC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
-        "id": "D.W. DAVIES",
-        "name": "D.W. DAVIES & CO, INC.",
-        "terms": "Net 30 Days",
-        "shipVia": "SPECIAL",
-        "priceLevel": "DIST + 100%"
-    },
-    {
-        "id": "D2 MARINE SOLUTIONS",
-        "name": "D2 MARINE SOLUTIONS INC",
-        "terms": "Prepaid",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
         "id": "DAIGGER",
         "name": "DAIGGER/ WEBER SCIENTIFIC",
         "terms": "1% 10, Net 30 Days",
@@ -376,13 +187,6 @@
         "terms": "1% 10, Net 30 Days",
         "shipVia": "UPS GRNC",
         "priceLevel": "DIST + 50%"
-    },
-    {
-        "id": "DEFENSE CONSULTING S",
-        "name": "DEFENSE CONSULTING SERVICES",
-        "terms": "Prepaid",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DISTRIBUTOR"
     },
     {
         "id": "DEVERE",
@@ -441,13 +245,6 @@
         "priceLevel": "DISTRIBUTOR"
     },
     {
-        "id": "EASTERN CROWN",
-        "name": "EASTERN CROWN",
-        "terms": "Prepaid",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
         "id": "ECA EDUCATIONAL SERV",
         "name": "ECA SCIENCE KIT SERVICE",
         "terms": "Net 30 Days",
@@ -464,23 +261,9 @@
     {
         "id": "ECOLAB PERU HOLDINGS",
         "name": "ECOLAB PERU HOLDINGS S.R.L.",
-        "terms": "1% 15, Net 60 Days",
+        "terms": "Net 60 Days",
         "shipVia": "SPECIAL",
         "priceLevel": "DIST - 15%"
-    },
-    {
-        "id": "EDITHGEN",
-        "name": "EDITHGEN",
-        "terms": "Prepaid",
-        "shipVia": "FEDIE",
-        "priceLevel": "DIST + 50%"
-    },
-    {
-        "id": "EDVOTEK, INC",
-        "name": "EDVOTEK, INC",
-        "terms": "Prepaid",
-        "shipVia": "FEDC",
-        "priceLevel": "DIST + 100%"
     },
     {
         "id": "EISCO SCI",
@@ -511,13 +294,6 @@
         "priceLevel": "DIST + 100%"
     },
     {
-        "id": "ENVIRONMENTAL EDUCAT",
-        "name": "VERDE VALLEY DISCOVERY CENTER",
-        "terms": "Prepaid",
-        "shipVia": "SPECIAL",
-        "priceLevel": "DIST + 100%"
-    },
-    {
         "id": "ETD DIRECT SUPPLY",
         "name": "ETD DIRECT SUPPLY LLC",
         "terms": "Prepaid",
@@ -530,13 +306,6 @@
         "terms": "Net 30 Days",
         "shipVia": "UPS INTX",
         "priceLevel": "DISTRIBUTOR"
-    },
-    {
-        "id": "EXPLOSIA as",
-        "name": "EXPLOSIA a.s.",
-        "terms": "Prepaid",
-        "shipVia": "FEDIE",
-        "priceLevel": "DIST + 100%"
     },
     {
         "id": "EXTRACT TECHNOLOGY",
@@ -560,39 +329,11 @@
         "priceLevel": "DIST + 10%"
     },
     {
-        "id": "FLOAT FRESH",
-        "name": "FLOAT FRESH LLC",
-        "terms": "Prepaid",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 50%"
-    },
-    {
         "id": "FLOWCHEM",
         "name": "FLOW CHEM S.A.S",
         "terms": "Prepaid",
         "shipVia": "UPS GRNC",
         "priceLevel": "DIST - 5%"
-    },
-    {
-        "id": "FORESTRY SUPPLIERS",
-        "name": "FORESTRY SUPPLIERS INC.",
-        "terms": "1% 10, Net 30 Days",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
-        "id": "FORMULATOR SAMPLE SH",
-        "name": "FORMULATOR SAMPLE SHOP",
-        "terms": "Net 30 Days",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 10%"
-    },
-    {
-        "id": "FOX MANUFACTURING",
-        "name": "FOX MANUFACTURING INC",
-        "terms": "Prepaid",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
     },
     {
         "id": "FRANZ ZIEL GmbH",
@@ -616,41 +357,6 @@
         "priceLevel": "DIST + 100%"
     },
     {
-        "id": "GENERAL LABORATORY",
-        "name": "GENERAL LABORATORY SUPPLY",
-        "terms": "Prepaid",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
-        "id": "GENERAL RUBBER & PLA",
-        "name": "GENERAL RUBBER & PLASTICS CO. INC.",
-        "terms": "1% 10, Net 30 Days",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
-        "id": "GEORGES INC",
-        "name": "GEORGE'S INC.",
-        "terms": "Net 30 Days",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
-        "id": "GSA FEDERAL CONTRACT",
-        "name": "GSA FEDERAL CONTRACTOR 8EY72",
-        "terms": "Prepaid",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DISTRIBUTOR"
-    },
-    {
-        "id": "H2O2 WATER INC",
-        "name": "H2O2 WATER INC",
-        "terms": "Prepaid",
-        "shipVia": "FEDC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
         "id": "HAGNOS HYGIENE",
         "name": "HAGNOS HYGIENE CO., LTD.",
         "terms": "Prepaid",
@@ -665,39 +371,11 @@
         "priceLevel": "DIST + 50%"
     },
     {
-        "id": "HAWAII CHEMICAL & SC",
-        "name": "HAWAII CHEMICAL & SCIENTIFIC",
-        "terms": "Net 30 Days",
-        "shipVia": "FEDC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
-        "id": "HOME BREW OHIO",
-        "name": "HOME BREW OHIO",
-        "terms": "Prepaid",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
         "id": "HOME SCIENCE TOOLS",
         "name": "HOME SCIENCE TOOLS",
         "terms": "1% 10, Net 30 Days",
         "shipVia": "UPS GRNC",
         "priceLevel": "DIST + 50%"
-    },
-    {
-        "id": "HVO CHEMISTRY LAB",
-        "name": "HVO CHEMISTRY",
-        "terms": "Prepaid",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DISTRIBUTOR"
-    },
-    {
-        "id": "IMPACT WATER",
-        "name": "IMPACT WATER FOUNDATION",
-        "terms": "Prepaid",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
     },
     {
         "id": "INDUSTRIAS CORY SAS",
@@ -714,27 +392,6 @@
         "priceLevel": "DIST + 10%"
     },
     {
-        "id": "ISOFILL TECHNOLOGY",
-        "name": "ISOFILL TECHNOLOGY",
-        "terms": "Prepaid",
-        "shipVia": "UPS INTX",
-        "priceLevel": "DIST + 100%"
-    },
-    {
-        "id": "ISSS CO LTD",
-        "name": "ISSS CO LTD",
-        "terms": "Prepaid",
-        "shipVia": "UPS INTX",
-        "priceLevel": "DIST + 100%"
-    },
-    {
-        "id": "JANITORIAL PRODUCTS",
-        "name": "JANITORIAL PRODUCTS, CORRECTION ENT",
-        "terms": "Prepaid",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
         "id": "JAYHAWK SALES TX",
         "name": "JAYHAWK SALES AKA LEONARD & ASSOC.",
         "terms": "2% 15, Net 30 Days",
@@ -747,13 +404,6 @@
         "terms": "Net 30 Days",
         "shipVia": "UPS GRNC",
         "priceLevel": "DIST + 10%"
-    },
-    {
-        "id": "JONKMAN EQUIPMENT",
-        "name": "JONKMAN EQUIPMENT LTD",
-        "terms": "Prepaid",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
     },
     {
         "id": "KOBBE-MCCAWLEY CORPO",
@@ -770,25 +420,11 @@
         "priceLevel": "DIST + 100%"
     },
     {
-        "id": "KOCOUR",
-        "name": "KOCOUR",
-        "terms": "Net 30 Days",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
         "id": "KROWNE METAL CORPORA",
         "name": "KROWNE METAL CORPORATION",
         "terms": "1% 10, Net 30 Days",
         "shipVia": "FEDC",
         "priceLevel": "DIST - 10%"
-    },
-    {
-        "id": "LABORATORY SALES &",
-        "name": "LABORATORY SALES & SERVICE LLC",
-        "terms": "Prepaid",
-        "shipVia": "FEDC",
-        "priceLevel": "DIST + 100%"
     },
     {
         "id": "LAMOTTE COMPANY",
@@ -803,34 +439,6 @@
         "terms": "1% 10, Net 30 Days",
         "shipVia": "FEDC",
         "priceLevel": "DIST + 10%"
-    },
-    {
-        "id": "LIT REFRIGERATION",
-        "name": "LIT REFRIGERATION CO.",
-        "terms": "1% 10, Net 30 Days",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
-        "id": "LOTIONCRAFTER",
-        "name": "LOTIONCRAFTER, LLC",
-        "terms": "Net 30 Days",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DISTRIBUTOR"
-    },
-    {
-        "id": "MAKINGCOSMETICS.COM",
-        "name": "MAKINGCOSMETICS INC.",
-        "terms": "Prepaid",
-        "shipVia": "SPECIAL",
-        "priceLevel": "DIST + 100%"
-    },
-    {
-        "id": "MARKETING Y COMUNICA",
-        "name": "MARKETING Y COMUNICACION DIRECTA",
-        "terms": "Prepaid",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DISTRIBUTOR"
     },
     {
         "id": "MATT-CHLOR INC",
@@ -875,13 +483,6 @@
         "priceLevel": "DIST - 10%"
     },
     {
-        "id": "MIDLAND SCIENTIFI",
-        "name": "MIDLAND SCIENTIFIC INC",
-        "terms": "Prepaid",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
         "id": "MIROIL USA, LLC",
         "name": "MIROIL USA, LLC",
         "terms": "Net 30 Days",
@@ -910,51 +511,9 @@
         "priceLevel": "DIST - 15%"
     },
     {
-        "id": "NASCO WI",
-        "name": "NASCO WISCONSIN",
-        "terms": "1% 10, Net 30 Days",
-        "shipVia": "FEDC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
         "id": "NATIONAL CHEMICALS",
         "name": "NATIONAL CHEMICALS, INC.",
         "terms": "Net 30 Days",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
-        "id": "NATURES WORKSHOP",
-        "name": "NATURE'S WORKSHOP PLUS, INC",
-        "terms": "Net 30 Days",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
-        "id": "NEPHRON PHARMACEUTIC",
-        "name": "NEPHRON PHARMACEUTICALS CORP",
-        "terms": "Prepaid",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
-        "id": "NEW YORK CITY POLICE",
-        "name": "NEW YORK CITY POLICE DEPT",
-        "terms": "Prepaid",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
-        "id": "NOCODE STUDIO CO",
-        "name": "NOCODE STUDIO COMPANY",
-        "terms": "Prepaid",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
-        "id": "OSCELOA SUPPLY, INC",
-        "name": "OSCEOLA SUPPLY, INC",
-        "terms": "Prepaid",
         "shipVia": "UPS GRNC",
         "priceLevel": "DIST + 100%"
     },
@@ -966,25 +525,11 @@
         "priceLevel": "DIST + 100%"
     },
     {
-        "id": "PATRICK SYSTEM",
-        "name": "PATRICK SYSTEM OPERATIONS, LLC",
-        "terms": "Prepaid",
-        "shipVia": "SPECIAL",
-        "priceLevel": "DIST + 100%"
-    },
-    {
         "id": "PDQ MANUFACTURING",
         "name": "PDQ MANUFACTURING INC.",
         "terms": "Net 30 Days",
         "shipVia": "UPS GRNC",
         "priceLevel": "DIST + 10%"
-    },
-    {
-        "id": "PHENOMUNE",
-        "name": "PHENOMUNE LLC",
-        "terms": "Prepaid",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
     },
     {
         "id": "PINETREE INSTRUMENTS",
@@ -997,7 +542,7 @@
         "id": "PLANT PRODUCTS",
         "name": "PLANT PRODUCTS",
         "terms": "1% 10, Net 30 Days",
-        "shipVia": "FEDC",
+        "shipVia": "FEDIE",
         "priceLevel": "DIST + 50%"
     },
     {
@@ -1022,13 +567,6 @@
         "priceLevel": "DIST + 10%"
     },
     {
-        "id": "PROWEST SUPPLIES INC",
-        "name": "PROWEST SUPPLIES INC.",
-        "terms": "Prepaid",
-        "shipVia": "FEDIE",
-        "priceLevel": "DIST + 100%"
-    },
-    {
         "id": "QUALITY SCIENCE LABS",
         "name": "QUALITY SCIENCE LABS",
         "terms": "Net 30 Days",
@@ -1036,24 +574,10 @@
         "priceLevel": "DIST + 50%"
     },
     {
-        "id": "QVORTEX LLC",
-        "name": "QVORTEX LLC",
-        "terms": "Net 30 Days",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
         "id": "RAMCO",
         "name": "RAMCO MANUFACTURING COMPANY INC.",
         "terms": "Prepaid",
         "shipVia": "SPECIAL",
-        "priceLevel": "DIST + 100%"
-    },
-    {
-        "id": "RHOMAR WATER",
-        "name": "RHOMAR WATER",
-        "terms": "Net 30 Days",
-        "shipVia": "UPS Collect",
         "priceLevel": "DIST + 100%"
     },
     {
@@ -1071,32 +595,11 @@
         "priceLevel": "DISTRIBUTOR"
     },
     {
-        "id": "RITZ SAFETY LLC",
-        "name": "RITZ SAFETY LLC",
-        "terms": "Prepaid",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
         "id": "Sage Test",
         "name": "Sage TEst",
         "terms": "Prepaid",
         "shipVia": "UPS GRNC",
         "priceLevel": "DISTRIBUTOR"
-    },
-    {
-        "id": "SAINT LUKES HEALTH",
-        "name": "SAINT LUKE'S HEALTH SYSTEM",
-        "terms": "Prepaid",
-        "shipVia": "UPS THRD",
-        "priceLevel": "DIST + 100%"
-    },
-    {
-        "id": "SANI-TEST",
-        "name": "SANI-TEST, LLC",
-        "terms": "Prepaid",
-        "shipVia": "FEDC",
-        "priceLevel": "DIST + 100%"
     },
     {
         "id": "SANITECH",
@@ -1113,31 +616,10 @@
         "priceLevel": "DISTRIBUTOR"
     },
     {
-        "id": "SCIEDCO LABS",
-        "name": "SCIEDCO LABS",
-        "terms": "Prepaid",
-        "shipVia": "UPS INTX",
-        "priceLevel": "DIST + 100%"
-    },
-    {
-        "id": "SCIENCE FIRST",
-        "name": "SCIENCE FIRST",
-        "terms": "1% 10, Net 30 Days",
-        "shipVia": "FEDC",
-        "priceLevel": "DIST + 50%"
-    },
-    {
         "id": "SCIENCE TAKEOUT",
         "name": "SCIENCE TAKEOUT",
         "terms": "Prepaid",
         "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
-        "id": "SCINO PHARM TAIWAN L",
-        "name": "SCINO PHARM TAIWAN LTD",
-        "terms": "Prepaid",
-        "shipVia": "DHL COLLECT",
         "priceLevel": "DIST + 100%"
     },
     {
@@ -1155,13 +637,6 @@
         "priceLevel": "DIST - 5%"
     },
     {
-        "id": "SINO TOPLEADER TECH",
-        "name": "SINO TOPLEADER TECHNOLOGIES CO. LTD",
-        "terms": "Prepaid",
-        "shipVia": "DHL Collect",
-        "priceLevel": "DIST + 100%"
-    },
-    {
         "id": "SOMERSET EDUCATIONAL",
         "name": "SOMERSET EDUCATIONAL (PTY) LTD",
         "terms": "Prepaid",
@@ -1176,30 +651,9 @@
         "priceLevel": "DIST + 100%"
     },
     {
-        "id": "STATLAB",
-        "name": "STATLAB MEDICAL PRODUCTS",
-        "terms": "Prepaid",
-        "shipVia": "FEDC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
-        "id": "STONER QUALITY WATER",
-        "name": "STONER QUALITY WATER",
-        "terms": "Net 30 Days",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
         "id": "SUMMIT SUPPLY",
         "name": "SUMMIT SUPPLY",
         "terms": "Net 30 Days",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
-        "id": "SUN CHEMICAL OH",
-        "name": "SUN CHEMICAL CORP.",
-        "terms": "1% 10, Net 30 Days",
         "shipVia": "UPS GRNC",
         "priceLevel": "DIST + 100%"
     },
@@ -1208,20 +662,6 @@
         "name": "SURRY CHEMICALS, INC",
         "terms": "Prepaid",
         "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
-        "id": "SUT CORP",
-        "name": "SUT CORP",
-        "terms": "Prepaid",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
-        "id": "TAYLOR TECHNOLOGIES",
-        "name": "TAYLOR WATER TECHNOLOGIES",
-        "terms": "Net 30 Days",
-        "shipVia": "SPECIAL",
         "priceLevel": "DIST + 100%"
     },
     {
@@ -1236,20 +676,6 @@
         "name": "TECHNOS Pty. Ltd.",
         "terms": "Prepaid",
         "shipVia": "FEDIE",
-        "priceLevel": "DIST + 100%"
-    },
-    {
-        "id": "THERMAL SCIENTIFIC",
-        "name": "THERMAL SCIENTIFIC INC.",
-        "terms": "1% 10, Net 30 Days",
-        "shipVia": "SPECIAL",
-        "priceLevel": "DIST + 100%"
-    },
-    {
-        "id": "TRANSATLANTIC TRADIN",
-        "name": "TRANSATLANTIC TRADING",
-        "terms": "Prepaid",
-        "shipVia": "UPS GRNC",
         "priceLevel": "DIST + 100%"
     },
     {
@@ -2415,6 +1841,13 @@
         "priceLevel": "DISTRIBUTOR"
     },
     {
+        "id": "TSA-SEATAC",
+        "name": "TSA-SEATAC",
+        "terms": "Prepaid",
+        "shipVia": "UPS GRNC",
+        "priceLevel": "DISTRIBUTOR"
+    },
+    {
         "id": "TSA-SEATTLE",
         "name": "TSA-SEATTLE",
         "terms": "Prepaid",
@@ -2625,20 +2058,6 @@
         "priceLevel": "DISTRIBUTOR"
     },
     {
-        "id": "TSM SOLUTIONS SDN BH",
-        "name": "TSM MFG SOLUTIONS PLT",
-        "terms": "Prepaid",
-        "shipVia": "FEDIE",
-        "priceLevel": "DIST + 100%"
-    },
-    {
-        "id": "TUNDRA SPECIALTIES",
-        "name": "TUNDRA SPECIALTIES",
-        "terms": "Prepaid",
-        "shipVia": "UPS THRD",
-        "priceLevel": "DIST - 15%"
-    },
-    {
         "id": "UNI-KEM.COM",
         "name": "UNI-KEM.COM",
         "terms": "1% 10, Net 30 Days",
@@ -2651,27 +2070,6 @@
         "terms": "1% 10, Net 30 Days",
         "shipVia": "SPECIAL",
         "priceLevel": "DIST + 10%"
-    },
-    {
-        "id": "UNITED SCIENTIFIC",
-        "name": "UNITED SCIENTIFIC SUPPLIES, INC.",
-        "terms": "Prepaid",
-        "shipVia": "FEDC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
-        "id": "UNIVISION USA INC",
-        "name": "UNIVISIOIN USA INC",
-        "terms": "Prepaid",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
-        "id": "US FOODS",
-        "name": "US FOODS, INC",
-        "terms": "Net 30 Days",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
     },
     {
         "id": "USABLUEBOOK",
@@ -2702,20 +2100,6 @@
         "priceLevel": "DIST - 5%"
     },
     {
-        "id": "WATERTEST SYSTEMS",
-        "name": "WATERTEST SYSTEMS PTY LTD",
-        "terms": "Net 30 Days",
-        "shipVia": "FEDIE",
-        "priceLevel": "DISTRIBUTOR"
-    },
-    {
-        "id": "WEBB CHEMICAL & PAPE",
-        "name": "WEBB CHEMICAL & PAPER",
-        "terms": "1% 10, Net 30 Days",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
         "id": "WESTERN AIR LIMITED",
         "name": "WESTERN AIR LIMITED",
         "terms": "Prepaid",
@@ -2730,32 +2114,11 @@
         "priceLevel": "DIST + 100%"
     },
     {
-        "id": "WILKEM SCIENTIFIC",
-        "name": "WILKEM SCIENTIFIC LIMITED",
-        "terms": "Prepaid",
-        "shipVia": "SPECIAL",
-        "priceLevel": "DIST + 100%"
-    },
-    {
-        "id": "WILKENS ANDERSON",
-        "name": "WILKENS-ANDERSON CO.",
-        "terms": "1% 10, Net 30 Days",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
         "id": "YU YU INSTRUMENT CO.",
         "name": "YU YU INSTRUMENT CO.",
         "terms": "Prepaid",
         "shipVia": "FEDIE",
         "priceLevel": "DISTRIBUTOR"
-    },
-    {
-        "id": "ZHANG JIAGANG SUREJI",
-        "name": "ZHANG JIAGANG SUREJIE ENVIRONMENTAL TEC",
-        "terms": "Prepaid",
-        "shipVia": "FEDIE",
-        "priceLevel": "DIST + 100%"
     },
     {
         "id": "ZZ SCHOOL SPEC HISTO",
