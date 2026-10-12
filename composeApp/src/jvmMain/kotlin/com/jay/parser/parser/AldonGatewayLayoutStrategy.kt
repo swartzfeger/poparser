@@ -11,7 +11,10 @@ class AldonGatewayLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         val text = compact(lines.joinToString("\n"))
         return text.contains("GATEWAYCHEMICALSLLC") &&
                 text.contains("DBAALDON") &&
-                text.contains("VENDORCODEPRELA")
+                (
+                        text.contains("VENDORCODEPRELA") ||
+                                text.contains("221ROCHESTERST") && text.contains("ALDONCHEMCOM")
+                        )
     }
 
     override fun score(lines: List<String>): Int {
@@ -42,7 +45,8 @@ class AldonGatewayLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
 
     private fun parseOrderNumber(lines: List<String>): String? {
         val joined = lines.joinToString(" ")
-        return PO_NUMBER_PATTERN.find(joined)?.groupValues?.get(1)
+        return OCR_PO_RECOVERY_PATTERN.find(joined)?.groupValues?.get(1)
+            ?: PO_NUMBER_PATTERN.find(joined)?.groupValues?.get(1)
             ?: PO_FALLBACK_PATTERN.find(joined)?.value
     }
 
@@ -88,13 +92,17 @@ class AldonGatewayLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         .replace(Regex("""[^A-Z0-9]"""), "")
 
     private companion object {
-        val PO_NUMBER_PATTERN = Regex(
-            """(?:PO|Pp|[5S][O9])\s*(?:Number|Jumper|umber)?\s*:?\s*(26\d{4})""",
+        val OCR_PO_RECOVERY_PATTERN = Regex(
+            """ALDON\s+OCR\s+PO\s*:\s*(2\d{5})""",
             RegexOption.IGNORE_CASE
         )
-        val PO_FALLBACK_PATTERN = Regex("""\b26\d{4}\b""")
+        val PO_NUMBER_PATTERN = Regex(
+            """(?:PO|Pp|[5S][O9])\s*(?:Number|Jumper|umber)?\s*:?\s*(2\d{5})""",
+            RegexOption.IGNORE_CASE
+        )
+        val PO_FALLBACK_PATTERN = Regex("""\b2\d{5}\b""")
         val VENDOR_SKU_PATTERN = Regex(
-            """V(?:nd|ind)#:\s*([A-Z0-9.-]+)""",
+            """V(?:ndi?|ind)#+\s*:\s*([A-Z0-9.-]+)""",
             RegexOption.IGNORE_CASE
         )
         val ORDER_ROW_PATTERN = Regex(

@@ -1,6 +1,6 @@
 # PO Parser - Codex Project Context
 
-Last updated: 2026-10-06
+Last updated: 2026-10-12
 
 ## How To Use This File
 
@@ -273,6 +273,12 @@ the codebase so a later master-list refresh can reactivate those customers.
 Bartovation's `QAC-1500-1V-50` 500-unit discount tier is an explicit fixed
 price of `$3.75` through quantity 4,999. The 250-unit percentage tier and the
 5,000-unit 9% tier retain their normal calculations.
+
+Aldon/Gateway PDFs are image-only two-column forms. Their OCR path uses an
+exact-customer grayscale PSM 4 pass so the PO header and item rows remain
+together. Aldon PO recovery accepts six-digit `2xxxxx` numbers and the observed
+OCR variants of the `Vnd#` SKU label; unrelated OCR layouts retain their existing
+processing.
 
 The bundled revision is declared in `data/masterDataRevision.json`. On startup,
 `MasterDataStore` compares that revision with any persisted user import. An older

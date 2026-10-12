@@ -100,6 +100,25 @@ class OcrPdfTextExtractor(
                     }
 
                     /*
+                     * Aldon's image-only purchase orders use a two-column form that
+                     * PSM 3 occasionally reads column-by-column. Grayscale PSM 4
+                     * preserves the PO header and keeps each item row with its Vnd#.
+                     */
+                    if (looksLikeAldon(pageText)) {
+                        val orderNumber = findAldonOrderNumber(pageText)
+                        val grayscaleFile = File(tempDir, "page_${i}_aldon_gray.png")
+                        ImageIO.write(grayscaleImage, "png", grayscaleFile)
+                        val formText = runTesseract(grayscaleFile, pageSegmentationMode = 4)
+                        if (formText.isNotBlank()) {
+                            pageText = buildString {
+                                append(formText)
+                                if (orderNumber != null) append("\nALDON OCR PO: $orderNumber")
+                            }
+                        }
+                        grayscaleFile.delete()
+                    }
+
+                    /*
                      * Covenant's low-contrast scans lose the boxed date, PO field,
                      * and table columns after binarization. Grayscale PSM 4 retains
                      * the complete single-row form across the known scan variants.
@@ -181,6 +200,21 @@ class OcrPdfTextExtractor(
                 compactText.contains("751NW1STLN") &&
                 compactText.contains("LAMARMO64759") &&
                 compactText.contains("OFFICEQVORTEXCHEMICALSCOM")
+    }
+
+    private fun looksLikeAldon(text: String): Boolean {
+        val compactText = text.uppercase().replace(Regex("""[^A-Z0-9]"""), "")
+        return compactText.contains("GATEWAYCHEMICALSLLC") &&
+                compactText.contains("DBAALDON") &&
+                compactText.contains("221ROCHESTER") &&
+                compactText.contains("ALDONCHEMCOM")
+    }
+
+    private fun findAldonOrderNumber(text: String): String? {
+        return Regex("""\b2\d{5}\b""")
+            .findAll(text)
+            .map { it.value }
+            .firstOrNull()
     }
 
     private fun looksLikeCovenant(text: String): Boolean {
