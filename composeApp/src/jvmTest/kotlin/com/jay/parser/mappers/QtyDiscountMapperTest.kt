@@ -7,7 +7,7 @@ import kotlin.test.assertTrue
 class QtyDiscountMapperTest {
 
     @Test
-    fun preservesThreeDecimalPrecisionForDiscountedPrices() {
+    fun roundsDiscountedPricesToFourDecimalsBeforeFinalCents() {
         val result = QtyDiscountMapper.applyQtyDiscount(
             customerId = "DIVERSIFIED FOODSERV",
             sku = "PH3060-1B-50",
@@ -17,7 +17,35 @@ class QtyDiscountMapperTest {
         )
 
         assertEquals(0.05, result.discountPercent)
-        assertEquals(2.826, result.unitPrice)
+        assertEquals(2.83, result.unitPrice)
+    }
+
+    @Test
+    fun matchesSageRoundingForFlinnThreePercentDiscount() {
+        val result = QtyDiscountMapper.applyQtyDiscount(
+            customerId = "FLINN SCIENTIFIC INC",
+            sku = "PH0114-1B-50",
+            quantity = 55.0,
+            unitPrice = 3.85,
+            priceLevel = "DIST + 10%"
+        )
+
+        assertEquals(0.03, result.discountPercent)
+        assertEquals(3.73, result.unitPrice)
+    }
+
+    @Test
+    fun leavesUndiscountedThreeDecimalMasterPriceUntouched() {
+        val result = QtyDiscountMapper.applyQtyDiscount(
+            customerId = "TEST CUSTOMER",
+            sku = "PER-400-1V-100",
+            quantity = 1.0,
+            unitPrice = 10.725,
+            priceLevel = "DISTRIBUTOR"
+        )
+
+        assertEquals(0.0, result.discountPercent)
+        assertEquals(10.725, result.unitPrice)
     }
 
     @Test
@@ -63,11 +91,11 @@ class QtyDiscountMapperTest {
         )
 
         assertEquals(0.10, quire.discountPercent)
-        assertEquals(11.565, quire.unitPrice)
+        assertEquals(11.57, quire.unitPrice)
         assertEquals(0.03, paa.discountPercent)
-        assertEquals(4.986, paa.unitPrice)
+        assertEquals(4.99, paa.unitPrice)
         assertEquals(0.05, customChlorine.discountPercent)
-        assertEquals(3.848, customChlorine.unitPrice)
+        assertEquals(3.85, customChlorine.unitPrice)
     }
 
     @Test
@@ -80,9 +108,9 @@ class QtyDiscountMapperTest {
             priceLevel = "DIST - 15%"
         ).unitPrice
 
-        assertEquals(3.834, priceAt(499.0))
+        assertEquals(3.83, priceAt(499.0))
         assertEquals(3.75, priceAt(500.0))
         assertEquals(3.75, priceAt(4_999.0))
-        assertEquals(3.597, priceAt(5_000.0))
+        assertEquals(3.60, priceAt(5_000.0))
     }
 }

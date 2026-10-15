@@ -200,9 +200,16 @@ object QtyDiscountMapper {
     }
 
     private fun roundDiscountedPrice(unitPrice: Double, discountPercent: Double): Double {
+        /*
+         * Sage calculates quantity discounts to four decimal places before it
+         * rounds the final unit price to cents. Keeping those as two distinct
+         * operations avoids prematurely turning 3.7345 into 3.735 and then
+         * rounding that intermediate value up to 3.74.
+         */
         return BigDecimal.valueOf(unitPrice)
             .multiply(BigDecimal.ONE.subtract(BigDecimal.valueOf(discountPercent)))
-            .setScale(3, RoundingMode.HALF_UP)
+            .setScale(4, RoundingMode.HALF_UP)
+            .setScale(2, RoundingMode.HALF_UP)
             .toDouble()
     }
 

@@ -338,6 +338,12 @@ The **Round Up to Nearest Cent** setting defaults on. It rounds a three-decimal
 unit price ending in 5 to two decimals before calculating the exported amount;
 turning it off preserves the three-decimal master price.
 
+Quantity-discount prices follow Sage's separate calculation path: calculate the
+discount with `BigDecimal`, round the result to four decimal places, and then
+round the final discounted unit price to two decimals. This prevents an exact
+result such as `3.7345` from being prematurely rounded to `3.735` and then to
+`3.74`. Undiscounted master prices retain their original three-decimal behavior.
+
 The **No Ship Via**, **No Ship To**, and **No Box Weights and Dimensions Needed**
 settings can blank those fields or the packaging Invoice Note during export. The
 parsed-order UI retains detailed volume, weight, box-plan, and packaging-status

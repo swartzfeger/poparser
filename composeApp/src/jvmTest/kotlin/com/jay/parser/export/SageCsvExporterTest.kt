@@ -1,5 +1,6 @@
 package com.jay.parser.export
 
+import com.jay.parser.mappers.QtyDiscountMapper
 import com.jay.parser.models.ExportOrder
 import com.jay.parser.models.ExportOrderLine
 import com.jay.parser.models.PackagingSummary
@@ -13,6 +14,86 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class SageCsvExporterTest {
+
+    @Test
+    fun exportsSageRoundedFlinnQuantityDiscount() {
+        val discountedPrice = QtyDiscountMapper.applyQtyDiscount(
+            customerId = "FLINN SCIENTIFIC INC",
+            sku = "PH0114-1B-50",
+            quantity = 55.0,
+            unitPrice = 3.85,
+            priceLevel = "DIST + 10%"
+        ).unitPrice
+        val order = testOrder().copy(
+            customer = ResolvedCustomer(
+                id = "FLINN SCIENTIFIC INC",
+                name = "FLINN SCIENTIFIC INC.",
+                terms = "1% 10, Net 30 Days",
+                shipVia = "UPS GRNC",
+                priceLevel = "DIST + 10%"
+            ),
+            orderNumber = "456511",
+            lines = listOf(
+                testOrder().lines.single().copy(
+                    sku = "PH0114-1B-50",
+                    quantityRaw = 55.0,
+                    quantityForExport = 55.0,
+                    unitPriceReference = 3.73,
+                    unitPriceResolved = discountedPrice
+                )
+            )
+        )
+
+        val records = CSVFormat.DEFAULT.builder()
+            .setHeader()
+            .setSkipHeaderRecord(true)
+            .build()
+            .parse(
+                StringReader(
+                    SageCsvExporter().buildCsv(
+                        orders = listOf(order),
+                        orderDate = LocalDate.of(2026, 10, 14),
+                        roundUpToNearestCent = true
+                    )
+                )
+            )
+            .records
+
+        assertEquals("-3.730", records.single().get("Unit Price"))
+        assertEquals("-205.15", records.single().get("Amount"))
+    }
+
+    @Test
+    fun retainsOptionalCentRoundingForThreeDecimalMasterPrices() {
+        val order = testOrder().copy(
+            lines = listOf(
+                testOrder().lines.single().copy(
+                    quantityRaw = 1.0,
+                    quantityForExport = 1.0,
+                    unitPriceResolved = 10.725
+                )
+            )
+        )
+
+        fun exportedUnitPrice(roundUpToNearestCent: Boolean): String {
+            val csv = SageCsvExporter().buildCsv(
+                orders = listOf(order),
+                orderDate = LocalDate.of(2026, 10, 14),
+                roundUpToNearestCent = roundUpToNearestCent
+            )
+            return CSVFormat.DEFAULT.builder()
+                .setHeader()
+                .setSkipHeaderRecord(true)
+                .build()
+                .parse(StringReader(csv))
+                .records
+                .single()
+                .get("Unit Price")
+        }
+
+        assertEquals("-10.730", exportedUnitPrice(roundUpToNearestCent = true))
+        assertEquals("-10.725", exportedUnitPrice(roundUpToNearestCent = false))
+    }
 
     @Test
     fun exportsUnitPricesWithThreeDecimals() {
