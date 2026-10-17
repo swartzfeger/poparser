@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -22,6 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -38,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.FrameWindowScope
 import com.jay.parser.export.SageCsvExporter
 import com.jay.parser.models.ExportOrder
+import com.jay.parser.parser.InactiveCustomerException
 import com.jay.parser.parser.OrderEnricher
 import com.jay.parser.parser.OrderFileParser
 import java.awt.Component
@@ -87,6 +90,7 @@ fun FrameWindowScope.MainScreen(
     val queuedFiles = remember { mutableStateListOf<File>() }
     var parsedOrders by remember { mutableStateOf<List<ExportOrder>>(emptyList()) }
     var uiState by remember { mutableStateOf(UiState()) }
+    var inactiveCustomerMessage by remember { mutableStateOf<String?>(null) }
     var isDragOver by remember { mutableStateOf(false) }
     val fileParser = remember { OrderFileParser() }
     val enricher = remember { OrderEnricher() }
@@ -439,6 +443,7 @@ fun FrameWindowScope.MainScreen(
                         onClear = {
                             queuedFiles.clear()
                             parsedOrders = emptyList()
+                            inactiveCustomerMessage = null
                             uiState = UiState()
                         },
                         onParse = {
@@ -454,6 +459,7 @@ fun FrameWindowScope.MainScreen(
                                 try {
                                     // All UI updates must go through invokeLater
                                     SwingUtilities.invokeLater {
+                                        inactiveCustomerMessage = null
                                         uiState = UiState(
                                             status = "Processing",
                                             message = "Starting parse of ${queuedFiles.size} file(s)..."
@@ -461,6 +467,7 @@ fun FrameWindowScope.MainScreen(
                                     }
 
                                     val results = mutableListOf<ExportOrder>()
+                                    val inactiveCustomers = linkedSetOf<String>()
 
                                     queuedFiles.forEachIndexed { index, file ->
                                         val fileNum = index + 1
@@ -482,6 +489,9 @@ fun FrameWindowScope.MainScreen(
                                             try {
                                                 val enriched = enricher.enrich(file.name, parsed)
                                                 results.add(enriched)
+                                            } catch (e: InactiveCustomerException) {
+                                                inactiveCustomers.add(e.customerName)
+                                                println("Blocked inactive customer order from ${file.name}: ${e.message}")
                                             } catch (e: Exception) {
                                                 println("Error enriching order from ${file.name}: ${e.message}")
                                                 e.printStackTrace()
@@ -493,10 +503,20 @@ fun FrameWindowScope.MainScreen(
 
                                     SwingUtilities.invokeLater {
                                         parsedOrders = results
-                                        uiState = UiState(
-                                            status = "Complete",
-                                            message = "Successfully parsed ${results.size} orders from ${queuedFiles.size} files in ${"%.2f".format(elapsedSeconds)}s."
-                                        )
+                                        if (inactiveCustomers.isNotEmpty()) {
+                                            inactiveCustomerMessage = inactiveCustomers.joinToString("\n\n") { customerName ->
+                                                InactiveCustomerException(customerName).message.orEmpty()
+                                            }
+                                            uiState = UiState(
+                                                status = if (results.isEmpty()) "Blocked" else "Complete with warnings",
+                                                message = "Parsed ${results.size} active order(s); blocked ${inactiveCustomers.size} inactive customer(s) in ${"%.2f".format(elapsedSeconds)}s."
+                                            )
+                                        } else {
+                                            uiState = UiState(
+                                                status = "Complete",
+                                                message = "Successfully parsed ${results.size} orders from ${queuedFiles.size} files in ${"%.2f".format(elapsedSeconds)}s."
+                                            )
+                                        }
                                         resetCursor()
                                     }
                                 } catch (e: Exception) {
@@ -590,6 +610,19 @@ fun FrameWindowScope.MainScreen(
                     }
                 }
             }
+        }
+
+        inactiveCustomerMessage?.let { message ->
+            AlertDialog(
+                onDismissRequest = { inactiveCustomerMessage = null },
+                title = { Text("Inactive Customer") },
+                text = { Text(message) },
+                confirmButton = {
+                    TextButton(onClick = { inactiveCustomerMessage = null }) {
+                        Text("OK")
+                    }
+                }
+            )
         }
     }
 }

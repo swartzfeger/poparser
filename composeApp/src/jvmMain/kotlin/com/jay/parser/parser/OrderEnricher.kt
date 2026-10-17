@@ -144,11 +144,12 @@ class OrderEnricher {
     }
 
     private fun resolveCustomer(parsed: ParsedPdfFields): ResolvedCustomer? {
-        val lookupSource = parsed.customerName
-            ?: parsed.shipToCustomer
+        val lookupSource = parsed.customerName?.takeIf { it.isNotBlank() }
+            ?: parsed.shipToCustomer?.takeIf { it.isNotBlank() }
             ?: return null
 
-        val match = CustomerMapper.lookupCustomer(lookupSource) ?: return null
+        val match = CustomerMapper.lookupCustomer(lookupSource)
+            ?: throw InactiveCustomerException(lookupSource)
 
         return ResolvedCustomer(
             id = match.id,

@@ -269,6 +269,11 @@ customer report removed 92 inactive customers, added `TSA-SEATAC`, updated three
 customer records, and removed three obsolete GL mappings. Item data and quantity
 discount rules were unchanged. Existing customer layout strategies remain in
 the codebase so a later master-list refresh can reactivate those customers.
+When a retained layout recognizes a customer that is absent from the active
+customer master, `OrderEnricher` throws `InactiveCustomerException` before any
+order can be exported. The main UI blocks that order and tells the user to
+onboard the customer again in Sage. Other active orders in the same batch may
+continue parsing.
 
 Bartovation's `QAC-1500-1V-50` 500-unit discount tier is an explicit fixed
 price of `$3.75` through quantity 4,999. The 250-unit percentage tier and the
