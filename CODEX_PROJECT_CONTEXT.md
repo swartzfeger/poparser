@@ -161,6 +161,14 @@ Chem Mark purchase orders use a dedicated XLSX parser. The parser selects
 `CHEM MARK OF EAST TE` or `CHEM MARK of SAN ANT` from the ship-to company name;
 it must not infer the account from the workbook heading alone.
 
+Summit Supply's XLSX parser supports both its original `QTY / ITEM #` template
+and the newer `Supply Source Item # / Price - each / qty/case` template.
+The newer workbook carries its name only in a logo, so matching combines its
+Brentwood address with the distinctive table and PO labels (or a textual Summit
+Supply identity). Worksheet names and PO/header row numbers are not fixed for
+that format. Read the address from the workbook, keep ordered case quantities
+unchanged, and normalize the observed `QAC-400-IV-50` typo to `QAC-400-1V-50`.
+
 Colorado Early Education Network uses a clean Word-generated PDF with adjacent
 bill-to and ship-to columns. Its positioned strategy reads the right-hand ship-to
 column dynamically and joins wrapped item numbers such as

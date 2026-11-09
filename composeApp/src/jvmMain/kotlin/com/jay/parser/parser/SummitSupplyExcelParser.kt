@@ -7,6 +7,7 @@ import com.jay.parser.pdf.ParsedPdfItem
 import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.ss.usermodel.DataFormatter
 import org.apache.poi.ss.usermodel.Row
+import org.apache.poi.ss.usermodel.Sheet
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import java.io.File
 import java.io.FileInputStream
@@ -18,11 +19,7 @@ class SummitSupplyExcelParser {
         return try {
             FileInputStream(file).use { input ->
                 XSSFWorkbook(input).use { workbook ->
-                    val sheet = workbook.getSheet("Sheet1") ?: return false
-                    sheet.cellText(0, 0).equals("PRECISION LABORATORIES", ignoreCase = true) &&
-                            sheet.cellText(6, 0).equals("PO:", ignoreCase = true) &&
-                            sheet.cellText(8, 1).equals("SUMMIT SUPPLY", ignoreCase = true) &&
-                            findItemHeader(sheet) != null
+                    workbook.any { sheet -> isLegacySheet(sheet) || isSupplySourceSheet(sheet) }
                 }
             }
         } catch (_: Exception) {
@@ -33,8 +30,9 @@ class SummitSupplyExcelParser {
     fun parse(file: File): ParsedPdfFields {
         FileInputStream(file).use { input ->
             XSSFWorkbook(input).use { workbook ->
-                val sheet = workbook.getSheet("Sheet1")
-                    ?: error("Missing Sheet1 in ${file.name}")
+                val sheet = workbook.firstOrNull { isLegacySheet(it) || isSupplySourceSheet(it) }
+                    ?: error("Missing Summit Supply worksheet in ${file.name}")
+                if (isSupplySourceSheet(sheet)) return parseSupplySourceSheet(sheet)
                 val headerRow = findItemHeader(sheet)
                     ?: error("Missing Summit Supply item header in ${file.name}")
                 val customer = CustomerMapper.lookupCustomer(CUSTOMER_NAME)
@@ -77,7 +75,75 @@ class SummitSupplyExcelParser {
         }
     }
 
-    private fun findItemHeader(sheet: org.apache.poi.ss.usermodel.Sheet): Int? =
+    private fun isLegacySheet(sheet: Sheet): Boolean =
+        sheet.cellText(0, 0).equals("PRECISION LABORATORIES", ignoreCase = true) &&
+            sheet.cellText(6, 0).equals("PO:", ignoreCase = true) &&
+            sheet.cellText(8, 1).equals(CUSTOMER_NAME, ignoreCase = true) &&
+            findItemHeader(sheet) != null
+
+    private fun isSupplySourceSheet(sheet: Sheet): Boolean {
+        val header = findSupplySourceHeader(sheet) ?: return false
+        val text = (0 until header).joinToString(" ") { row ->
+            sheet.getRow(row)?.joinToString(" ") { DataFormatter().formatCellValue(it) }.orEmpty()
+        }.uppercase().replace(Regex("""\s+"""), " ")
+
+        // This template carries the customer name only in an embedded logo.
+        // Its address plus the specific order/table labels identify the logo-only form.
+        val summitIdentity = text.contains(CUSTOMER_NAME) || SUMMIT_ADDRESS_PATTERN.containsMatchIn(text)
+        return summitIdentity && text.contains("PRECISION LAB") &&
+            findPurchaseOrderRow(sheet, header) != null
+    }
+
+    private fun findSupplySourceHeader(sheet: Sheet): Int? =
+        (0..sheet.lastRowNum).firstOrNull { row ->
+            sheet.cellText(row, 0).equals("Supply Source Item #", ignoreCase = true) &&
+                sheet.cellText(row, 1).equals("Product Description", ignoreCase = true) &&
+                sheet.cellText(row, 2).equals("Price - each", ignoreCase = true) &&
+                sheet.cellText(row, 3).equals("qty/case", ignoreCase = true) &&
+                sheet.cellText(row, 4).equals("Extended Price", ignoreCase = true)
+        }
+
+    private fun findPurchaseOrderRow(sheet: Sheet, header: Int): Int? =
+        (0 until header).firstOrNull { row ->
+            sheet.cellText(row, 0).equals("Purchase Order #:", ignoreCase = true)
+        }
+
+    private fun parseSupplySourceSheet(sheet: Sheet): ParsedPdfFields {
+        val header = findSupplySourceHeader(sheet) ?: error("Missing Summit Supply item header")
+        val poRow = findPurchaseOrderRow(sheet, header) ?: error("Missing Summit Supply PO number")
+        val customer = CustomerMapper.lookupCustomer(CUSTOMER_NAME)
+        val address = (0 until header).firstNotNullOfOrNull { row ->
+            SINGLE_LINE_ADDRESS_PATTERN.matchEntire(sheet.cellText(row, 0))
+        }
+        val items = buildList {
+            for (rowIndex in (header + 1)..sheet.lastRowNum) {
+                val row = sheet.getRow(rowIndex) ?: continue
+                if (row.text(3).equals("Total:", ignoreCase = true)) break
+                val sku = normalizeSku(row.text(0)) ?: continue
+                val quantity = row.numericOrNull(3)?.takeIf { it > 0 } ?: continue
+                val unitPrice = row.numericOrNull(2) ?: continue
+                add(ParsedPdfItem(
+                    sku = sku,
+                    description = ItemMapper.getItemDescription(sku).ifBlank { row.text(1).ifBlank { sku } },
+                    quantity = quantity,
+                    unitPrice = unitPrice
+                ))
+            }
+        }
+        return ParsedPdfFields(
+            customerName = CUSTOMER_NAME,
+            orderNumber = sheet.cellText(poRow, 1).ifBlank { null },
+            shipToCustomer = CUSTOMER_NAME,
+            addressLine1 = address?.groupValues?.get(1)?.trim(),
+            city = address?.groupValues?.get(2)?.trim(),
+            state = address?.groupValues?.get(3)?.uppercase(),
+            zip = address?.groupValues?.get(4),
+            terms = customer?.terms,
+            items = items
+        )
+    }
+
+    private fun findItemHeader(sheet: Sheet): Int? =
         (0..sheet.lastRowNum).firstOrNull { rowIndex ->
             sheet.cellText(rowIndex, 0).equals("QTY", ignoreCase = true) &&
                     sheet.cellText(rowIndex, 1).equals("ITEM #", ignoreCase = true) &&
@@ -105,7 +171,7 @@ class SummitSupplyExcelParser {
         )
     }
 
-    private fun org.apache.poi.ss.usermodel.Sheet.cellText(rowIndex: Int, columnIndex: Int): String =
+    private fun Sheet.cellText(rowIndex: Int, columnIndex: Int): String =
         getRow(rowIndex)?.text(columnIndex).orEmpty()
 
     private fun Row.text(columnIndex: Int): String {
@@ -131,6 +197,13 @@ class SummitSupplyExcelParser {
 
     private companion object {
         const val CUSTOMER_NAME = "SUMMIT SUPPLY"
+        val SUMMIT_ADDRESS_PATTERN = Regex(
+            """\b25\s+COMMERCIAL\s+DRIVE,?\s+UNIT\s+3A,?\s+BRENTWOOD,?\s+NH\s+03833\b"""
+        )
+        val SINGLE_LINE_ADDRESS_PATTERN = Regex(
+            """^(.+),\s*([^,]+),\s*([A-Z]{2})\s+(\d{5}(?:-\d{4})?)$""",
+            RegexOption.IGNORE_CASE
+        )
         val CITY_STATE_ZIP_PATTERN = Regex(
             """^(.+?),\s*([A-Z]{2})\s+(\d{5}(?:-\d{4})?)$""",
             RegexOption.IGNORE_CASE
