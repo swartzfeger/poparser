@@ -1,0 +1,114 @@
+name: Build Windows Installers
+
+on:
+  workflow_dispatch:
+    inputs:
+      create_draft_release:
+        description: Attach the installers to a new, unpublished GitHub Release draft
+        type: boolean
+        default: false
+      support_date:
+        description: Supported Customers date (YYYY-MM-DD; defaults to the built commit's date)
+        type: string
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-2022
+    timeout-minutes: 30
+    outputs:
+      version: ${{ steps.metadata.outputs.version }}
+      tag: ${{ steps.metadata.outputs.tag }}
+    steps:
+      # IntelliJ can miss input metadata for actions pinned to a commit SHA.
+      #noinspection UndefinedParamsPresent
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Prepare version and release notes
+        id: metadata
+        shell: pwsh
+        env:
+          SUPPORT_DATE: ${{ inputs.support_date }}
+        run: node tools/prepare-windows-release.mjs windows-release
+
+      #noinspection UndefinedParamsPresent
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: '21'
+          architecture: x64
+          cache: gradle
+
+      - name: Build x64 MSI and EXE
+        shell: pwsh
+        run: |
+          if ($env:WIX) { $env:Path = "$(Join-Path $env:WIX 'bin');$env:Path" }
+          Get-Command candle.exe, light.exe -ErrorAction Stop | Select-Object Name, Source
+          .\gradlew.bat --no-daemon :composeApp:packageMsi :composeApp:packageExe
+
+      - name: Stage both installers
+        shell: pwsh
+        env:
+          VERSION: ${{ steps.metadata.outputs.version }}
+        run: |
+          foreach ($extension in 'exe', 'msi') {
+            $directory = "composeApp/build/compose/binaries/main/$extension"
+            $installers = @(Get-ChildItem -LiteralPath $directory -Filter "*.$extension" -File)
+            if ($installers.Count -ne 1 -or $installers[0].Length -le 0) {
+              throw "Expected exactly one nonempty .$extension installer in $directory"
+            }
+            Copy-Item -LiteralPath $installers[0].FullName -Destination "windows-release/PO.Parser-$env:VERSION.$extension"
+          }
+
+      #noinspection UndefinedParamsPresent
+      - name: Upload Windows installers and release notes
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: PO-Parser-${{ steps.metadata.outputs.version }}-Windows-x64
+          path: windows-release/
+          if-no-files-found: error
+          retention-days: 7
+          overwrite: true
+
+  draft-release:
+    if: inputs.create_draft_release
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency: windows-draft-release
+    permissions:
+      contents: write
+    steps:
+      #noinspection UndefinedParamsPresent
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          name: PO-Parser-${{ needs.build.outputs.version }}-Windows-x64
+          path: windows-release
+
+      - name: Create draft release and attach installers
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.build.outputs.version }}
+          RELEASE_TAG: ${{ needs.build.outputs.tag }}
+        run: |
+          existing_tags=$(git ls-remote --tags "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git" "refs/tags/$RELEASE_TAG")
+          existing_releases=$(gh api --paginate "repos/$GITHUB_REPOSITORY/releases" --jq '.[].tag_name')
+          if [[ -n "$existing_tags" ]] || grep -Fxq -- "$RELEASE_TAG" <<< "$existing_releases"; then
+            echo "A tag or release already exists for $RELEASE_TAG. Nothing was changed. Use the build artifacts for a manual update."
+            exit 1
+          fi
+          gh release create "$RELEASE_TAG" \
+            "windows-release/PO.Parser-$VERSION.exe" \
+            "windows-release/PO.Parser-$VERSION.msi" \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "PO Parser v$VERSION" \
+            --notes-file windows-release/release-notes.md \
+            --draft

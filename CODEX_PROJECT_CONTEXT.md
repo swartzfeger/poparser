@@ -422,6 +422,12 @@ that had not been added to Git.
 
 ## Releases
 
+The manual **Build Windows Installers** workflow runs the existing EXE/MSI
+packaging tasks on GitHub's Windows x64 runner. It uploads both installers
+and generated notes as build artifacts. An optional, separate job attaches
+the installers to an unpublished GitHub Release draft for the exact build
+commit. See the README for the run steps and the supported layout roster.
+
 GitHub Releases are used to distribute the application:
 
 https://github.com/swartzfeger/poparser/releases
