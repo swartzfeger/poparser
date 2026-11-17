@@ -126,6 +126,13 @@
         "priceLevel": "DIST - 5%"
     },
     {
+        "id": "CARROWAY HOLDINGS",
+        "name": "CARROWAY HOLDINGS LLC",
+        "terms": "Prepaid",
+        "shipVia": "UPS GRNC",
+        "priceLevel": "DISTRIBUTOR"
+    },
+    {
         "id": "CHARLOTTE PRODUCTS",
         "name": "CHARLOTTE PRODUCTS LTD.",
         "terms": "Net 30 Days",
@@ -145,13 +152,6 @@
         "terms": "Prepaid",
         "shipVia": "FEDIE",
         "priceLevel": "DISTRIBUTOR"
-    },
-    {
-        "id": "COLORADO EARLY EDUCA",
-        "name": "COLORADO EARLY EDUCATION NETWORK",
-        "terms": "Net 30 Days",
-        "shipVia": "UPS GRNC",
-        "priceLevel": "DIST + 100%"
     },
     {
         "id": "COVENANT AVIATION SE",
@@ -175,13 +175,6 @@
         "priceLevel": "DIST + 100%"
     },
     {
-        "id": "DAIGGER",
-        "name": "DAIGGER/ WEBER SCIENTIFIC",
-        "terms": "1% 10, Net 30 Days",
-        "shipVia": "FEDC",
-        "priceLevel": "DIST + 100%"
-    },
-    {
         "id": "DEARDORFF FITZ",
         "name": "DEARDORFF FITZSIMMONS CORP.",
         "terms": "1% 10, Net 30 Days",
@@ -201,13 +194,6 @@
         "terms": "Prepaid",
         "shipVia": "FEDC",
         "priceLevel": "DIST + 50%"
-    },
-    {
-        "id": "DIVERSEY TAIWAN1",
-        "name": "DIVERSEY HYGIENE (TAIWAN) LTD",
-        "terms": "1% 10, Net 30 Days",
-        "shipVia": "UPS INTX",
-        "priceLevel": "DIST + 100%"
     },
     {
         "id": "DIVERSEY TURKEY",
@@ -264,6 +250,13 @@
         "terms": "Net 60 Days",
         "shipVia": "SPECIAL",
         "priceLevel": "DIST - 15%"
+    },
+    {
+        "id": "EDVOTEK, INC",
+        "name": "EDVOTEK, INC",
+        "terms": "Prepaid",
+        "shipVia": "FEDC",
+        "priceLevel": "DIST + 100%"
     },
     {
         "id": "EISCO SCI",
@@ -466,13 +459,6 @@
         "name": "MEDLINE INDUSTRIES LP",
         "terms": "Net 60 Days",
         "shipVia": "UPS GRNC",
-        "priceLevel": "DISTRIBUTOR"
-    },
-    {
-        "id": "MEDTRONIC",
-        "name": "MEDTRONIC/COVIDIEN MFG GRENOBLE SAS",
-        "terms": "1% 10, Net 30 Days",
-        "shipVia": "FEDIE",
         "priceLevel": "DISTRIBUTOR"
     },
     {

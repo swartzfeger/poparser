@@ -58,6 +58,7 @@ class StrategyRegistry(
                     EasternCrownLayoutStrategy(),
                     EcolabLayoutStrategy(),
                     EcolabPeruLayoutStrategy(),
+                    EdvotekLayoutStrategy(),
                     EiscoSciLayoutStrategy(),
                     ElectronicControlsDesignLayoutStrategy(),
                     EnvironicsLayoutStrategy(),

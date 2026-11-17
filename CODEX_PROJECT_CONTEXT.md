@@ -144,6 +144,12 @@ the app/working directory and standard Tesseract installation paths. On macOS it
 searches common Homebrew/MacPorts paths. Do not assume macOS OCR output exactly
 matches Windows output.
 
+Precision Laboratories web invoices for `TSAPER100` can be billed to DSA
+Detection as well as TSA. The shared invoice strategy checks DSA billing
+identity before trying a TSA location and reads DSA's Ship To column using PDF
+coordinates. Ordinary TSA invoices continue to use their billing location to
+resolve the Sage account.
+
 ## Current Layout Coverage
 
 `StrategyRegistry` currently registers 126 customer layout strategies. Inspect
@@ -270,13 +276,13 @@ Prices support three decimal places. JSON numbers omit unnecessary trailing
 zeroes, so `265.250` may be represented as `265.25` without losing value.
 
 The bundled defaults were most recently refreshed from **Master List
-10.06.26.xlsx**. The bundle contains 304 active customers, 634 item
-descriptions, 499 priced items, 659 GL-account mappings, 70 quantity-discount
-IDs, and 62 quantity-discount rules. Compared with 09.11.26, the active-only
-customer report removed 92 inactive customers, added `TSA-SEATAC`, updated three
-customer records, and removed three obsolete GL mappings. Item data and quantity
-discount rules were unchanged. Existing customer layout strategies remain in
-the codebase so a later master-list refresh can reactivate those customers.
+11.16.26.xlsx**. The bundle contains 302 active customers, 634 item descriptions,
+499 priced items, 659 GL-account mappings, 70 quantity-discount IDs, and 62
+quantity-discount rules. Compared with 10.06.26, the master adds EDVOTEK and
+CARROWAY HOLDINGS and removes four customer records. Items, GL mappings,
+discounts, and the source dimensions sheet were unchanged. Existing customer
+layout strategies remain in the codebase so a later master-list refresh can
+reactivate those customers.
 When a retained layout recognizes a customer that is absent from the active
 customer master, `OrderEnricher` throws `InactiveCustomerException` before any
 order can be exported. The main UI blocks that order and tells the user to

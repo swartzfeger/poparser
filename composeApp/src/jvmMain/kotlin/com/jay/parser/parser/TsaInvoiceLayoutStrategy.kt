@@ -1,10 +1,13 @@
 package com.jay.parser.parser
 
+import com.jay.parser.mappers.CustomerMapper
 import com.jay.parser.pdf.ParsedPdfFields
 import com.jay.parser.pdf.ParsedPdfItem
+import com.jay.parser.pdf.PdfLine
+import com.jay.parser.pdf.PdfToken
 import kotlin.math.round
 
-class TsaInvoiceLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
+class TsaInvoiceLayoutStrategy : BaseLayoutStrategy(), PositionedLayoutStrategy {
 
     override val name: String = "TSA_INVOICE"
 
@@ -49,14 +52,15 @@ class TsaInvoiceLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         // TSA invoices can have one billing/location block and a different Ship To block.
         // Sage customer resolution must use the location portion of the Customer ID, which
         // corresponds to the non-Ship To/customer block, not necessarily the physical ship-to city.
-        val tsaAccount = TsaLocationMapper.resolveByAccountLocation(
+        val dsaInvoice = isDsaBillingBlock(clean)
+        val tsaAccount = if (dsaInvoice) null else TsaLocationMapper.resolveByAccountLocation(
             city = accountLocation.city,
             state = accountLocation.state,
             zip = accountLocation.zip
         )
 
         return ParsedPdfFields(
-            customerName = tsaAccount?.customerId ?: "TSA-UNRESOLVED",
+            customerName = if (dsaInvoice) DSA_CUSTOMER_ID else tsaAccount?.customerId ?: "TSA-UNRESOLVED",
             orderNumber = parseOrderNumber(clean),
             shipToCustomer = shipTo.shipToCustomer,
             addressLine1 = shipTo.addressLine1,
@@ -64,10 +68,70 @@ class TsaInvoiceLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
             city = shipTo.city,
             state = shipTo.state,
             zip = shipTo.zip,
-            terms = tsaAccount?.terms ?: "Prepaid",
+            terms = if (dsaInvoice) CustomerMapper.lookupCustomer(DSA_CUSTOMER_ID)?.terms
+                else tsaAccount?.terms ?: "Prepaid",
             items = parseItems(clean)
         )
     }
+
+    private fun isDsaBillingBlock(lines: List<String>): Boolean {
+        val billing = lines.dropWhile { !compact(it).contains("SHIPTO:") }
+            .drop(1)
+            .takeWhile { !compact(it).startsWith("PRODUCTQUANTITYPRICE") }
+        return billing.any { DSA_COMPANY_AT_START.containsMatchIn(it) } &&
+            billing.any { DSA_BILLING_EMAIL.containsMatchIn(it) }
+    }
+
+    override fun parsePositioned(lines: List<PdfLine>): ParsedPdfFields {
+        val parsed = parse(lines.map(PdfLine::text))
+        if (parsed.customerName != DSA_CUSTOMER_ID) return parsed
+
+        val headerIndex = lines.indexOfFirst { compact(it.text).contains("SHIPTO:") }
+        if (headerIndex < 0) return parsed
+        val columns = mutableListOf<MutableList<PdfToken>>()
+        for (token in lines[headerIndex].tokens.sortedBy(PdfToken::x)) {
+            val previous = columns.lastOrNull()?.last()
+            if (previous == null || token.x - previous.x - previous.width > 20f) {
+                columns.add(mutableListOf(token))
+            } else {
+                columns.last().add(token)
+            }
+        }
+        val shipColumn = columns.indexOfFirst { compact(rebuildColumn(it)) == "SHIPTO:" }
+        if (shipColumn < 0) return parsed
+        val shipX = columns[shipColumn].first().x
+        val metadataX = columns.getOrNull(shipColumn + 1)?.first()?.x ?: return parsed
+        val shipRows = lines.drop(headerIndex + 1)
+            .takeWhile { !compact(it.text).startsWith("PRODUCTQUANTITYPRICE") }
+            .map { rebuildColumn(it.tokens.filter { token -> token.x >= shipX - 1 && token.x < metadataX - 1 }) }
+            .filter(String::isNotBlank)
+        val localityIndex = shipRows.indexOfFirst { DSA_LOCALITY.matches(it) }
+        if (localityIndex < 1) return parsed
+        val locality = DSA_LOCALITY.matchEntire(shipRows[localityIndex]) ?: return parsed
+        val addressIndex = shipRows.take(localityIndex).indexOfFirst { DSA_STREET.matches(it) }
+        if (addressIndex < 1) return parsed
+        val street = shipRows[addressIndex]
+        val suite = DSA_SUITE.find(street)
+        val (city, state, zip) = locality.destructured
+        return parsed.copy(
+            shipToCustomer = shipRows.take(addressIndex).last(),
+            addressLine1 = suite?.let { street.substring(0, it.range.first).trimEnd() } ?: street,
+            addressLine2 = suite?.value?.trim() ?: shipRows.subList(addressIndex + 1, localityIndex)
+                .joinToString(", ").ifBlank { null },
+            city = city,
+            state = state.uppercase(),
+            zip = zip
+        )
+    }
+
+    private fun rebuildColumn(tokens: List<PdfToken>): String = buildString {
+        var previous: PdfToken? = null
+        for (token in tokens.sortedBy(PdfToken::x)) {
+            previous?.let { if (token.x - it.x - it.width > 0.8f) append(' ') }
+            append(token.text)
+            previous = token
+        }
+    }.trim()
 
     private fun parseOrderNumber(lines: List<String>): String? {
         val joined = lines.joinToString(" ")
@@ -491,4 +555,13 @@ class TsaInvoiceLayoutStrategy : BaseLayoutStrategy(), LayoutStrategy {
         val startIndex: Int,
         val endIndex: Int
     )
+
+    private companion object {
+        const val DSA_CUSTOMER_ID = "DSA DETECTION"
+        val DSA_COMPANY_AT_START = Regex("""^DSA\s+Detection\b|^DSADetection(?:LLC)?\b""", RegexOption.IGNORE_CASE)
+        val DSA_BILLING_EMAIL = Regex("""^\S+@dsadetection\.com(?:\s|$)""", RegexOption.IGNORE_CASE)
+        val DSA_STREET = Regex("""\d+\s+\S.*""")
+        val DSA_LOCALITY = Regex("""(.+?),\s*([A-Z]{2})\s*(\d{5}(?:-\d{4})?)""", RegexOption.IGNORE_CASE)
+        val DSA_SUITE = Regex("""\s+(?:Ste\.?|Suite|Unit|Apt\.?)\s+\S.*$""", RegexOption.IGNORE_CASE)
+    }
 }
