@@ -80,6 +80,7 @@ class StrategyRegistry(
                     InterconChemicalLayoutStrategy(),
                     IsssCoLtdLayoutStrategy(),
                     JayhawkSalesTxLayoutStrategy(),
+                    JayhawkSalesTxModernLayoutStrategy(),
                     JayhawkSalesWiLayoutStrategy(),
                     JonkmanEquipmentLayoutStrategy(),
                     KochFoodsMorristownLayoutStrategy(),

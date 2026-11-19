@@ -115,6 +115,13 @@ Parse the right-hand Raddant Road street number and the following right-hand
 Batavia locality dynamically; current examples use both 770 and 950 N. Raddant
 Road. Do not reinstate a fixed 950 address.
 
+Jayhawk Texas also uses a modern QuickBooks-style template with a numbered
+\`Product or service / Description / Qty / Rate / Amount\` table and \`PO NO.:\`
+label. Its additional strategy reads the SKU from the description, validates
+the extension, excludes account/instruction rows, and reads the Ship To column
+dynamically. The existing Texas and Wisconsin strategies remain registered.
+Texas raw vial quantities still use the existing pack conversion in enrichment.
+
 Fisher Scientific POs are unusually noisy and often require OCR. Fisher parsing
 contains special segmentation and PO-number recovery logic. Treat broad OCR or
 Fisher changes as high risk and test on Windows as well as macOS.
@@ -244,6 +251,8 @@ Regression examples:
   quantity is divided by 500 into sellable packages.
 - Beta Procesos `1V` quantities already represent the ordered sellable quantity
   and remain unchanged.
+- Eisco's `SPC-GEN-2V` is priced per complete two-vial genetics kit. Its ordered
+  EA quantity is already kits and must not be halved because of the `2V` suffix.
 
 When fixing UOM behavior, verify all of these independently:
 

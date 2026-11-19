@@ -297,10 +297,13 @@ class OrderEnricher {
          *
          * 150-500V-100 comes in as UOM PK500 with quantity 1.
          * 185-12V-100 comes in as EA with quantity 10 and should remain 10.
+         * SPC-GEN-2V is a complete two-vial genetics kit, priced per kit.
+         * Its EA quantity is kits, not individual vials; 600 stays 600.
         */
         if (customerId == "EISCO SCI" && normalizedSku in setOf(
                 "150-500V-100",
-                "185-12V-100"
+                "185-12V-100",
+                "SPC-GEN-2V"
             )
         ) {
             return rawQuantity
